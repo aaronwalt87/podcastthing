@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:upstash.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(echo no git repo:*)"
+    ]
+  }
+}
