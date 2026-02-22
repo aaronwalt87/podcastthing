@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json(episodes)
   } catch (error) {
     console.error('GET /api/episodes error:', error)
-    return NextResponse.json({ error: 'Failed to fetch episodes' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch episodes', detail: String(error) }, { status: 500 })
   }
 }
 
