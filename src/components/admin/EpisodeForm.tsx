@@ -68,6 +68,7 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
         const blob = await upload(file.name, file, {
           access: 'public',
           handleUploadUrl: '/api/upload',
+          multipart: true,
         })
         audioUrl = blob.url
         setUploading(false)
