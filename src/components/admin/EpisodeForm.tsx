@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { upload } from '@vercel/blob/client'
 import type { Episode } from '@/types/episode'
 
 interface EpisodeFormProps {
@@ -61,52 +62,15 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
     try {
       let audioUrl = form.audioUrl
 
-      // Step 1: Upload file to Vercel Blob via chunked server-side upload
+      // Step 1: Upload file directly to Vercel Blob CDN from the browser
       if (form.audioType === 'upload' && file) {
         setUploading(true)
-
-        const CHUNK_SIZE = 5.5 * 1024 * 1024 // 5.5 MB — above the 5 MB S3 minimum per part
-
-        // Init multipart upload
-        const initRes = await fetch('/api/upload/init', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filename: file.name }),
+        const blob = await upload(file.name, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+          multipart: true,
         })
-        if (!initRes.ok) throw new Error('Failed to initialise upload')
-        const { uploadId, key } = await initRes.json()
-
-        // Upload parts
-        const parts: { etag: string; partNumber: number }[] = []
-        const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
-
-        for (let i = 0; i < totalChunks; i++) {
-          const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-          const fd = new FormData()
-          fd.append('chunk', chunk)
-          fd.append('uploadId', uploadId)
-          fd.append('key', key)
-          fd.append('pathname', file.name)
-          fd.append('partNumber', String(i + 1))
-
-          const partRes = await fetch('/api/upload/part', { method: 'POST', body: fd })
-          if (!partRes.ok) throw new Error(`Failed to upload part ${i + 1}`)
-          parts.push(await partRes.json())
-        }
-
-        // Complete multipart upload
-        const completeRes = await fetch('/api/upload/complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uploadId, key, pathname: file.name, parts }),
-        })
-        if (!completeRes.ok) {
-          const errData = await completeRes.json().catch(() => ({}))
-          throw new Error(errData.error || 'Failed to complete upload')
-        }
-        const { url: finalUrl } = await completeRes.json()
-
-        audioUrl = finalUrl
+        audioUrl = blob.url
         setUploading(false)
       }
 
