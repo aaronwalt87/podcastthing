@@ -65,7 +65,7 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
       if (form.audioType === 'upload' && file) {
         setUploading(true)
 
-        const CHUNK_SIZE = 4 * 1024 * 1024 // 4 MB per chunk
+        const CHUNK_SIZE = 5.5 * 1024 * 1024 // 5.5 MB — above the 5 MB S3 minimum per part
 
         // Init multipart upload
         const initRes = await fetch('/api/upload/init', {
@@ -100,7 +100,10 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ uploadId, key, pathname: file.name, parts }),
         })
-        if (!completeRes.ok) throw new Error('Failed to complete upload')
+        if (!completeRes.ok) {
+          const errData = await completeRes.json().catch(() => ({}))
+          throw new Error(errData.error || 'Failed to complete upload')
+        }
         const { url: finalUrl } = await completeRes.json()
 
         audioUrl = finalUrl
