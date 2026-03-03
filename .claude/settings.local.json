@@ -4,7 +4,9 @@
       "WebFetch(domain:upstash.com)",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(echo no git repo:*)"
+      "Bash(echo no git repo:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)"
     ]
   }
 }
