@@ -29,6 +29,7 @@ export async function getAllEpisodes(): Promise<Episode[]> {
         audioUrl: ep.audioUrl,
         audioType: ep.audioType as 'upload' | 'url',
         thumbnailUrl: ep.thumbnailUrl || undefined,
+        category: ep.category || undefined,
         addedAt: Number(ep.addedAt),
       })
     }
@@ -49,6 +50,7 @@ export async function getEpisode(id: string): Promise<Episode | null> {
     audioUrl: data.audioUrl,
     audioType: data.audioType as 'upload' | 'url',
     thumbnailUrl: data.thumbnailUrl || undefined,
+    category: data.category || undefined,
     addedAt: Number(data.addedAt),
   }
 }
@@ -75,6 +77,9 @@ export async function createEpisode(
   if (episode.thumbnailUrl) {
     fields.thumbnailUrl = episode.thumbnailUrl
   }
+  if (episode.category) {
+    fields.category = episode.category
+  }
 
   await redis.hset(episodeKey(episode.id), fields)
   await redis.zadd(INDEX_KEY, { score: episode.addedAt, member: episode.id })
@@ -100,11 +105,25 @@ export async function updateEpisode(
     audioType: updated.audioType,
     addedAt: String(updated.addedAt),
   }
+
+  const toClear: string[] = []
+
   if (updated.thumbnailUrl) {
     fields.thumbnailUrl = updated.thumbnailUrl
+  } else if ('thumbnailUrl' in input) {
+    toClear.push('thumbnailUrl')
+  }
+
+  if (updated.category) {
+    fields.category = updated.category
+  } else if ('category' in input) {
+    toClear.push('category')
   }
 
   await redis.hset(episodeKey(id), fields)
+  if (toClear.length > 0) {
+    await redis.hdel(episodeKey(id), ...toClear)
+  }
   return updated
 }
 
@@ -114,4 +133,13 @@ export async function deleteEpisode(id: string): Promise<boolean> {
   pipeline.zrem(INDEX_KEY, id)
   await pipeline.exec()
   return true
+}
+
+export async function getAllCategories(): Promise<string[]> {
+  const episodes = await getAllEpisodes()
+  const seen = new Set<string>()
+  for (const ep of episodes) {
+    if (ep.category) seen.add(ep.category)
+  }
+  return Array.from(seen).sort()
 }

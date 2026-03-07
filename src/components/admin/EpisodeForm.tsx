@@ -8,6 +8,7 @@ interface EpisodeFormProps {
   episode?: Episode
   onSuccess: (episode: Episode) => void
   onCancel?: () => void
+  categories?: string[]
 }
 
 const emptyForm = {
@@ -16,10 +17,11 @@ const emptyForm = {
   description: '',
   audioUrl: '',
   thumbnailUrl: '',
+  category: '',
   audioType: 'url' as 'upload' | 'url',
 }
 
-export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFormProps) {
+export default function EpisodeForm({ episode, onSuccess, onCancel, categories = [] }: EpisodeFormProps) {
   const isEditing = Boolean(episode)
 
   const [form, setForm] = useState({
@@ -28,6 +30,7 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
     description: episode?.description ?? '',
     audioUrl: episode?.audioUrl ?? '',
     thumbnailUrl: episode?.thumbnailUrl ?? '',
+    category: episode?.category ?? '',
     audioType: episode?.audioType ?? 'url' as 'upload' | 'url',
   })
   const [file, setFile] = useState<File | null>(null)
@@ -89,6 +92,7 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
           audioUrl,
           audioType: form.audioType,
           thumbnailUrl: form.thumbnailUrl.trim() || undefined,
+          category: form.category.trim() || undefined,
         }),
       })
 
@@ -213,6 +217,26 @@ export default function EpisodeForm({ episode, onSuccess, onCancel }: EpisodeFor
           placeholder="https://example.com/cover.jpg"
           className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
         />
+      </div>
+
+      {/* Category */}
+      <div>
+        <label className="block text-xs text-neutral-400 mb-1">Category (optional)</label>
+        <input
+          type="text"
+          list="episode-categories"
+          value={form.category}
+          onChange={(e) => update('category', e.target.value)}
+          placeholder="e.g. Technology, True Crime, Business…"
+          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+        />
+        {categories.length > 0 && (
+          <datalist id="episode-categories">
+            {categories.map((cat) => (
+              <option key={cat} value={cat} />
+            ))}
+          </datalist>
+        )}
       </div>
 
       {/* Error */}

@@ -6,5 +6,6 @@ export interface Episode {
   audioUrl: string
   audioType: 'upload' | 'url'
   thumbnailUrl?: string
+  category?: string
   addedAt: number // Unix ms timestamp
 }

@@ -108,6 +108,11 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
             {episode.description}
           </p>
         )}
+        {episode.category && (
+          <span className="self-start mt-1 text-xs px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+            {episode.category}
+          </span>
+        )}
       </div>
     </div>
   )

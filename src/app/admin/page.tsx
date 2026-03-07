@@ -1,15 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import EpisodeForm from '@/components/admin/EpisodeForm'
 import EpisodeList from '@/components/admin/EpisodeList'
 import type { Episode } from '@/types/episode'
 
 export default function AdminPage() {
+  const router = useRouter()
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/admin/login')
+  }
 
   useEffect(() => {
     fetchEpisodes()
@@ -30,6 +38,8 @@ export default function AdminPage() {
     }
   }
 
+  const categories = Array.from(new Set(episodes.map((ep) => ep.category).filter(Boolean) as string[])).sort()
+
   const handleAdded = (episode: Episode) => {
     setEpisodes((prev) => [episode, ...prev])
     setShowForm(false)
@@ -47,16 +57,27 @@ export default function AdminPage() {
     <main className="max-w-2xl mx-auto px-4 py-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Admin</h1>
-          <p className="text-neutral-500 text-sm mt-0.5">Manage your podcast episodes.</p>
+        <div className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-white">Admin</h1>
+            <p className="text-neutral-500 text-sm mt-0.5">Manage your podcast episodes.</p>
+          </div>
         </div>
-        <a
-          href="/"
-          className="text-sm text-neutral-400 hover:text-white transition-colors"
-        >
-          ← View site
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href="/"
+            className="text-sm text-neutral-400 hover:text-white transition-colors"
+          >
+            ← View site
+          </a>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-neutral-600 hover:text-neutral-300 transition-colors"
+          >
+            Log out
+          </button>
+        </div>
       </div>
 
       {/* Add episode section */}
@@ -69,6 +90,7 @@ export default function AdminPage() {
             <EpisodeForm
               onSuccess={handleAdded}
               onCancel={() => setShowForm(false)}
+              categories={categories}
             />
           </div>
         ) : (
@@ -111,6 +133,7 @@ export default function AdminPage() {
             episodes={episodes}
             onUpdate={handleUpdated}
             onDelete={handleDeleted}
+            categories={categories}
           />
         )}
       </section>

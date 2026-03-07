@@ -8,9 +8,10 @@ interface EpisodeListProps {
   episodes: Episode[]
   onUpdate: (episode: Episode) => void
   onDelete: (id: string) => void
+  categories?: string[]
 }
 
-export default function EpisodeList({ episodes, onUpdate, onDelete }: EpisodeListProps) {
+export default function EpisodeList({ episodes, onUpdate, onDelete, categories = [] }: EpisodeListProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -54,6 +55,7 @@ export default function EpisodeList({ episodes, onUpdate, onDelete }: EpisodeLis
                   setEditingId(null)
                 }}
                 onCancel={() => setEditingId(null)}
+                categories={categories}
               />
             </div>
           ) : (
@@ -77,7 +79,7 @@ export default function EpisodeList({ episodes, onUpdate, onDelete }: EpisodeLis
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-medium truncate">{episode.title}</p>
                 <p className="text-neutral-500 text-xs truncate">{episode.showName}</p>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className={`text-xs px-1.5 py-0.5 rounded ${
                     episode.audioType === 'upload'
                       ? 'bg-blue-950 text-blue-400'
@@ -85,6 +87,11 @@ export default function EpisodeList({ episodes, onUpdate, onDelete }: EpisodeLis
                   }`}>
                     {episode.audioType === 'upload' ? 'Blob' : 'URL'}
                   </span>
+                  {episode.category && (
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+                      {episode.category}
+                    </span>
+                  )}
                   <span className="text-neutral-600 text-xs">
                     {new Date(episode.addedAt).toLocaleDateString()}
                   </span>
