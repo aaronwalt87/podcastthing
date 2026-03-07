@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-neutral-950 text-white antialiased">
+      <body className="text-white antialiased">
         <PlayerProvider>
           {/* pb-24 to clear the fixed bottom player bar */}
           <div className="min-h-screen pb-24">
