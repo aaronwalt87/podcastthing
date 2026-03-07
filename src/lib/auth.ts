@@ -1,24 +1,37 @@
-import crypto from 'crypto'
-
 export const COOKIE_NAME = 'admin_token'
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days in seconds
 
-// Derive the expected cookie token from ADMIN_PASSWORD.
-// The token never contains the raw password — it's an HMAC-derived value.
-export function computeToken(): string {
-  const pw = process.env.ADMIN_PASSWORD
-  if (!pw) throw new Error('ADMIN_PASSWORD is not set')
-  return crypto.createHmac('sha256', pw).update('admin-session').digest('hex')
+// Uses Web Crypto API — works in both Edge runtime (middleware) and Node.js (API routes)
+
+async function getKey(): Promise<CryptoKey> {
+  const pw = process.env.ADMIN_PASSWORD || ''
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(pw),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
 }
 
-// Constant-time comparison to prevent timing attacks.
-export function isValidToken(token: string): boolean {
+export async function computeToken(): Promise<string> {
+  const key = await getKey()
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('admin-session'))
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// Constant-time string comparison to prevent timing attacks
+export async function isValidToken(token: string): Promise<boolean> {
   try {
-    const expected = computeToken()
-    const a = Buffer.from(token)
-    const b = Buffer.from(expected)
-    if (a.length !== b.length) return false
-    return crypto.timingSafeEqual(a, b)
+    const expected = await computeToken()
+    if (token.length !== expected.length) return false
+    let diff = 0
+    for (let i = 0; i < token.length; i++) {
+      diff |= token.charCodeAt(i) ^ expected.charCodeAt(i)
+    }
+    return diff === 0
   } catch {
     return false
   }

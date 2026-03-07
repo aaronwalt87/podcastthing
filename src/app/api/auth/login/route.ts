@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Incorrect password' }, { status: 401 })
     }
 
-    const token = computeToken()
+    const token = await computeToken()
     const response = NextResponse.json({ ok: true })
     response.cookies.set(COOKIE_NAME, token, cookieOptions)
     return response
