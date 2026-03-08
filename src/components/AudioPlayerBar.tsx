@@ -81,24 +81,27 @@ export default function AudioPlayerBar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-800/60"
+      className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(4, 8, 16, 0.95)',
+        background: 'rgba(12, 8, 3, 0.96)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        boxShadow: '0 -2px 20px rgba(29, 78, 216, 0.2), 0 -1px 0 rgba(59, 130, 246, 0.15)',
+        borderTop: '1px solid rgba(160,80,40,0.4)',
+        boxShadow: '0 -2px 20px rgba(160,60,20,0.18), 0 -1px 0 rgba(120,50,20,0.2)',
       }}
     >
-      {/* Top neon accent line */}
-      <div className="h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+      {/* Top accent line */}
+      <div className="h-px"
+           style={{ background: 'linear-gradient(to right, transparent, rgba(200,70,30,0.5), rgba(180,110,50,0.3), transparent)' }} />
 
       {/* Scrub bar */}
-      <div className="relative h-1.5 bg-blue-950/80 group cursor-pointer">
+      <div className="relative h-1.5 cursor-pointer" style={{ background: 'rgba(40,20,8,0.8)' }}>
         <div
-          className="absolute left-0 top-0 h-full bg-amber-400 transition-all"
+          className="absolute left-0 top-0 h-full transition-all"
           style={{
             width: `${progress}%`,
-            boxShadow: '0 0 6px rgba(251,191,36,0.7)',
+            background: '#cc2810',
+            boxShadow: '0 0 6px rgba(204,40,16,0.7)',
           }}
         />
         <input
@@ -117,42 +120,52 @@ export default function AudioPlayerBar() {
         />
       </div>
 
-      {/* Player controls */}
+      {/* Controls */}
       <div className="flex items-center gap-4 px-4 py-3 max-w-screen-xl mx-auto">
-        {/* Thumbnail / cassette icon */}
+        {/* Thumbnail */}
         {currentEpisode.thumbnailUrl ? (
           <img
             src={currentEpisode.thumbnailUrl}
             alt={currentEpisode.title}
-            className="w-10 h-10 object-cover flex-shrink-0 border border-blue-700/50"
+            className="w-10 h-10 object-cover flex-shrink-0"
+            style={{ border: '1px solid rgba(160,80,40,0.5)' }}
           />
         ) : (
           <div
-            className="w-10 h-10 flex-shrink-0 flex items-center justify-center border border-blue-700/50"
-            style={{ background: '#060d1a' }}
+            className="w-10 h-10 flex-shrink-0 flex items-center justify-center"
+            style={{ background: '#0e0803', border: '1px solid rgba(122,60,30,0.5)' }}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="7" width="20" height="12" rx="1" stroke="#2563eb" strokeWidth="1" fill="#040810"/>
-              <rect x="5" y="11" width="14" height="5" rx="0.5" stroke="#1d4ed8" strokeWidth="0.8" fill="#020408"/>
-              <circle cx="8.5" cy="13.5" r="2.2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
-              <circle cx="8.5" cy="13.5" r="0.8" stroke="#60a5fa" strokeWidth="0.8" fill="#020408"/>
-              <circle cx="15.5" cy="13.5" r="2.2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
-              <circle cx="15.5" cy="13.5" r="0.8" stroke="#60a5fa" strokeWidth="0.8" fill="#020408"/>
-              <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#f59e0b" strokeWidth="1" fill="none"/>
+              <rect x="2" y="7" width="20" height="12" rx="1" stroke="#7a5030" strokeWidth="1" fill="#060401"/>
+              <rect x="5" y="11" width="14" height="5" rx="0.5" stroke="#5a3820" strokeWidth="0.8" fill="#030200"/>
+              <circle cx="8.5" cy="13.5" r="2.2" stroke="#a07040" strokeWidth="1" fill="#060401"/>
+              <circle cx="8.5" cy="13.5" r="0.8" stroke="#c49060" strokeWidth="0.8" fill="#030200"/>
+              <circle cx="15.5" cy="13.5" r="2.2" stroke="#a07040" strokeWidth="1" fill="#060401"/>
+              <circle cx="15.5" cy="13.5" r="0.8" stroke="#c49060" strokeWidth="0.8" fill="#030200"/>
+              <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#cc3020" strokeWidth="1" fill="none"/>
             </svg>
           </div>
         )}
 
         {/* Episode info */}
         <div className="flex-1 min-w-0">
-          <p className="text-blue-100 text-xs font-mono truncate tracking-wide">{currentEpisode.title}</p>
-          <p className="text-blue-500 text-xs truncate tracking-widest">{currentEpisode.showName}</p>
+          <p className="text-xs font-mono truncate tracking-wide" style={{ color: '#e8d8c0' }}>
+            {currentEpisode.title}
+          </p>
+          <p className="text-xs truncate tracking-widest" style={{ color: '#a07850' }}>
+            {currentEpisode.showName}
+          </p>
         </div>
 
-        {/* Time display — retro terminal style */}
+        {/* Time display */}
         <div
-          className="text-amber-400 text-xs tabular-nums hidden sm:block px-2 py-1 border border-blue-900/50 font-mono"
-          style={{ textShadow: '0 0 6px rgba(251,191,36,0.6)', background: '#060d1a' }}
+          className="text-xs tabular-nums hidden sm:block px-2 py-1 font-mono"
+          style={{
+            color: '#e83020',
+            textShadow: '0 0 6px rgba(232,48,32,0.6)',
+            background: '#080503',
+            border: '1px solid rgba(120,40,20,0.5)',
+          }}
         >
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
@@ -160,10 +173,12 @@ export default function AudioPlayerBar() {
         {/* Play/Pause button */}
         <button
           onClick={togglePlayPause}
-          className="flex-shrink-0 w-10 h-10 text-black flex items-center justify-center transition-all border border-amber-300/80"
+          className="flex-shrink-0 w-10 h-10 flex items-center justify-center transition-all"
           style={{
-            background: '#fbbf24',
-            boxShadow: '0 0 12px rgba(251,191,36,0.6)',
+            background: '#cc2810',
+            border: '1px solid rgba(220,80,40,0.7)',
+            boxShadow: '0 0 12px rgba(204,40,16,0.5)',
+            color: '#f5ead0',
           }}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
