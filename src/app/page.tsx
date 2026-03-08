@@ -49,7 +49,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
           <div>
             {/* Retro label */}
-            <div className="text-xs text-blue-600 tracking-widest mb-1 font-mono">// SYSTEM AUDIO ARCHIVE</div>
+            <div className="text-xs text-blue-600 tracking-widest mb-1 font-mono">{'// SYSTEM AUDIO ARCHIVE'}</div>
             <h1
               className="text-4xl font-black tracking-wider text-blue-100 font-mono"
               style={{
