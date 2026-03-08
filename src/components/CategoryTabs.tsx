@@ -19,28 +19,30 @@ export default function CategoryTabs({ categories, selected }: CategoryTabsProps
   }
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-0 flex-wrap border border-blue-900/40 p-0 w-fit">
       <button
         onClick={() => navigate(undefined)}
-        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+        className={`px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150 border-r border-blue-900/40 ${
           !selected
-            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/30'
-            : 'bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 hover:border-violet-500/30'
+            ? 'bg-amber-400 text-black font-bold'
+            : 'bg-transparent text-blue-400 hover:bg-blue-900/30 hover:text-blue-200'
         }`}
+        style={!selected ? { boxShadow: '0 0 10px rgba(251,191,36,0.4)' } : undefined}
       >
-        All
+        ALL
       </button>
       {categories.map((cat) => (
         <button
           key={cat}
           onClick={() => navigate(cat)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+          className={`px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150 border-r border-blue-900/40 last:border-r-0 ${
             selected === cat
-              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/30'
-              : 'bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 hover:border-violet-500/30'
+              ? 'bg-amber-400 text-black font-bold'
+              : 'bg-transparent text-blue-400 hover:bg-blue-900/30 hover:text-blue-200'
           }`}
+          style={selected === cat ? { boxShadow: '0 0 10px rgba(251,191,36,0.4)' } : undefined}
         >
-          {cat}
+          {cat.toUpperCase()}
         </button>
       ))}
     </div>

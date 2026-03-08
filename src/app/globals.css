@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,35 +13,76 @@ html {
 }
 
 body {
-  background-color: #09090b;
+  font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+  background-color: #040810;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(109, 40, 217, 0.25) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(79, 70, 229, 0.12) 0%, transparent 60%);
+    linear-gradient(rgba(29, 78, 216, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 78, 216, 0.10) 1px, transparent 1px),
+    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(0, 80, 200, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(30, 60, 160, 0.10) 0%, transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
   background-attachment: fixed;
+  color: #bfdbfe;
 }
 
-/* Custom scrollbar for dark theme */
+/* CRT scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.10) 3px,
+    rgba(0, 0, 0, 0.10) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Custom scrollbar — retro blue */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #040810;
 }
 ::-webkit-scrollbar-thumb {
-  background: #4c1d95;
-  border-radius: 3px;
+  background: #1d4ed8;
+  border-radius: 0px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+  background: #3b82f6;
+}
+
+/* Neon text glow utility */
+.neon-text {
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.9), 0 0 20px rgba(59, 130, 246, 0.5);
+}
+.neon-gold {
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.9), 0 0 20px rgba(245, 158, 11, 0.5);
 }
 
 /* Animate bars for now-playing indicator */
 @keyframes bounce-bar {
   0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.4); }
+  50% { transform: scaleY(0.3); }
 }
 
-/* Range input — hide default track so we overlay our own */
+/* Retro blink animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.blink {
+  animation: blink 1.2s step-end infinite;
+}
+
+/* Range input — hide default track */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -50,16 +93,17 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
   height: 12px;
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 0px;
+  background: #fbbf24;
   cursor: pointer;
   margin-top: -4px;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
 }
 input[type="range"]::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 0px;
+  background: #fbbf24;
   border: none;
   cursor: pointer;
 }

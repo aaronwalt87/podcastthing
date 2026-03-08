@@ -18,7 +18,6 @@ export default function AudioPlayerBar() {
   const scrubRef = useRef(false)
   const prevEpisodeId = useRef<string | null>(null)
 
-  // Auto-play when episode changes
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !currentEpisode) return
@@ -31,7 +30,6 @@ export default function AudioPlayerBar() {
     }
   }, [currentEpisode, audioRef])
 
-  // Time/duration listeners
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -54,8 +52,7 @@ export default function AudioPlayerBar() {
   }, [audioRef])
 
   const handleScrubChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value)
-    setCurrentTime(value)
+    setCurrentTime(Number(e.target.value))
   }
 
   const handleScrubStart = () => {
@@ -67,9 +64,7 @@ export default function AudioPlayerBar() {
     scrubRef.current = false
     setIsScrubbing(false)
     const audio = audioRef.current
-    if (audio) {
-      audio.currentTime = currentTime
-    }
+    if (audio) audio.currentTime = currentTime
   }
 
   const togglePlayPause = () => {
@@ -86,18 +81,25 @@ export default function AudioPlayerBar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-800/60"
       style={{
-        background: 'rgba(9, 9, 11, 0.85)',
+        background: 'rgba(4, 8, 16, 0.95)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 -2px 20px rgba(29, 78, 216, 0.2), 0 -1px 0 rgba(59, 130, 246, 0.15)',
       }}
     >
+      {/* Top neon accent line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+
       {/* Scrub bar */}
-      <div className="relative h-1 bg-white/10 group cursor-pointer">
+      <div className="relative h-1.5 bg-blue-950/80 group cursor-pointer">
         <div
-          className="absolute left-0 top-0 h-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all"
-          style={{ width: `${progress}%` }}
+          className="absolute left-0 top-0 h-full bg-amber-400 transition-all"
+          style={{
+            width: `${progress}%`,
+            boxShadow: '0 0 6px rgba(251,191,36,0.7)',
+          }}
         />
         <input
           type="range"
@@ -117,36 +119,52 @@ export default function AudioPlayerBar() {
 
       {/* Player controls */}
       <div className="flex items-center gap-4 px-4 py-3 max-w-screen-xl mx-auto">
-        {/* Thumbnail */}
+        {/* Thumbnail / cassette icon */}
         {currentEpisode.thumbnailUrl ? (
           <img
             src={currentEpisode.thumbnailUrl}
             alt={currentEpisode.title}
-            className="w-10 h-10 rounded-lg object-cover flex-shrink-0 shadow-md"
+            className="w-10 h-10 object-cover flex-shrink-0 border border-blue-700/50"
           />
         ) : (
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-900/60 to-indigo-900/60 border border-white/10 flex-shrink-0 flex items-center justify-center">
-            <svg className="w-5 h-5 text-violet-400/70" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+          <div
+            className="w-10 h-10 flex-shrink-0 flex items-center justify-center border border-blue-700/50"
+            style={{ background: '#060d1a' }}
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="7" width="20" height="12" rx="1" stroke="#2563eb" strokeWidth="1" fill="#040810"/>
+              <rect x="5" y="11" width="14" height="5" rx="0.5" stroke="#1d4ed8" strokeWidth="0.8" fill="#020408"/>
+              <circle cx="8.5" cy="13.5" r="2.2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
+              <circle cx="8.5" cy="13.5" r="0.8" stroke="#60a5fa" strokeWidth="0.8" fill="#020408"/>
+              <circle cx="15.5" cy="13.5" r="2.2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
+              <circle cx="15.5" cy="13.5" r="0.8" stroke="#60a5fa" strokeWidth="0.8" fill="#020408"/>
+              <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#f59e0b" strokeWidth="1" fill="none"/>
             </svg>
           </div>
         )}
 
         {/* Episode info */}
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium truncate">{currentEpisode.title}</p>
-          <p className="text-violet-400/70 text-xs truncate">{currentEpisode.showName}</p>
+          <p className="text-blue-100 text-xs font-mono truncate tracking-wide">{currentEpisode.title}</p>
+          <p className="text-blue-500 text-xs truncate tracking-widest">{currentEpisode.showName}</p>
         </div>
 
-        {/* Time */}
-        <div className="text-neutral-500 text-xs tabular-nums hidden sm:block">
+        {/* Time display — retro terminal style */}
+        <div
+          className="text-amber-400 text-xs tabular-nums hidden sm:block px-2 py-1 border border-blue-900/50 font-mono"
+          style={{ textShadow: '0 0 6px rgba(251,191,36,0.6)', background: '#060d1a' }}
+        >
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
 
         {/* Play/Pause button */}
         <button
           onClick={togglePlayPause}
-          className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/30"
+          className="flex-shrink-0 w-10 h-10 text-black flex items-center justify-center transition-all border border-amber-300/80"
+          style={{
+            background: '#fbbf24',
+            boxShadow: '0 0 12px rgba(251,191,36,0.6)',
+          }}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (
