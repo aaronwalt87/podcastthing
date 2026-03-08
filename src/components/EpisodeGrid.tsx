@@ -10,26 +10,32 @@ export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridP
   if (episodes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
-        <svg className="w-16 h-16 text-blue-800 mb-6" viewBox="0 0 48 48" fill="none">
-          <rect x="4" y="14" width="40" height="24" rx="2" stroke="#1d4ed8" strokeWidth="1.5" fill="#080f1e"/>
-          <rect x="10" y="22" width="28" height="10" rx="1" stroke="#1e40af" strokeWidth="1" fill="#040810"/>
-          <circle cx="17" cy="27" r="5" stroke="#2563eb" strokeWidth="1.5" fill="#080f1e"/>
-          <circle cx="17" cy="27" r="2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
-          <circle cx="31" cy="27" r="5" stroke="#2563eb" strokeWidth="1.5" fill="#080f1e"/>
-          <circle cx="31" cy="27" r="2" stroke="#3b82f6" strokeWidth="1" fill="#040810"/>
-          <path d="M22 27 Q24 29 26 27" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
+        <svg className="w-16 h-16 mb-6" viewBox="0 0 48 48" fill="none">
+          <rect x="4" y="14" width="40" height="24" rx="2" stroke="#7a5030" strokeWidth="1.5" fill="#0e0803"/>
+          <rect x="10" y="22" width="28" height="10" rx="1" stroke="#5a3820" strokeWidth="1" fill="#060401"/>
+          <circle cx="17" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
+          <circle cx="17" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
+          <circle cx="31" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
+          <circle cx="31" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
+          <path d="M22 27 Q24 29 26 27" stroke="#cc3020" strokeWidth="1.5" fill="none"/>
         </svg>
         {selectedCategory ? (
           <>
-            <p className="text-blue-400 text-sm tracking-widest font-mono">NO SIGNAL IN &ldquo;{selectedCategory}&rdquo;</p>
-            <p className="text-blue-700 text-xs mt-2 tracking-wider">TRY DIFFERENT FREQUENCY</p>
+            <p className="text-sm tracking-widest font-mono" style={{ color: '#a07850' }}>
+              NO SIGNAL IN &ldquo;{selectedCategory}&rdquo;
+            </p>
+            <p className="text-xs mt-2 tracking-wider" style={{ color: '#5a3820' }}>
+              TRY DIFFERENT FREQUENCY
+            </p>
           </>
         ) : (
           <>
-            <p className="text-blue-400 text-sm tracking-widest font-mono">ARCHIVE EMPTY</p>
-            <p className="text-blue-700 text-xs mt-2 tracking-wider">
+            <p className="text-sm tracking-widest font-mono" style={{ color: '#a07850' }}>
+              ARCHIVE EMPTY
+            </p>
+            <p className="text-xs mt-2 tracking-wider" style={{ color: '#5a3820' }}>
               ACCESS{' '}
-              <a href="/admin" className="text-amber-400 hover:text-amber-300 transition-colors">
+              <a href="/admin" style={{ color: '#e83020' }} className="hover:opacity-80 transition-opacity">
                 /ADMIN
               </a>{' '}
               TO UPLOAD RECORDINGS

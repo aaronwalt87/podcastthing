@@ -25,17 +25,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {/* Header */}
       <header className="mb-10">
         {/* Top status bar */}
-        <div className="flex items-center justify-between mb-4 text-xs text-blue-600 border-b border-blue-900/40 pb-2">
-          <span>SYS:ONLINE <span className="blink">▮</span></span>
-          <span className="text-amber-500/70">[ BROADCAST READY ]</span>
-          <span>VER 2.0</span>
+        <div className="flex items-center justify-between mb-4 text-xs pb-2 border-b border-amber-900/30"
+             style={{ color: '#a07850' }}>
+          <span style={{ color: '#7a5a38' }}>SYS:ONLINE <span className="blink" style={{ color: '#e83020' }}>▮</span></span>
+          <span style={{ color: '#cc4020' }}>[ BROADCAST READY ]</span>
+          <span style={{ color: '#7a5a38' }}>VER 2.0</span>
         </div>
 
         <div className="flex items-center gap-5 mb-3">
-          {/* Logo with neon frame */}
+          {/* Logo with warm frame */}
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1 rounded-sm bg-blue-500/20 blur-md" />
-            <div className="relative border border-blue-500/40 rounded-sm p-0.5" style={{ boxShadow: '0 0 12px rgba(59,130,246,0.3), inset 0 0 8px rgba(59,130,246,0.05)' }}>
+            <div className="absolute -inset-1 rounded-sm opacity-30"
+                 style={{ background: 'radial-gradient(circle, rgba(200,80,30,0.5) 0%, transparent 70%)' }} />
+            <div className="relative rounded-sm p-0.5"
+                 style={{ border: '1px solid rgba(160,80,40,0.5)', boxShadow: '0 0 12px rgba(180,70,30,0.25), inset 0 0 8px rgba(160,60,20,0.05)' }}>
               <Image
                 src="/logo.svg"
                 alt="Podcast Showcase"
@@ -48,31 +51,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
 
           <div>
-            {/* Retro label */}
-            <div className="text-xs text-blue-600 tracking-widest mb-1 font-mono">{'// SYSTEM AUDIO ARCHIVE'}</div>
+            <div className="text-xs tracking-widest mb-1 font-mono" style={{ color: '#7a5038' }}>
+              {'// SYSTEM AUDIO ARCHIVE'}
+            </div>
             <h1
-              className="text-4xl font-black tracking-wider text-blue-100 font-mono"
+              className="text-4xl font-black tracking-wider font-mono"
               style={{
                 fontFamily: "'Orbitron', 'Share Tech Mono', monospace",
-                textShadow: '0 0 12px rgba(96,165,250,0.8), 0 0 30px rgba(59,130,246,0.4)',
+                color: '#e8d8c0',
+                textShadow: '0 0 12px rgba(196,144,80,0.7), 0 0 30px rgba(160,100,50,0.35)',
                 letterSpacing: '0.08em',
               }}
             >
-              PODCAST<span className="text-amber-400" style={{ textShadow: '0 0 12px rgba(251,191,36,0.8)' }}>_</span>SHOWCASE
+              PODCAST<span style={{ color: '#e83020', textShadow: '0 0 12px rgba(232,48,32,0.9)' }}>_</span>SHOWCASE
             </h1>
-            <p className="text-blue-500 text-sm mt-1 tracking-widest">
+            <p className="text-sm mt-1 tracking-widest" style={{ color: '#a07850' }}>
               ◆ CURATED EPISODE ARCHIVE ◆
             </p>
           </div>
         </div>
 
-        {/* Neon divider with corner marks */}
+        {/* Divider with corner marks */}
         <div className="flex items-center gap-2 mt-4">
-          <span className="text-amber-500 text-xs">◀</span>
-          <div className="flex-1 h-px bg-gradient-to-r from-amber-500/60 via-blue-500/40 to-transparent" />
-          <span className="text-blue-500 text-xs tracking-widest">AUDIO DB v2.0</span>
-          <div className="flex-1 h-px bg-gradient-to-l from-amber-500/60 via-blue-500/40 to-transparent" />
-          <span className="text-amber-500 text-xs">▶</span>
+          <span className="text-xs" style={{ color: '#e83020' }}>◀</span>
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(232,48,32,0.6), rgba(160,100,50,0.3), transparent)' }} />
+          <span className="text-xs tracking-widest" style={{ color: '#a07850' }}>AUDIO DB v2.0</span>
+          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, rgba(232,48,32,0.6), rgba(160,100,50,0.3), transparent)' }} />
+          <span className="text-xs" style={{ color: '#e83020' }}>▶</span>
         </div>
       </header>
 
