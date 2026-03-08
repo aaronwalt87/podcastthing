@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#0a0a0a"/>
+  <!-- Headphone arc -->
+  <path d="M9 17 C9 11.477 12.134 7.5 16 7.5 C19.866 7.5 23 11.477 23 17" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left ear cup -->
+  <rect x="7" y="17" width="4.5" height="7" rx="2.25" fill="white"/>
+  <!-- Right ear cup -->
+  <rect x="20.5" y="17" width="4.5" height="7" rx="2.25" fill="white"/>
+</svg>
