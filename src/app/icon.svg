@@ -1,9 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0a0a0a"/>
-  <!-- Headphone arc -->
-  <path d="M9 17 C9 11.477 12.134 7.5 16 7.5 C19.866 7.5 23 11.477 23 17" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <!-- Left ear cup -->
-  <rect x="7" y="17" width="4.5" height="7" rx="2.25" fill="white"/>
-  <!-- Right ear cup -->
-  <rect x="20.5" y="17" width="4.5" height="7" rx="2.25" fill="white"/>
+  <rect width="32" height="32" rx="4" fill="#0c0804"/>
+  <!-- Corner brackets -->
+  <path d="M4,8 L4,4 L8,4" fill="none" stroke="#a07040" stroke-width="1"/>
+  <path d="M24,4 L28,4 L28,8" fill="none" stroke="#a07040" stroke-width="1"/>
+  <path d="M4,24 L4,28 L8,28" fill="none" stroke="#a07040" stroke-width="1"/>
+  <path d="M28,24 L28,28 L24,28" fill="none" stroke="#a07040" stroke-width="1"/>
+  <!-- Cassette body -->
+  <rect x="5" y="11" width="22" height="13" rx="1.5" fill="#140e06" stroke="#7a5030" stroke-width="1"/>
+  <!-- Left reel -->
+  <circle cx="11" cy="17.5" r="3.5" fill="#0c0804" stroke="#a07040" stroke-width="1"/>
+  <circle cx="11" cy="17.5" r="1.5" fill="#060401" stroke="#c49060" stroke-width="0.75"/>
+  <!-- Right reel -->
+  <circle cx="21" cy="17.5" r="3.5" fill="#0c0804" stroke="#a07040" stroke-width="1"/>
+  <circle cx="21" cy="17.5" r="1.5" fill="#060401" stroke="#c49060" stroke-width="0.75"/>
+  <!-- Center window -->
+  <rect x="14" y="15" width="4" height="5" rx="0.5" fill="none" stroke="#e83020" stroke-width="0.75"/>
 </svg>
