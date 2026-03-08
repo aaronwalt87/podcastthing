@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0f1729"/>
+      <stop offset="70%" stop-color="#080d1a"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+
+    <!-- Cassette body gradient -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e2d4a"/>
+      <stop offset="100%" stop-color="#0d1827"/>
+    </linearGradient>
+
+    <!-- Label gradient -->
+    <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d3a8a"/>
+      <stop offset="100%" stop-color="#0f2060"/>
+    </linearGradient>
+
+    <!-- Reel gradient -->
+    <radialGradient id="reelGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a1020"/>
+      <stop offset="60%" stop-color="#111e35"/>
+      <stop offset="100%" stop-color="#1a2d4d"/>
+    </radialGradient>
+
+    <!-- Gold gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b8860b"/>
+      <stop offset="50%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#b8860b"/>
+    </linearGradient>
+
+    <!-- Neon blue glow filter -->
+    <filter id="blueGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Gold glow filter -->
+    <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Outer ring gradient -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a6fa5"/>
+      <stop offset="25%" stop-color="#1e3a6e"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="75%" stop-color="#1e3a6e"/>
+      <stop offset="100%" stop-color="#4a6fa5"/>
+    </linearGradient>
+
+    <clipPath id="circleClip">
+      <circle cx="256" cy="256" r="248"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer metallic ring -->
+  <circle cx="256" cy="256" r="252" fill="url(#ringGrad)" stroke="#2563eb" stroke-width="1"/>
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)"/>
+
+  <!-- Circuit board background lines -->
+  <g clip-path="url(#circleClip)" opacity="0.25" stroke="#1d4ed8" stroke-width="1" fill="none">
+    <!-- Horizontal lines -->
+    <line x1="20" y1="80"  x2="180" y2="80"/>
+    <line x1="20" y1="120" x2="100" y2="120"/>
+    <line x1="330" y1="80" x2="490" y2="80"/>
+    <line x1="390" y1="120" x2="490" y2="120"/>
+    <line x1="20" y1="380" x2="150" y2="380"/>
+    <line x1="20" y1="420" x2="110" y2="420"/>
+    <line x1="340" y1="380" x2="490" y2="380"/>
+    <line x1="390" y1="420" x2="490" y2="420"/>
+    <!-- Vertical lines -->
+    <line x1="80"  y1="20"  x2="80"  y2="160"/>
+    <line x1="130" y1="20"  x2="130" y2="110"/>
+    <line x1="380" y1="20"  x2="380" y2="160"/>
+    <line x1="430" y1="20"  x2="430" y2="110"/>
+    <line x1="80"  y1="350" x2="80"  y2="490"/>
+    <line x1="130" y1="400" x2="130" y2="490"/>
+    <line x1="380" y1="350" x2="380" y2="490"/>
+    <line x1="430" y1="400" x2="430" y2="490"/>
+    <!-- Corner dots (circuit nodes) -->
+    <circle cx="80"  cy="80"  r="4" fill="#1d4ed8"/>
+    <circle cx="130" cy="120" r="3" fill="#1d4ed8"/>
+    <circle cx="380" cy="80"  r="4" fill="#1d4ed8"/>
+    <circle cx="430" cy="120" r="3" fill="#1d4ed8"/>
+    <circle cx="80"  cy="380" r="4" fill="#1d4ed8"/>
+    <circle cx="130" cy="420" r="3" fill="#1d4ed8"/>
+    <circle cx="380" cy="380" r="4" fill="#1d4ed8"/>
+    <circle cx="430" cy="420" r="3" fill="#1d4ed8"/>
+  </g>
+
+  <!-- Subtle scanlines overlay -->
+  <g clip-path="url(#circleClip)" opacity="0.04">
+    <rect x="8" y="8" width="496" height="496" fill="url(#bgGrad)"/>
+    <!-- Horizontal scanlines -->
+    <rect x="0" y="50"  width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="70"  width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="90"  width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="110" width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="130" width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="390" width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="410" width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="430" width="512" height="1" fill="#60a5fa"/>
+    <rect x="0" y="450" width="512" height="1" fill="#60a5fa"/>
+  </g>
+
+  <!-- ===== CASSETTE TAPE BODY ===== -->
+  <!-- Outer shell -->
+  <rect x="64" y="158" width="384" height="220" rx="20" ry="20"
+        fill="url(#bodyGrad)" stroke="#2563eb" stroke-width="2.5"/>
+
+  <!-- Top edge highlight -->
+  <rect x="64" y="158" width="384" height="6" rx="3"
+        fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5"/>
+
+  <!-- Cassette screws (corners) -->
+  <circle cx="95"  cy="185" r="9" fill="#0d1827" stroke="#2563eb" stroke-width="1.5"/>
+  <circle cx="417" cy="185" r="9" fill="#0d1827" stroke="#2563eb" stroke-width="1.5"/>
+  <circle cx="95"  cy="350" r="9" fill="#0d1827" stroke="#2563eb" stroke-width="1.5"/>
+  <circle cx="417" cy="350" r="9" fill="#0d1827" stroke="#2563eb" stroke-width="1.5"/>
+  <!-- Screw cross marks -->
+  <line x1="91" y1="185" x2="99" y2="185" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="95" y1="181" x2="95" y2="189" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="413" y1="185" x2="421" y2="185" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="417" y1="181" x2="417" y2="189" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="91" y1="350" x2="99" y2="350" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="95" y1="346" x2="95" y2="354" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="413" y1="350" x2="421" y2="350" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="417" y1="346" x2="417" y2="354" stroke="#1d4ed8" stroke-width="1"/>
+
+  <!-- Label area (main sticker) -->
+  <rect x="114" y="168" width="284" height="130" rx="6" ry="6"
+        fill="url(#labelGrad)" stroke="#3b82f6" stroke-width="1.5"/>
+
+  <!-- Label top gold stripe -->
+  <rect x="114" y="168" width="284" height="18" rx="4" ry="4"
+        fill="url(#goldGrad)" filter="url(#goldGlow)"/>
+
+  <!-- STEREO badge on gold stripe -->
+  <text x="256" y="181" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="10"
+        font-weight="bold" letter-spacing="4" fill="#0a0a0f">STEREO</text>
+
+  <!-- Label brand line -->
+  <text x="256" y="215" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="22"
+        font-weight="bold" letter-spacing="3" fill="#fbbf24"
+        filter="url(#goldGlow)">AARON'S MIX</text>
+
+  <!-- Side lines on label -->
+  <line x1="124" y1="222" x2="176" y2="222" stroke="#3b82f6" stroke-width="1" opacity="0.7"/>
+  <line x1="336" y1="222" x2="388" y2="222" stroke="#3b82f6" stroke-width="1" opacity="0.7"/>
+
+  <!-- Type label -->
+  <text x="256" y="245" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11"
+        letter-spacing="2" fill="#93c5fd">Type II · Chrome</text>
+
+  <!-- Small horizontal separator on label -->
+  <line x1="150" y1="254" x2="362" y2="254" stroke="#2563eb" stroke-width="1" opacity="0.5"/>
+
+  <!-- Time indicator -->
+  <text x="256" y="270" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="10"
+        letter-spacing="1" fill="#60a5fa" opacity="0.8">C-90 ◆ 90 MIN</text>
+
+  <!-- Small decorative dots on label -->
+  <circle cx="150" cy="235" r="2.5" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="362" cy="235" r="2.5" fill="#fbbf24" opacity="0.8"/>
+
+  <!-- ===== TAPE WINDOW CUTOUT ===== -->
+  <rect x="98" y="308" width="316" height="58" rx="8" ry="8"
+        fill="#030609" stroke="#1d4ed8" stroke-width="1.5"/>
+
+  <!-- Inner window highlight -->
+  <rect x="98" y="308" width="316" height="4" rx="2"
+        fill="none" stroke="#2563eb" stroke-width="0.5" opacity="0.6"/>
+
+  <!-- Tape path line (the tape running between reels) -->
+  <path d="M 152 337 Q 256 350 360 337" stroke="#b8860b" stroke-width="2.5"
+        fill="none" opacity="0.9" filter="url(#goldGlow)"/>
+
+  <!-- ===== LEFT REEL ===== -->
+  <g filter="url(#blueGlow)">
+    <!-- Reel outer ring -->
+    <circle cx="185" cy="337" r="26" fill="url(#reelGrad)" stroke="#3b82f6" stroke-width="2"/>
+    <!-- Reel hub -->
+    <circle cx="185" cy="337" r="10" fill="#0a0f1e" stroke="#60a5fa" stroke-width="1.5"/>
+    <!-- Reel spokes (6) -->
+    <line x1="185" y1="311" x2="185" y2="325" stroke="#2563eb" stroke-width="2"/>
+    <line x1="207.6" y1="324" x2="197.2" y2="330.7" stroke="#2563eb" stroke-width="2"/>
+    <line x1="207.6" y1="350" x2="197.2" y2="343.3" stroke="#2563eb" stroke-width="2"/>
+    <line x1="185" y1="363" x2="185" y2="349" stroke="#2563eb" stroke-width="2"/>
+    <line x1="162.4" y1="350" x2="172.8" y2="343.3" stroke="#2563eb" stroke-width="2"/>
+    <line x1="162.4" y1="324" x2="172.8" y2="330.7" stroke="#2563eb" stroke-width="2"/>
+    <!-- Hub center dot -->
+    <circle cx="185" cy="337" r="3" fill="#60a5fa"/>
+  </g>
+
+  <!-- ===== RIGHT REEL ===== -->
+  <g filter="url(#blueGlow)">
+    <!-- Reel outer ring -->
+    <circle cx="327" cy="337" r="26" fill="url(#reelGrad)" stroke="#3b82f6" stroke-width="2"/>
+    <!-- Reel hub -->
+    <circle cx="327" cy="337" r="10" fill="#0a0f1e" stroke="#60a5fa" stroke-width="1.5"/>
+    <!-- Reel spokes (6) -->
+    <line x1="327" y1="311" x2="327" y2="325" stroke="#2563eb" stroke-width="2"/>
+    <line x1="349.6" y1="324" x2="339.2" y2="330.7" stroke="#2563eb" stroke-width="2"/>
+    <line x1="349.6" y1="350" x2="339.2" y2="343.3" stroke="#2563eb" stroke-width="2"/>
+    <line x1="327" y1="363" x2="327" y2="349" stroke="#2563eb" stroke-width="2"/>
+    <line x1="304.4" y1="350" x2="314.8" y2="343.3" stroke="#2563eb" stroke-width="2"/>
+    <line x1="304.4" y1="324" x2="314.8" y2="330.7" stroke="#2563eb" stroke-width="2"/>
+    <!-- Hub center dot -->
+    <circle cx="327" cy="337" r="3" fill="#60a5fa"/>
+  </g>
+
+  <!-- Center guide (the little notch between the reels at the bottom) -->
+  <rect x="240" y="358" width="32" height="12" rx="3"
+        fill="#0d1827" stroke="#1d4ed8" stroke-width="1"/>
+  <line x1="256" y1="358" x2="256" y2="370" stroke="#2563eb" stroke-width="1" opacity="0.6"/>
+
+  <!-- Side grip ridges (left) -->
+  <line x1="68"  y1="220" x2="68"  y2="320" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <line x1="76"  y1="230" x2="76"  y2="310" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Side grip ridges (right) -->
+  <line x1="444" y1="220" x2="444" y2="320" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <line x1="436" y1="230" x2="436" y2="310" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Bottom edge neon accent line -->
+  <line x1="84" y1="374" x2="428" y2="374"
+        stroke="#2563eb" stroke-width="1.5" opacity="0.5" filter="url(#blueGlow)"/>
+
+  <!-- "PODCAST SHOWCASE" bottom text outside cassette -->
+  <text x="256" y="420" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="18"
+        font-weight="bold" letter-spacing="5" fill="#3b82f6"
+        filter="url(#blueGlow)">PODCAST SHOWCASE</text>
+
+  <!-- Decorative side dashes flanking bottom text -->
+  <line x1="66"  y1="416" x2="106" y2="416" stroke="#fbbf24" stroke-width="1.5" opacity="0.7"/>
+  <line x1="406" y1="416" x2="446" y2="416" stroke="#fbbf24" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- Outer ring inner glow (subtle neon border) -->
+  <circle cx="256" cy="256" r="247" fill="none" stroke="#1d4ed8" stroke-width="2" opacity="0.4"
+          filter="url(#blueGlow)"/>
+</svg>

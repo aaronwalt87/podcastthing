@@ -58,7 +58,7 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
+          <Image src="/logo.svg" alt="Logo" width={56} height={56} className="rounded-lg" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">Admin</h1>
             <p className="text-neutral-500 text-sm mt-0.5">Manage your podcast episodes.</p>
