@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,69 +14,36 @@ html {
 
 body {
   font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
-  background-color: #0e0a05;
+  background-color: #ede0c8;
   background-image:
-    linear-gradient(rgba(122, 90, 56, 0.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(122, 90, 56, 0.10) 1px, transparent 1px),
-    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(160, 60, 20, 0.16) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(100, 50, 20, 0.10) 0%, transparent 60%);
-  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
-  background-attachment: fixed;
-  color: #e8d8c0;
+    linear-gradient(rgba(160, 120, 70, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160, 120, 70, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: #2a1e10;
 }
 
-/* CRT scanline overlay */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(0, 0, 0, 0.10) 3px,
-    rgba(0, 0, 0, 0.10) 4px
-  );
-  pointer-events: none;
-  z-index: 9998;
-}
-
-/* Custom scrollbar — warm tan/red */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0e0a05;
+  background: #d4c4a0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #7a3a20;
-  border-radius: 0px;
+  background: #b89870;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #cc3020;
+  background: #cc2010;
 }
 
-/* Neon glow utilities */
-.neon-text {
-  text-shadow: 0 0 8px rgba(232, 48, 32, 0.9), 0 0 20px rgba(180, 40, 20, 0.5);
-}
-.neon-tan {
-  text-shadow: 0 0 8px rgba(196, 144, 80, 0.9), 0 0 20px rgba(160, 112, 56, 0.5);
+/* Pixel-style focus ring */
+:focus-visible {
+  outline: 2px solid #cc2010;
+  outline-offset: 2px;
 }
 
-/* Retro blink animation */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.blink {
-  animation: blink 1.2s step-end infinite;
-}
-
-/* Range input */
+/* Range input styling */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -85,19 +52,19 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 0px;
-  background: #e83020;
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: #cc2010;
   cursor: pointer;
-  margin-top: -4px;
-  box-shadow: 0 0 6px rgba(232, 48, 32, 0.8);
+  margin-top: -5px;
+  border: 2px solid #8b1508;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 0px;
-  background: #e83020;
-  border: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: #cc2010;
+  border: 2px solid #8b1508;
   cursor: pointer;
 }

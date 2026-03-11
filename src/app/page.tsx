@@ -21,72 +21,84 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : allEpisodes
 
   return (
-    <main className="max-w-screen-xl mx-auto px-4 py-10">
+    <main className="max-w-screen-xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
       {/* Header */}
-      <header className="mb-10">
-        {/* Top status bar */}
-        <div className="flex items-center justify-between mb-4 text-xs pb-2 border-b border-amber-900/30"
-             style={{ color: '#a07850' }}>
-          <span style={{ color: '#7a5a38' }}>SYS:ONLINE <span className="blink" style={{ color: '#e83020' }}>▮</span></span>
-          <span style={{ color: '#cc4020' }}>[ BROADCAST READY ]</span>
-          <span style={{ color: '#7a5a38' }}>VER 2.0</span>
+      <header className="mb-6 sm:mb-10">
+        {/* Beige top bar — like a monitor bezel label */}
+        <div
+          className="flex items-center gap-3 px-3 sm:px-4 py-2 mb-4 text-xs font-mono"
+          style={{
+            background: '#c4b488',
+            border: '2px solid #a09060',
+            borderBottom: '3px solid #8a7840',
+          }}
+        >
+          {/* Power LED */}
+          <span
+            className="inline-block w-2.5 h-2.5 flex-shrink-0"
+            style={{ background: '#cc2010', border: '1px solid #8b1508', boxShadow: '0 0 4px rgba(200,30,10,0.6)' }}
+          />
+          <span style={{ color: '#2a1e10', letterSpacing: '0.1em' }}>PODCAST SHOWCASE</span>
+          <span className="ml-auto hidden sm:block" style={{ color: '#6b5030' }}>v2.0</span>
         </div>
 
-        <div className="flex items-center gap-5 mb-3">
-          {/* Logo with warm frame */}
-          <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1 rounded-sm opacity-30"
-                 style={{ background: 'radial-gradient(circle, rgba(200,80,30,0.5) 0%, transparent 70%)' }} />
-            <div className="relative rounded-sm p-0.5"
-                 style={{ border: '1px solid rgba(160,80,40,0.5)', boxShadow: '0 0 12px rgba(180,70,30,0.25), inset 0 0 8px rgba(160,60,20,0.05)' }}>
-              <Image
-                src="/logo.svg"
-                alt="Podcast Showcase"
-                width={96}
-                height={96}
-                className="relative block"
-                priority
-              />
-            </div>
+        {/* Main header row */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          {/* Logo */}
+          <div
+            className="flex-shrink-0 rounded-sm overflow-hidden"
+            style={{ border: '2px solid #a09060', boxShadow: '2px 2px 0 #8a7840' }}
+          >
+            <Image
+              src="/logo.svg"
+              alt="Aaron's Mix"
+              width={80}
+              height={80}
+              className="block sm:w-24 sm:h-24"
+              priority
+            />
           </div>
 
-          <div>
-            <div className="text-xs tracking-widest mb-1 font-mono" style={{ color: '#7a5038' }}>
-              {'// SYSTEM AUDIO ARCHIVE'}
-            </div>
+          <div className="flex-1 min-w-0">
             <h1
-              className="text-4xl font-black tracking-wider font-mono"
+              className="text-2xl sm:text-4xl font-bold tracking-tight leading-tight"
               style={{
-                fontFamily: "'Orbitron', 'Share Tech Mono', monospace",
-                color: '#e8d8c0',
-                textShadow: '0 0 12px rgba(196,144,80,0.7), 0 0 30px rgba(160,100,50,0.35)',
-                letterSpacing: '0.08em',
+                fontFamily: "'Courier New', Courier, monospace",
+                color: '#2a1e10',
               }}
             >
-              PODCAST<span style={{ color: '#e83020', textShadow: '0 0 12px rgba(232,48,32,0.9)' }}>_</span>SHOWCASE
+              Aaron&apos;s Mix
             </h1>
-            <p className="text-sm mt-1 tracking-widest" style={{ color: '#a07850' }}>
-              ◆ CURATED EPISODE ARCHIVE ◆
+            <p
+              className="text-xs sm:text-sm mt-1 tracking-widest"
+              style={{ color: '#7a5a30' }}
+            >
+              Curated podcast episodes
             </p>
+            {/* Red underline accent */}
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-1 w-16 sm:w-24" style={{ background: '#cc2010' }} />
+              <div className="h-px flex-1 max-w-xs" style={{ background: '#c0a878' }} />
+            </div>
           </div>
-        </div>
-
-        {/* Divider with corner marks */}
-        <div className="flex items-center gap-2 mt-4">
-          <span className="text-xs" style={{ color: '#e83020' }}>◀</span>
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(232,48,32,0.6), rgba(160,100,50,0.3), transparent)' }} />
-          <span className="text-xs tracking-widest" style={{ color: '#a07850' }}>AUDIO DB v2.0</span>
-          <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, rgba(232,48,32,0.6), rgba(160,100,50,0.3), transparent)' }} />
-          <span className="text-xs" style={{ color: '#e83020' }}>▶</span>
         </div>
       </header>
 
       {/* Category filter tabs */}
       {categories.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-5 sm:mb-8 overflow-x-auto pb-1">
           <CategoryTabs categories={categories} selected={selectedCategory} />
         </div>
       )}
+
+      {/* Episode count */}
+      <div className="mb-4 flex items-center gap-2">
+        <span className="text-xs font-mono" style={{ color: '#8a6a40' }}>
+          {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
+          {selectedCategory ? ` in "${selectedCategory}"` : ''}
+        </span>
+        <div className="flex-1 h-px" style={{ background: '#c0a878' }} />
+      </div>
 
       {/* Episode grid */}
       <EpisodeGrid episodes={episodes} selectedCategory={selectedCategory} />

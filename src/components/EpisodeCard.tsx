@@ -10,16 +10,12 @@ interface EpisodeCardProps {
 export default function EpisodeCard({ episode }: EpisodeCardProps) {
   const { currentEpisode, isPlaying, play, pause, resume } = usePlayer()
 
-  const isCurrentEpisode = currentEpisode?.id === episode.id
-  const isThisPlaying = isCurrentEpisode && isPlaying
+  const isActive = currentEpisode?.id === episode.id
+  const isThisPlaying = isActive && isPlaying
 
   const handleClick = () => {
-    if (isCurrentEpisode) {
-      if (isPlaying) {
-        pause()
-      } else {
-        resume()
-      }
+    if (isActive) {
+      isPlaying ? pause() : resume()
     } else {
       play(episode)
     }
@@ -27,22 +23,26 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden cursor-pointer transition-all duration-200 rounded-sm"
+      className="group relative flex flex-col cursor-pointer select-none"
       style={{
-        border: isCurrentEpisode ? '1px solid rgba(232,48,32,0.8)' : '1px solid rgba(122,80,40,0.35)',
-        background: isCurrentEpisode ? 'rgba(80,20,10,0.35)' : 'rgba(30,18,8,0.5)',
-        boxShadow: isCurrentEpisode ? '0 0 16px rgba(232,48,32,0.22), inset 0 0 20px rgba(200,40,20,0.04)' : undefined,
+        background: isActive ? '#f5ead8' : '#d4c4a0',
+        border: isActive ? '2px solid #cc2010' : '2px solid #a09060',
+        borderBottom: isActive ? '4px solid #8b1508' : '4px solid #7a6840',
+        boxShadow: isActive ? '2px 2px 0 #8b1508' : '2px 2px 0 #7a6840',
+        transition: 'border-color 0.1s, box-shadow 0.1s',
       }}
       onMouseEnter={(e) => {
-        if (!isCurrentEpisode) {
-          (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(160,80,40,0.6)'
-          ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(40,22,10,0.6)'
+        if (!isActive) {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderColor = '#8a6a40'
+          el.style.borderBottomColor = '#6a5020'
         }
       }}
       onMouseLeave={(e) => {
-        if (!isCurrentEpisode) {
-          (e.currentTarget as HTMLDivElement).style.border = '1px solid rgba(122,80,40,0.35)'
-          ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(30,18,8,0.5)'
+        if (!isActive) {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.border = '2px solid #a09060'
+          el.style.borderBottom = '4px solid #7a6840'
         }
       }}
       onClick={handleClick}
@@ -51,114 +51,96 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       aria-label={`${isThisPlaying ? 'Pause' : 'Play'} ${episode.title}`}
     >
-      {/* Corner brackets */}
-      <span className="absolute top-0 left-0 w-2 h-2 z-10"
-            style={{ borderTop: '1px solid rgba(196,130,80,0.5)', borderLeft: '1px solid rgba(196,130,80,0.5)' }} />
-      <span className="absolute top-0 right-0 w-2 h-2 z-10"
-            style={{ borderTop: '1px solid rgba(196,130,80,0.5)', borderRight: '1px solid rgba(196,130,80,0.5)' }} />
-
       {/* Thumbnail */}
-      <div className="relative aspect-square" style={{ background: '#140e06' }}>
+      <div className="relative w-full aspect-square overflow-hidden" style={{ background: '#2a1e10' }}>
         {episode.thumbnailUrl ? (
           <img
             src={episode.thumbnailUrl}
             alt={episode.title}
-            className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
+            className="w-full h-full object-cover"
+            style={{ opacity: isActive ? 1 : 0.88 }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center"
-               style={{ background: 'linear-gradient(135deg, #1a1008 0%, #2d1e10 100%)' }}>
-            <svg className="w-12 h-12" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="14" width="40" height="24" rx="2" stroke="#7a5030" strokeWidth="1.5" fill="#0e0803"/>
-              <rect x="10" y="22" width="28" height="10" rx="1" stroke="#5a3820" strokeWidth="1" fill="#060401"/>
-              <circle cx="17" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
-              <circle cx="17" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
-              <circle cx="31" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
-              <circle cx="31" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
-              <path d="M22 27 Q24 29 26 27" stroke="#cc3020" strokeWidth="1.5" fill="none"/>
+          /* Pixel-style cassette placeholder */
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #c4b488 0%, #b0a070 100%)' }}
+          >
+            <svg viewBox="0 0 80 56" className="w-3/5" fill="none">
+              <rect x="2" y="2" width="76" height="52" rx="4" fill="#d4c4a0" stroke="#8a7040" strokeWidth="2"/>
+              <rect x="14" y="18" width="52" height="22" rx="2" fill="#1a1208" stroke="#6a5020" strokeWidth="1.5"/>
+              <circle cx="28" cy="29" r="7" stroke="#c4b080" strokeWidth="1.5" fill="#0e0a05"/>
+              <circle cx="28" cy="29" r="2.5" stroke="#d4c090" strokeWidth="1" fill="#080603"/>
+              <circle cx="52" cy="29" r="7" stroke="#c4b080" strokeWidth="1.5" fill="#0e0a05"/>
+              <circle cx="52" cy="29" r="2.5" stroke="#d4c090" strokeWidth="1" fill="#080603"/>
+              <path d="M35 29 Q40 32 45 29" stroke="#cc2010" strokeWidth="2" fill="none"/>
+              <rect x="4" y="44" width="8" height="6" rx="1" fill="#cc2010" stroke="#8b1508" strokeWidth="1"/>
+              <rect x="68" y="44" width="8" height="6" rx="1" fill="#cc2010" stroke="#8b1508" strokeWidth="1"/>
             </svg>
           </div>
         )}
 
         {/* Play/pause overlay */}
-        <div className={`
-          absolute inset-0 flex items-center justify-center
-          transition-opacity duration-200
-          ${isThisPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-        `} style={{ background: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 ${isThisPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+          style={{ background: 'rgba(0,0,0,0.45)' }}
+        >
           <div
-            className="w-12 h-12 flex items-center justify-center"
+            className="flex items-center justify-center"
             style={{
-              background: 'rgba(10,6,2,0.75)',
-              border: '1px solid rgba(220,60,30,0.8)',
-              boxShadow: '0 0 14px rgba(220,60,30,0.5)',
+              width: 44,
+              height: 44,
+              background: '#cc2010',
+              border: '2px solid #f5ead8',
+              boxShadow: '0 2px 0 #8b1508',
             }}
           >
             {isThisPlaying ? (
-              <svg className="w-5 h-5" fill="#e83020" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              <svg className="w-5 h-5" fill="#f5ead8" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
               </svg>
             ) : (
-              <svg className="w-5 h-5 ml-0.5" fill="#e83020" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
+              <svg className="w-5 h-5 ml-0.5" fill="#f5ead8" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
               </svg>
             )}
           </div>
         </div>
 
-        {/* VU bars — now playing indicator */}
-        {isCurrentEpisode && (
-          <div className="absolute top-2 right-2 flex gap-0.5 items-end h-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className={isThisPlaying ? 'animate-bounce' : ''}
-                style={{
-                  width: 4,
-                  height: `${[55, 100, 70, 85][i - 1]}%`,
-                  background: isThisPlaying ? '#e83020' : '#7a3020',
-                  boxShadow: isThisPlaying ? '0 0 4px rgba(232,48,32,0.8)' : undefined,
-                  animationDelay: `${(i - 1) * 0.12}s`,
-                }}
-              />
-            ))}
+        {/* NOW PLAYING badge */}
+        {isActive && (
+          <div
+            className="absolute top-0 left-0 px-1.5 py-0.5 text-xs font-mono font-bold tracking-wider"
+            style={{ background: '#cc2010', color: '#f5ead8' }}
+          >
+            {isThisPlaying ? '▶ PLAYING' : '❙❙ PAUSED'}
           </div>
-        )}
-
-        {/* Active bottom line */}
-        {isCurrentEpisode && (
-          <div className="absolute bottom-0 left-0 right-0 h-0.5"
-               style={{ background: '#e83020', boxShadow: '0 0 6px rgba(232,48,32,0.9)' }} />
         )}
       </div>
 
-      {/* Info */}
-      <div className="p-2.5 flex flex-col gap-1 flex-1"
-           style={{ borderTop: '1px solid rgba(90,50,20,0.35)' }}>
-        <p className="text-xs uppercase tracking-widest truncate" style={{ color: '#a07850' }}>
+      {/* Info area — looks like cassette label */}
+      <div
+        className="flex-1 flex flex-col gap-1 p-2 sm:p-3"
+        style={{
+          background: isActive ? '#f5ead8' : '#e8d8b8',
+          borderTop: '1px solid #c0a878',
+        }}
+      >
+        <p className="text-xs font-mono uppercase tracking-widest truncate" style={{ color: '#8a6030' }}>
           {episode.showName}
         </p>
-        <h3 className="text-xs font-medium line-clamp-2 leading-snug" style={{ color: '#e8d8c0' }}>
+        <p className="text-xs sm:text-sm font-mono font-bold leading-snug line-clamp-2" style={{ color: '#2a1e10' }}>
           {episode.title}
-        </h3>
-        {episode.description && (
-          <p className="text-xs line-clamp-2 mt-0.5" style={{ color: '#6b4a28' }}>
-            {episode.description}
-          </p>
-        )}
+        </p>
         {episode.category && (
-          <span className="self-start mt-1 text-xs px-1.5 py-0 tracking-wider"
-                style={{ border: '1px solid rgba(160,80,40,0.45)', color: '#c49070' }}>
+          <span
+            className="self-start mt-auto text-xs font-mono px-1.5 py-px tracking-wider"
+            style={{ background: '#c4b080', color: '#2a1e10', border: '1px solid #a09060' }}
+          >
             {episode.category}
           </span>
         )}
       </div>
-
-      {/* Bottom corner brackets */}
-      <span className="absolute bottom-0 left-0 w-2 h-2"
-            style={{ borderBottom: '1px solid rgba(160,100,50,0.3)', borderLeft: '1px solid rgba(160,100,50,0.3)' }} />
-      <span className="absolute bottom-0 right-0 w-2 h-2"
-            style={{ borderBottom: '1px solid rgba(160,100,50,0.3)', borderRight: '1px solid rgba(160,100,50,0.3)' }} />
     </div>
   )
 }

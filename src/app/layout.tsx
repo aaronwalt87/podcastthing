@@ -15,10 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="text-white antialiased">
+      <body className="antialiased" style={{ color: '#2a1e10' }}>
         <PlayerProvider>
-          {/* pb-24 to clear the fixed bottom player bar */}
-          <div className="min-h-screen pb-24">
+          {/* pb-28 to clear the fixed bottom player bar */}
+          <div className="min-h-screen pb-28">
             {children}
           </div>
           <AudioPlayerBar />

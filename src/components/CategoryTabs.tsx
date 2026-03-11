@@ -18,32 +18,34 @@ export default function CategoryTabs({ categories, selected }: CategoryTabsProps
     }
   }
 
+  const allTabs = [{ label: 'ALL', value: undefined }, ...categories.map((c) => ({ label: c, value: c }))]
+
   return (
-    <div className="flex items-center gap-0 flex-wrap w-fit"
-         style={{ border: '1px solid rgba(122,80,40,0.4)' }}>
-      <button
-        onClick={() => navigate(undefined)}
-        className="px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150"
-        style={!selected
-          ? { background: '#cc2810', color: '#f5ead0', fontWeight: 700, boxShadow: '0 0 10px rgba(204,40,16,0.4)', borderRight: '1px solid rgba(122,80,40,0.4)' }
-          : { background: 'transparent', color: '#a07850', borderRight: '1px solid rgba(122,80,40,0.4)' }
-        }
-      >
-        ALL
-      </button>
-      {categories.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => navigate(cat)}
-          className="px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150"
-          style={selected === cat
-            ? { background: '#cc2810', color: '#f5ead0', fontWeight: 700, boxShadow: '0 0 10px rgba(204,40,16,0.4)', borderRight: '1px solid rgba(122,80,40,0.4)' }
-            : { background: 'transparent', color: '#a07850', borderRight: '1px solid rgba(122,80,40,0.4)' }
-          }
-        >
-          {cat.toUpperCase()}
-        </button>
-      ))}
+    <div className="flex items-stretch gap-1 w-max min-w-full sm:min-w-0">
+      {allTabs.map(({ label, value }) => {
+        const active = selected === value
+        return (
+          <button
+            key={label}
+            onClick={() => navigate(value)}
+            className="px-3 sm:px-4 py-1.5 text-xs font-mono tracking-widest whitespace-nowrap transition-all duration-100"
+            style={active ? {
+              background: '#cc2010',
+              color: '#f5ead8',
+              border: '2px solid #8b1508',
+              borderBottom: '3px solid #6a1006',
+              fontWeight: 700,
+            } : {
+              background: '#c4b488',
+              color: '#4a3010',
+              border: '2px solid #a09060',
+              borderBottom: '3px solid #8a7840',
+            }}
+          >
+            {label.toUpperCase()}
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -9,36 +9,45 @@ interface EpisodeGridProps {
 export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridProps) {
   if (episodes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-center">
-        <svg className="w-16 h-16 mb-6" viewBox="0 0 48 48" fill="none">
-          <rect x="4" y="14" width="40" height="24" rx="2" stroke="#7a5030" strokeWidth="1.5" fill="#0e0803"/>
-          <rect x="10" y="22" width="28" height="10" rx="1" stroke="#5a3820" strokeWidth="1" fill="#060401"/>
-          <circle cx="17" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
-          <circle cx="17" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
-          <circle cx="31" cy="27" r="5" stroke="#a07040" strokeWidth="1.5" fill="#0e0803"/>
-          <circle cx="31" cy="27" r="2" stroke="#c49060" strokeWidth="1" fill="#060401"/>
-          <path d="M22 27 Q24 29 26 27" stroke="#cc3020" strokeWidth="1.5" fill="none"/>
+      <div
+        className="flex flex-col items-center justify-center py-20 sm:py-32 text-center mx-auto"
+        style={{ maxWidth: 360 }}
+      >
+        {/* Cassette icon */}
+        <svg viewBox="0 0 120 84" className="w-28 sm:w-36 mb-6" fill="none">
+          <rect x="3" y="3" width="114" height="78" rx="6" fill="#c4b488" stroke="#a09060" strokeWidth="3"/>
+          <rect x="20" y="26" width="80" height="34" rx="3" fill="#1a1208" stroke="#6a5020" strokeWidth="2"/>
+          <circle cx="42" cy="43" r="11" stroke="#c4b080" strokeWidth="2" fill="#0e0a05"/>
+          <circle cx="42" cy="43" r="4" stroke="#d4c090" strokeWidth="1.5" fill="#080603"/>
+          <circle cx="78" cy="43" r="11" stroke="#c4b080" strokeWidth="2" fill="#0e0a05"/>
+          <circle cx="78" cy="43" r="4" stroke="#d4c090" strokeWidth="1.5" fill="#080603"/>
+          <path d="M54 43 Q60 48 66 43" stroke="#cc2010" strokeWidth="2.5" fill="none"/>
+          <rect x="6"  y="64" width="12" height="9" rx="2" fill="#cc2010" stroke="#8b1508" strokeWidth="1.5"/>
+          <rect x="22" y="64" width="12" height="9" rx="2" fill="#cc2010" stroke="#8b1508" strokeWidth="1.5"/>
+          <rect x="86" y="64" width="12" height="9" rx="2" fill="#cc2010" stroke="#8b1508" strokeWidth="1.5"/>
+          <rect x="102" y="64" width="12" height="9" rx="2" fill="#cc2010" stroke="#8b1508" strokeWidth="1.5"/>
         </svg>
+
         {selectedCategory ? (
           <>
-            <p className="text-sm tracking-widest font-mono" style={{ color: '#a07850' }}>
-              NO SIGNAL IN &ldquo;{selectedCategory}&rdquo;
+            <p className="text-sm font-mono font-bold" style={{ color: '#2a1e10' }}>
+              No episodes in &ldquo;{selectedCategory}&rdquo;
             </p>
-            <p className="text-xs mt-2 tracking-wider" style={{ color: '#5a3820' }}>
-              TRY DIFFERENT FREQUENCY
+            <p className="text-xs font-mono mt-2" style={{ color: '#8a6a40' }}>
+              Try a different category
             </p>
           </>
         ) : (
           <>
-            <p className="text-sm tracking-widest font-mono" style={{ color: '#a07850' }}>
-              ARCHIVE EMPTY
+            <p className="text-sm font-mono font-bold" style={{ color: '#2a1e10' }}>
+              Tape deck is empty
             </p>
-            <p className="text-xs mt-2 tracking-wider" style={{ color: '#5a3820' }}>
-              ACCESS{' '}
-              <a href="/admin" style={{ color: '#e83020' }} className="hover:opacity-80 transition-opacity">
-                /ADMIN
+            <p className="text-xs font-mono mt-2" style={{ color: '#8a6a40' }}>
+              Visit{' '}
+              <a href="/admin" className="underline" style={{ color: '#cc2010' }}>
+                /admin
               </a>{' '}
-              TO UPLOAD RECORDINGS
+              to add episodes
             </p>
           </>
         )}
@@ -47,7 +56,7 @@ export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridP
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
       {episodes.map((episode) => (
         <EpisodeCard key={episode.id} episode={episode} />
       ))}
