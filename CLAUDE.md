@@ -1,4 +1,8 @@
-# CLAUDE.md — AI Assistant Guide for podcast-showcase
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# AI Assistant Guide for podcast-showcase
 
 ## Project Overview
 
@@ -147,7 +151,7 @@ All Redis operations go through `src/lib/episodes.ts`. Do not call `src/lib/redi
 ## Audio Playback Architecture
 
 - `PlayerContext` (`src/context/PlayerContext.tsx`) holds the global player state: current episode, playing flag, and control methods (`play`, `pause`, `resume`).
-- A single `<audio>` element lives inside `PlayerProvider` and is referenced via a `useRef`.
+- A single `<audio>` element is rendered inside `PlayerProvider` and referenced via `audioRef` (exposed on the context). `AudioPlayerBar` consumes `audioRef` directly for scrubbing rather than going through context methods.
 - `AudioPlayerBar` is rendered in the root layout and is always visible at the bottom of the screen (root layout adds `pb-24`).
 - Scrub/seek uses a ref-based approach to avoid triggering React re-renders during drag.
 
@@ -156,10 +160,11 @@ All Redis operations go through `src/lib/episodes.ts`. Do not call `src/lib/redi
 ## Styling Conventions
 
 - **Tailwind CSS only** — no CSS modules, no styled-components.
-- Dark monochromatic palette: `neutral-50` (text) through `neutral-950` (background).
+- Retro amber/warm palette: background `#0e0a05`, body text `#e8d8c0`, red accent `#e83020`. These are set as raw CSS in `globals.css`, not via Tailwind neutral tokens.
+- Fonts: **Share Tech Mono** (body) and **Orbitron** (headings), loaded via Google Fonts in `globals.css`.
+- `globals.css` also provides: CRT scanline overlay (`body::after`), `.neon-text` / `.neon-tan` glow utilities, `.blink` animation, and custom range input styling.
 - Responsive grid: 2 columns on mobile → up to 6 columns on wide screens.
 - Interactive elements use `hover:` and `transition-colors` utilities.
-- Custom scrollbar styling is in `globals.css`.
 
 ---
 
