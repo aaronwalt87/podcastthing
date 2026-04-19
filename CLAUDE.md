@@ -2,11 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# AI Assistant Guide for podcast-showcase
+# AI Assistant Guide for PODCAST//TERM
 
 ## Project Overview
 
-**podcast-showcase** is a personal podcast episode showcase web app. It features a responsive dark UI with a persistent audio player, an admin panel for managing episodes, and is designed for zero-config Vercel deployment backed by Upstash Redis (metadata) and Vercel Blob (audio files).
+**PODCAST//TERM** is an AI/tech news terminal with a curated podcast episode archive. It aggregates AI/tech news from RSS feeds and Hacker News into a live telemetry sidebar, while displaying podcast episodes in an editorial magazine layout. Deployed on Vercel, backed by Upstash Redis and Vercel Blob.
 
 **Tech stack:** Next.js 14 (App Router) · TypeScript · Tailwind CSS · Upstash Redis · Vercel Blob
 
@@ -17,9 +17,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 src/
 ├── app/                        # Next.js App Router
-│   ├── page.tsx                # Homepage (server component, force-dynamic)
-│   ├── layout.tsx              # Root layout (wraps PlayerProvider)
-│   ├── globals.css
+│   ├── page.tsx                # Homepage: 2-column layout (episodes + news sidebar)
+│   ├── layout.tsx              # Root layout: TopNav + PlayerProvider + AudioPlayerBar
+│   ├── globals.css             # Analog Frontier tokens + IBM Plex Mono + animations
 │   ├── admin/
 │   │   ├── page.tsx            # Admin dashboard (client component)
 │   │   └── login/page.tsx      # Login page
@@ -30,25 +30,31 @@ src/
 │       ├── episodes/
 │       │   ├── route.ts        # GET all, POST create
 │       │   └── [id]/route.ts   # GET, PUT, DELETE single episode
+│       ├── news/route.ts       # GET cached news items
+│       ├── news/refresh/route.ts # GET (cron) — refresh news cache
 │       └── upload/route.ts     # Vercel Blob upload handler
 ├── components/
 │   ├── admin/
 │   │   ├── EpisodeForm.tsx     # Add/edit episode form
 │   │   ├── EpisodeList.tsx     # Admin episode list with edit/delete
 │   │   └── LoginForm.tsx
+│   ├── TopNav.tsx              # Fixed top navigation bar (hidden on /admin)
 │   ├── AudioPlayerBar.tsx      # Fixed bottom audio player
-│   ├── CategoryTabs.tsx        # Category filter tabs
-│   ├── EpisodeCard.tsx         # Episode thumbnail card
-│   └── EpisodeGrid.tsx         # Responsive episode grid
+│   ├── CategoryTabs.tsx        # Category filter chips
+│   ├── EpisodeCard.tsx         # 16:9 editorial article card (featured prop)
+│   ├── EpisodeGrid.tsx         # Featured-first editorial grid layout
+│   └── NewsReadout.tsx         # LIVE_TELEMETRY_ sidebar list (server-populated)
 ├── context/
 │   └── PlayerContext.tsx       # Global audio player state (React Context)
 ├── lib/
 │   ├── auth.ts                 # HMAC-SHA256 session token helpers
 │   ├── episodes.ts             # Episode CRUD wrappers (calls redis.ts)
+│   ├── news.ts                 # RSS + HN Algolia fetch, Redis cache
 │   └── redis.ts                # Upstash Redis client initialisation
 ├── middleware.ts               # Protects /admin/* — redirects if unauthenticated
 └── types/
-    └── episode.ts              # Episode TypeScript interface
+    ├── episode.ts              # Episode TypeScript interface
+    └── news.ts                 # NewsItem interface
 ```
 
 ---
@@ -76,6 +82,8 @@ Copy `.env.local.example` to `.env.local` and fill in all values before running 
 | `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis auth token |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob read/write token |
+| `CRON_SECRET` | Bearer token for `GET /api/news/refresh` (generate: `openssl rand -hex 32`) |
+| `NEWS_TTL_SECONDS` | News cache TTL in seconds (optional, default 7200) |
 
 > **Note:** On Vercel, `BLOB_READ_WRITE_TOKEN` and the Redis tokens are injected automatically when you connect the respective integrations from the Vercel dashboard.
 
@@ -159,12 +167,21 @@ All Redis operations go through `src/lib/episodes.ts`. Do not call `src/lib/redi
 
 ## Styling Conventions
 
-- **Tailwind CSS only** — no CSS modules, no styled-components.
-- Retro amber/warm palette: background `#0e0a05`, body text `#e8d8c0`, red accent `#e83020`. These are set as raw CSS in `globals.css`, not via Tailwind neutral tokens.
-- Fonts: **Share Tech Mono** (body) and **Orbitron** (headings), loaded via Google Fonts in `globals.css`.
-- `globals.css` also provides: CRT scanline overlay (`body::after`), `.neon-text` / `.neon-tan` glow utilities, `.blink` animation, and custom range input styling.
-- Responsive grid: 2 columns on mobile → up to 6 columns on wide screens.
-- Interactive elements use `hover:` and `transition-colors` utilities.
+- **Tailwind CSS + inline `style` props** — no CSS modules, no styled-components. Custom design tokens are applied via `style={}`, not Tailwind config extensions.
+- **The Analog Frontier** palette (see `design.md`):
+  - Background: `#131313` (void), surface: `#1c1b1b`, elevated: `#353534`
+  - Primary accent: `#FF3B3B` (phosphor red, with `0 0 Npx rgba(255,59,59,X)` glow)
+  - Secondary accent: `#67d7e1` (cyan phosphor)
+  - Text: `#e5e2e1` (paper white)
+- **Fonts** (Google Fonts, loaded in `globals.css`):
+  - **Space Grotesk** — all labels, headings, nav; always uppercase + `tracking-widest`
+  - **Manrope** — body text, episode titles, descriptions
+  - **IBM Plex Mono** — timestamps, tabular metadata; use `.font-mono` class
+- **Zero border radius** — every element has `0px` corners, no exceptions.
+- `globals.css` provides: CRT scanline overlay (`body::after`), `.font-mono`, `.blink`, `newsFadeIn` keyframe, custom range input and scrollbar styling.
+- `EpisodeCard` accepts a `featured?: boolean` prop — featured cards use `text-base` title and `p-4` padding vs `text-sm` / `p-3` for standard.
+- `EpisodeGrid` uses a featured-first layout when ≥ 3 episodes (first episode large, next 2 secondary, rest in archive grid).
+- `TopNav` uses `usePathname()` to highlight active nav link; returns `null` on `/admin` routes so the admin panel has its own header.
 
 ---
 

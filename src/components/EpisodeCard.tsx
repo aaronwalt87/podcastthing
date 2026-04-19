@@ -5,9 +5,18 @@ import type { Episode } from '@/types/episode'
 
 interface EpisodeCardProps {
   episode: Episode
+  featured?: boolean
 }
 
-export default function EpisodeCard({ episode }: EpisodeCardProps) {
+function formatDate(ms: number): string {
+  const d = new Date(ms)
+  const yyyy = d.getFullYear()
+  const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+  const dd = d.getDate().toString().padStart(2, '0')
+  return `${yyyy}.${mm}.${dd}`
+}
+
+export default function EpisodeCard({ episode, featured = false }: EpisodeCardProps) {
   const { currentEpisode, isPlaying, play, pause, resume } = usePlayer()
 
   const isCurrentEpisode = currentEpisode?.id === episode.id
@@ -15,11 +24,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
 
   const handleClick = () => {
     if (isCurrentEpisode) {
-      if (isPlaying) {
-        pause()
-      } else {
-        resume()
-      }
+      isPlaying ? pause() : resume()
     } else {
       play(episode)
     }
@@ -31,18 +36,14 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
       style={{
         background: isCurrentEpisode ? '#353534' : '#1c1b1b',
         boxShadow: isCurrentEpisode
-          ? '0 0 20px rgba(255,59,59,0.2), 0 20px 50px rgba(0,0,0,0.5)'
+          ? '0 0 20px rgba(255,59,59,0.15), 0 20px 50px rgba(0,0,0,0.5)'
           : '0 20px 50px rgba(0,0,0,0.3)',
       }}
       onMouseEnter={(e) => {
-        if (!isCurrentEpisode) {
-          (e.currentTarget as HTMLDivElement).style.background = '#222220'
-        }
+        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = '#222220'
       }}
       onMouseLeave={(e) => {
-        if (!isCurrentEpisode) {
-          (e.currentTarget as HTMLDivElement).style.background = '#1c1b1b'
-        }
+        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = '#1c1b1b'
       }}
       onClick={handleClick}
       role="button"
@@ -51,7 +52,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
       aria-label={`${isThisPlaying ? 'Pause' : 'Play'} ${episode.title}`}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-square" style={{ background: '#131313' }}>
+      <div className="relative aspect-video" style={{ background: '#131313' }}>
         {episode.thumbnailUrl ? (
           <img
             src={episode.thumbnailUrl}
@@ -60,7 +61,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-12 h-12" viewBox="0 0 48 48" fill="none">
+            <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
               <rect x="4" y="14" width="40" height="24" stroke="#353534" strokeWidth="1.5" fill="#1c1b1b"/>
               <rect x="10" y="22" width="28" height="10" stroke="#353534" strokeWidth="1" fill="#131313"/>
               <circle cx="17" cy="27" r="5" stroke="#67d7e1" strokeWidth="1.5" fill="#1c1b1b" strokeOpacity="0.5"/>
@@ -95,7 +96,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
           </div>
         </div>
 
-        {/* VU bars — now playing indicator */}
+        {/* VU bars */}
         {isCurrentEpisode && (
           <div className="absolute top-2 right-2 flex gap-0.5 items-end h-4">
             {[1, 2, 3, 4].map((i) => (
@@ -103,7 +104,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
                 key={i}
                 className={isThisPlaying ? 'animate-bounce' : ''}
                 style={{
-                  width: 4,
+                  width: 3,
                   height: `${[55, 100, 70, 85][i - 1]}%`,
                   background: isThisPlaying ? '#FF3B3B' : '#353534',
                   boxShadow: isThisPlaying ? '0 0 4px rgba(255,59,59,0.8)' : undefined,
@@ -114,7 +115,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
           </div>
         )}
 
-        {/* Active bottom line — phosphor accent */}
+        {/* Active bottom line */}
         {isCurrentEpisode && (
           <div
             className="absolute bottom-0 left-0 right-0 h-0.5"
@@ -123,34 +124,55 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
         )}
       </div>
 
-      {/* Info */}
-      <div className="p-2.5 flex flex-col gap-1 flex-1">
+      {/* Metadata */}
+      <div className={`flex flex-col gap-1.5 flex-1 ${featured ? 'p-4' : 'p-3'}`}>
+        {/* Category + date row */}
+        <div className="flex items-center justify-between gap-2">
+          {episode.category ? (
+            <span
+              className="text-xs px-1.5 py-0.5 tracking-wider uppercase flex-shrink-0"
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                background: '#353534',
+                borderLeft: '1px solid #67d7e1',
+                color: '#67d7e1',
+                fontSize: '9px',
+              }}
+            >
+              {episode.category}
+            </span>
+          ) : (
+            <span />
+          )}
+          <span
+            className="font-mono text-xs tabular-nums flex-shrink-0"
+            style={{ color: '#67d7e1', opacity: 0.6, fontSize: '9px' }}
+          >
+            {formatDate(episode.addedAt)}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3
+          className={`font-semibold leading-snug line-clamp-2 ${featured ? 'text-base' : 'text-sm'}`}
+          style={{ color: '#e5e2e1' }}
+        >
+          {episode.title}
+        </h3>
+
+        {/* Show name */}
         <p
-          className="text-xs uppercase tracking-widest truncate"
-          style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}
+          className="text-xs uppercase tracking-wider truncate"
+          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.8 }}
         >
           {episode.showName}
         </p>
-        <h3 className="text-xs font-medium line-clamp-2 leading-snug" style={{ color: '#e5e2e1' }}>
-          {episode.title}
-        </h3>
+
+        {/* Description */}
         {episode.description && (
-          <p className="text-xs line-clamp-2 mt-0.5" style={{ color: '#e5e2e1', opacity: 0.4 }}>
+          <p className="text-xs line-clamp-1 mt-0.5" style={{ color: '#e5e2e1', opacity: 0.4 }}>
             {episode.description}
           </p>
-        )}
-        {episode.category && (
-          <span
-            className="self-start mt-1 text-xs px-1.5 py-0.5 tracking-wider uppercase"
-            style={{
-              background: '#353534',
-              borderLeft: '1px solid #67d7e1',
-              color: '#67d7e1',
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-          >
-            {episode.category}
-          </span>
         )}
       </div>
     </div>

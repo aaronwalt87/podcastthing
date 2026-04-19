@@ -1,13 +1,13 @@
-# Podcast Showcase
+# PODCAST//TERM — AI Tech Terminal
 
-A minimal, dark-themed personal podcast episode showcase website. Browse curated episode cards and listen via a persistent bottom audio player. Episodes can be added via the admin UI at `/admin` by pasting an external audio URL or uploading an MP3.
+An AI/tech news terminal with a curated podcast episode archive. Features a live intelligence feed aggregating headlines from OpenAI, VentureBeat, The Verge, TechCrunch, Ars Technica, Wired, and Hacker News — displayed alongside podcast episodes in an editorial layout.
 
 ## Stack
 
 - **Next.js 14** (App Router)
-- **Tailwind CSS** — monochromatic dark palette
+- **Tailwind CSS** — The Analog Frontier design system (dark terminal aesthetic)
 - **Vercel Blob** — audio file storage (public CDN)
-- **Upstash Redis** — episode metadata persistence
+- **Upstash Redis** — episode metadata + news feed cache
 
 ## Local Development
 
@@ -19,17 +19,19 @@ npm install
 
 ### 2. Set up environment variables
 
-Copy `.env.local.example` to `.env.local` and fill in your credentials:
-
 ```bash
 cp .env.local.example .env.local
 ```
 
-```env
-BLOB_READ_WRITE_TOKEN=       # from Vercel Blob store
-UPSTASH_REDIS_REST_URL=      # from Upstash Redis
-UPSTASH_REDIS_REST_TOKEN=    # from Upstash Redis
-```
+| Variable | Description |
+|---|---|
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store token |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis auth token |
+| `ADMIN_PASSWORD` | Admin panel password |
+| `CRON_SECRET` | Bearer token for the news refresh endpoint |
+
+Generate `CRON_SECRET` with: `openssl rand -hex 32`
 
 ### 3. Run dev server
 
@@ -39,54 +41,68 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> **Note:** The Vercel Blob `onUploadCompleted` callback won't fire in local dev (requires a public URL). Episodes are saved from the client after `upload()` resolves instead, so uploads work normally locally.
+## News Feed
+
+The `[LIVE_TELEMETRY_]` sidebar pulls from:
+- **RSS:** OpenAI blog, VentureBeat AI, The Verge AI, TechCrunch AI, Ars Technica, Wired AI
+- **Hacker News:** Top AI/LLM stories via Algolia search API
+
+Refresh the cache manually:
+```bash
+curl -X GET https://<your-domain>/api/news/refresh \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Cache TTL: `NEWS_TTL_SECONDS` env var (default 7200s = 2h).
 
 ## Vercel Deployment
 
-1. Push to GitHub → import into Vercel (Next.js preset)
-2. **Blob:** Vercel dashboard → Storage → Create Blob store → Connect to project
-   → `BLOB_READ_WRITE_TOKEN` added automatically
-3. **Redis:** Vercel Marketplace → Upstash → Install → Connect to project
-   → `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` added automatically
-4. `vercel env pull .env.local` to sync secrets locally
-5. Redeploy after connecting storage
+```bash
+npx vercel --prod
+```
+
+1. Connect a **Blob store** in Vercel dashboard → Storage → `BLOB_READ_WRITE_TOKEN` auto-added
+2. Install **Upstash Redis** from Vercel Marketplace → tokens auto-added
+3. Add `ADMIN_PASSWORD` and `CRON_SECRET` manually in Vercel → Settings → Environment Variables
+4. After deploy, seed the news cache: `curl .../api/news/refresh -H "Authorization: Bearer $CRON_SECRET"`
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx               # Root layout with PlayerProvider + AudioPlayerBar
-│   ├── page.tsx                 # Homepage (server component)
-│   ├── admin/page.tsx           # Admin UI (client component)
+│   ├── layout.tsx               # Root layout: TopNav + PlayerProvider + AudioPlayerBar
+│   ├── page.tsx                 # Homepage: 2-column (episodes + news sidebar)
+│   ├── globals.css              # Analog Frontier tokens, IBM Plex Mono, animations
+│   ├── admin/page.tsx           # Admin dashboard (client component)
 │   └── api/
-│       ├── episodes/route.ts    # GET all, POST create
-│       ├── episodes/[id]/route.ts  # GET, PUT, DELETE
-│       └── upload/route.ts      # Vercel Blob upload token handler
+│       ├── auth/                # Login/logout cookie auth
+│       ├── episodes/            # Episode CRUD
+│       ├── news/route.ts        # GET cached news items
+│       ├── news/refresh/route.ts # GET (cron) — refresh news cache
+│       └── upload/route.ts      # Vercel Blob upload handler
 ├── components/
-│   ├── EpisodeGrid.tsx
-│   ├── EpisodeCard.tsx
-│   ├── AudioPlayerBar.tsx
-│   └── admin/
-│       ├── EpisodeForm.tsx
-│       └── EpisodeList.tsx
-├── context/PlayerContext.tsx
+│   ├── TopNav.tsx               # Fixed top nav bar (hidden on /admin)
+│   ├── NewsReadout.tsx          # LIVE_TELEMETRY_ sidebar list
+│   ├── EpisodeGrid.tsx          # Featured-first editorial grid
+│   ├── EpisodeCard.tsx          # 16:9 editorial article card
+│   ├── AudioPlayerBar.tsx       # Fixed bottom audio player
+│   ├── CategoryTabs.tsx         # Category filter chips
+│   └── admin/                   # Admin-only components
+├── context/PlayerContext.tsx    # Global audio player state
 ├── lib/
-│   ├── redis.ts
-│   └── episodes.ts
-└── types/episode.ts
+│   ├── episodes.ts              # Episode CRUD (Redis)
+│   ├── news.ts                  # RSS + HN fetch, Redis cache
+│   └── redis.ts                 # Upstash client
+└── types/
+    ├── episode.ts
+    └── news.ts                  # NewsItem interface
 ```
 
-## Admin UI
+## Admin
 
-Navigate to `/admin` to:
-- Add episodes via URL paste or file upload
-- Edit episode metadata
+Navigate to `/admin`. Protected by `ADMIN_PASSWORD` via HMAC-SHA256 cookie session.
+
+- Add episodes via URL paste or file upload (MP3, M4A, OGG, WAV, AAC, FLAC — 200 MB limit)
+- Edit metadata and categories
 - Delete episodes
-
-No authentication — this is a personal site. Keep `/admin` private by URL obscurity or add your own auth layer.
-
-## Known Limitations
-
-- **CORS on external audio URLs:** Some podcast CDNs block cross-origin browser requests. If playback fails for a URL-based episode, download and re-upload the file instead.
-- **File upload size limit:** 200 MB (configurable in `src/app/api/upload/route.ts`).

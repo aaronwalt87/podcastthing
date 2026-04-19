@@ -1,10 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import type { NewsItem } from '@/types/news'
 
 interface NewsReadoutProps {
   initialItems: NewsItem[]
+}
+
+function formatTime(ms: number): string {
+  const d = new Date(ms)
+  const hh = d.getHours().toString().padStart(2, '0')
+  const mm = d.getMinutes().toString().padStart(2, '0')
+  return `${hh}:${mm}`
 }
 
 function formatAge(ms: number): string {
@@ -18,156 +24,92 @@ function formatAge(ms: number): string {
   return `${days}D AGO`
 }
 
-function pad(n: number): string {
-  return n.toString().padStart(2, '0')
-}
-
 export default function NewsReadout({ initialItems }: NewsReadoutProps) {
-  const [items] = useState<NewsItem[]>(initialItems)
-  const [index, setIndex] = useState(0)
-  const [visible, setVisible] = useState(true)
+  const items = initialItems.slice(0, 20)
 
-  const goTo = (next: number) => {
-    setVisible(false)
-    setTimeout(() => {
-      setIndex(next)
-      setVisible(true)
-    }, 300)
-  }
-
-  useEffect(() => {
-    if (items.length <= 1) return
-    const t = setInterval(() => {
-      goTo((index + 1) % items.length)
-    }, 6000)
-    return () => clearInterval(t)
-  }, [index, items.length])
-
-  if (items.length === 0) {
-    return (
+  return (
+    <div
+      className="flex flex-col"
+      style={{ background: '#1c1b1b', borderLeft: '2px solid #FF3B3B' }}
+    >
+      {/* Header */}
       <div
-        className="flex items-center gap-3 px-4 py-3"
-        style={{ background: '#1c1b1b', borderLeft: '2px solid #FF3B3B' }}
+        className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+        style={{ borderBottom: '1px solid rgba(53,53,52,0.8)' }}
       >
         <span
           className="text-xs uppercase tracking-widest"
           style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#FF3B3B' }}
         >
-          [INTEL FEED]
+          LIVE_TELEMETRY_
         </span>
-        <span
-          className="text-xs uppercase tracking-wider"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.5 }}
-        >
-          FEED OFFLINE — SIGNAL LOST <span className="blink">▮</span>
-        </span>
-      </div>
-    )
-  }
-
-  const item = items[index]
-
-  return (
-    <div
-      style={{ background: '#1c1b1b', borderLeft: '2px solid #FF3B3B', boxShadow: '0 20px 50px rgba(0,0,0,0.4)' }}
-    >
-      {/* Header row */}
-      <div
-        className="flex items-center gap-3 px-4 py-2"
-        style={{ borderBottom: '1px solid rgba(53,53,52,0.8)' }}
-      >
-        <span
-          className="text-xs uppercase tracking-widest flex-shrink-0"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#FF3B3B' }}
-        >
-          [INTEL FEED]
-        </span>
-
-        {/* Source chip */}
-        <span
-          className="text-xs uppercase tracking-wider px-1.5 py-0.5 flex-shrink-0"
-          style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            background: '#353534',
-            borderLeft: `1px solid ${item.sourceType === 'social' ? '#FF3B3B' : '#67d7e1'}`,
-            color: item.sourceType === 'social' ? '#ffb3ac' : '#67d7e1',
-          }}
-        >
-          {item.source}
-        </span>
-
-        <span className="blink text-xs flex-shrink-0" style={{ color: '#FF3B3B' }}>▮</span>
-
-        <div className="flex-1" />
-
-        {/* Counter */}
-        <span
-          className="text-xs tabular-nums flex-shrink-0"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e5e2e1', opacity: 0.35 }}
-        >
-          {pad(index + 1)}/{pad(items.length)}
-        </span>
-
-        {/* Prev / Next */}
-        <button
-          onClick={() => goTo((index - 1 + items.length) % items.length)}
-          className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-colors"
-          style={{ background: '#353534', color: '#e5e2e1' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#67d7e1' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1' }}
-          aria-label="Previous"
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-            <path d="M7 1L3 5l4 4" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-          </svg>
-        </button>
-        <button
-          onClick={() => goTo((index + 1) % items.length)}
-          className="flex-shrink-0 w-6 h-6 flex items-center justify-center transition-colors"
-          style={{ background: '#353534', color: '#e5e2e1' }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#67d7e1' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#e5e2e1' }}
-          aria-label="Next"
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-            <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-          </svg>
-        </button>
+        <span className="blink text-xs" style={{ color: '#FF3B3B' }}>▮</span>
       </div>
 
-      {/* Content */}
-      <div
-        className="px-4 py-3"
-        style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}
-      >
-        <a
-          href={item.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block group"
-        >
-          <p
-            className="text-sm font-medium leading-snug group-hover:opacity-80 transition-opacity"
-            style={{ color: '#e5e2e1' }}
+      {/* Feed */}
+      {items.length === 0 ? (
+        <div className="px-3 py-4">
+          <span
+            className="text-xs uppercase tracking-wider"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.5 }}
           >
-            {item.title}
-          </p>
-          {item.summary && (
-            <p
-              className="text-xs mt-1 line-clamp-1"
-              style={{ color: '#e5e2e1', opacity: 0.4 }}
+            FEED OFFLINE — SIGNAL LOST <span className="blink">▮</span>
+          </span>
+        </div>
+      ) : (
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          {items.map((item, i) => (
+            <div
+              key={item.id}
+              style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(53,53,52,0.6)' : undefined }}
             >
-              {item.summary}
-            </p>
-          )}
-        </a>
-        <p
-          className="text-xs mt-2 uppercase tracking-widest"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.6 }}
-        >
-          {formatAge(item.publishedAt)}
-        </p>
-      </div>
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-3 py-2.5 group"
+              >
+                {/* Timestamp + source */}
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className="font-mono text-xs tabular-nums flex-shrink-0"
+                    style={{ color: '#67d7e1', opacity: 0.7 }}
+                  >
+                    [{formatTime(item.publishedAt)}]
+                  </span>
+                  <span
+                    className="text-xs uppercase tracking-wider px-1 flex-shrink-0"
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      background: '#353534',
+                      borderLeft: `1px solid ${item.sourceType === 'social' ? '#FF3B3B' : '#67d7e1'}`,
+                      color: item.sourceType === 'social' ? '#ffb3ac' : '#67d7e1',
+                      fontSize: '9px',
+                    }}
+                  >
+                    {item.source}
+                  </span>
+                  <span
+                    className="font-mono text-xs flex-shrink-0 ml-auto"
+                    style={{ color: '#67d7e1', opacity: 0.4, fontSize: '9px' }}
+                  >
+                    {formatAge(item.publishedAt)}
+                  </span>
+                </div>
+                {/* Headline */}
+                <p
+                  className="text-xs leading-snug line-clamp-2 transition-colors duration-150"
+                  style={{ color: '#e5e2e1' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLParagraphElement).style.color = '#67d7e1' }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLParagraphElement).style.color = '#e5e2e1' }}
+                >
+                  {item.title}
+                </p>
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

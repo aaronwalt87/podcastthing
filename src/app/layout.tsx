@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { PlayerProvider } from '@/context/PlayerContext'
 import AudioPlayerBar from '@/components/AudioPlayerBar'
+import TopNav from '@/components/TopNav'
 
 export const metadata: Metadata = {
-  title: 'Podcast Showcase',
-  description: 'A curated collection of favorite podcast episodes.',
+  title: 'PODCAST//TERM — AI Tech Terminal',
+  description: 'AI/tech news terminal with curated podcast episode archive.',
 }
 
 export default function RootLayout({
@@ -17,8 +18,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <PlayerProvider>
-          {/* pb-24 to clear the fixed bottom player bar */}
-          <div className="min-h-screen pb-24">
+          <TopNav />
+          <div className="min-h-screen">
             {children}
           </div>
           <AudioPlayerBar />

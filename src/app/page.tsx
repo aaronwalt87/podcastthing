@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { getAllEpisodes, getAllCategories } from '@/lib/episodes'
 import { getCachedNews } from '@/lib/news'
 import EpisodeGrid from '@/components/EpisodeGrid'
@@ -9,6 +8,46 @@ export const dynamic = 'force-dynamic'
 
 interface HomePageProps {
   searchParams: { category?: string }
+}
+
+function StatusBar() {
+  const now = new Date()
+  const timestamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}_UTC`
+
+  return (
+    <div
+      className="flex items-center justify-between px-3 py-1.5 mb-6"
+      style={{ background: '#1c1b1b', borderLeft: '2px solid #FF3B3B' }}
+    >
+      <div className="flex items-center gap-3">
+        <span
+          className="text-xs uppercase tracking-widest"
+          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
+        >
+          STATUS:
+        </span>
+        <span
+          className="text-xs uppercase tracking-widest font-semibold"
+          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#FF3B3B' }}
+        >
+          SIGNAL_ACTIVE
+        </span>
+        <span className="blink text-xs" style={{ color: '#FF3B3B' }}>▮</span>
+      </div>
+      <span
+        className="font-mono text-xs tabular-nums hidden sm:block"
+        style={{ color: '#67d7e1', opacity: 0.6 }}
+      >
+        TIMESTAMP: {timestamp}
+      </span>
+      <span
+        className="text-xs tracking-widest"
+        style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e5e2e1', opacity: 0.3 }}
+      >
+        VER 2.0
+      </span>
+    </div>
+  )
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -24,70 +63,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     : allEpisodes
 
   return (
-    <main className="max-w-screen-xl mx-auto px-4 py-10">
-      <header className="mb-12">
-        {/* Status bar */}
-        <div
-          className="flex items-center justify-between mb-6 text-xs uppercase tracking-widest"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.8 }}
-        >
-          <span>SYS:ONLINE <span className="blink" style={{ color: '#FF3B3B', opacity: 1 }}>▮</span></span>
-          <span style={{ color: '#FF3B3B', opacity: 1 }}>[ BROADCAST READY ]</span>
-          <span>VER 2.0</span>
+    <main className="max-w-screen-xl mx-auto px-4 pt-16 pb-28">
+      {/* Status bar — full width */}
+      <StatusBar />
+
+      {/* Two-column layout: content + sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+        {/* Left: episodes */}
+        <div className="min-w-0">
+          {categories.length > 0 && (
+            <div className="mb-6">
+              <CategoryTabs categories={categories} selected={selectedCategory} />
+            </div>
+          )}
+          <EpisodeGrid episodes={episodes} selectedCategory={selectedCategory} />
         </div>
 
-        <div className="flex items-center gap-6">
-          {/* Logo — tonal container, ambient shadow */}
-          <div
-            className="relative flex-shrink-0 p-1"
-            style={{ background: '#1c1b1b', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
-          >
-            <Image
-              src="/logo.svg"
-              alt="Podcast Showcase"
-              width={88}
-              height={88}
-              className="block"
-              priority
-            />
-          </div>
-
-          <div>
-            <p
-              className="text-xs tracking-widest uppercase mb-2"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.7 }}
-            >
-              {'// SYSTEM AUDIO ARCHIVE'}
-            </p>
-            <h1
-              className="text-4xl font-bold tracking-widest uppercase"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e5e2e1' }}
-            >
-              PODCAST
-              <span style={{ color: '#FF3B3B', textShadow: '0 0 4px rgba(255,59,59,0.3)' }}>_</span>
-              SHOWCASE
-            </h1>
-            <p
-              className="text-sm mt-2 tracking-widest uppercase"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
-            >
-              ◆ CURATED EPISODE ARCHIVE ◆
-            </p>
-          </div>
+        {/* Right: live telemetry sidebar */}
+        <div className="lg:sticky lg:top-16 lg:self-start">
+          <NewsReadout initialItems={newsItems} />
         </div>
-      </header>
-
-      <div className="mb-8">
-        <NewsReadout initialItems={newsItems} />
       </div>
-
-      {categories.length > 0 && (
-        <div className="mb-8">
-          <CategoryTabs categories={categories} selected={selectedCategory} />
-        </div>
-      )}
-
-      <EpisodeGrid episodes={episodes} selectedCategory={selectedCategory} />
     </main>
   )
 }
