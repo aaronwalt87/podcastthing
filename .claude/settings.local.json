@@ -6,7 +6,9 @@
       "Bash(npm run:*)",
       "Bash(echo no git repo:*)",
       "Bash(node:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx next *)",
+      "Bash(./node_modules/.bin/next build *)"
     ]
   }
 }

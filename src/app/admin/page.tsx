@@ -58,22 +58,31 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <Image src="/logo.svg" alt="Logo" width={56} height={56} className="rounded-lg" />
+          <Image src="/logo.svg" alt="Logo" width={48} height={48} />
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Admin</h1>
-            <p className="text-neutral-500 text-sm mt-0.5">Manage your podcast episodes.</p>
+            <h1
+              className="text-xl font-bold tracking-widest uppercase"
+              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e5e2e1' }}
+            >
+              ADMIN
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: '#e5e2e1', opacity: 0.45 }}>
+              Manage your podcast episodes.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <a
             href="/"
-            className="text-sm text-neutral-400 hover:text-white transition-colors"
+            className="text-sm uppercase tracking-wider transition-colors hover:opacity-100"
+            style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif", opacity: 0.8 }}
           >
             ← View site
           </a>
           <button
             onClick={handleLogout}
-            className="text-sm text-neutral-600 hover:text-neutral-300 transition-colors"
+            className="text-sm uppercase tracking-wider transition-colors"
+            style={{ color: '#e5e2e1', opacity: 0.4, fontFamily: "'Space Grotesk', sans-serif" }}
           >
             Log out
           </button>
@@ -83,8 +92,11 @@ export default function AdminPage() {
       {/* Add episode section */}
       <section className="mb-10">
         {showForm ? (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-5">
-            <h2 className="text-sm font-medium text-white mb-4 uppercase tracking-wider">
+          <div className="p-5" style={{ background: '#1c1b1b' }}>
+            <h2
+              className="text-xs font-medium uppercase tracking-wider mb-4"
+              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
+            >
               New Episode
             </h2>
             <EpisodeForm
@@ -96,22 +108,45 @@ export default function AdminPage() {
         ) : (
           <button
             onClick={() => setShowForm(true)}
-            className="w-full py-3 border border-dashed border-neutral-700 rounded-lg text-sm text-neutral-400 hover:border-neutral-500 hover:text-white transition-colors"
+            className="w-full py-3 text-sm uppercase tracking-wider transition-all"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(93,63,60,0.35)',
+              color: '#e5e2e1',
+              opacity: 0.6,
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}
+            onMouseEnter={(e) => {
+              const btn = e.currentTarget
+              btn.style.opacity = '1'
+              btn.style.borderColor = 'rgba(255,59,59,0.5)'
+              btn.style.color = '#FF3B3B'
+            }}
+            onMouseLeave={(e) => {
+              const btn = e.currentTarget
+              btn.style.opacity = '0.6'
+              btn.style.borderColor = 'rgba(93,63,60,0.35)'
+              btn.style.color = '#e5e2e1'
+            }}
           >
-            + Add Episode
+            + ADD EPISODE
           </button>
         )}
       </section>
 
       {/* Episode list */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-neutral-400 uppercase tracking-wider">
+        <div className="flex items-center justify-between mb-6">
+          <h2
+            className="text-xs font-medium uppercase tracking-wider"
+            style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
+          >
             Episodes ({episodes.length})
           </h2>
           <button
             onClick={fetchEpisodes}
-            className="text-xs text-neutral-600 hover:text-neutral-300 transition-colors"
+            className="text-xs uppercase tracking-wider transition-colors"
+            style={{ color: '#e5e2e1', opacity: 0.35, fontFamily: "'Space Grotesk', sans-serif" }}
           >
             Refresh
           </button>
@@ -119,12 +154,22 @@ export default function AdminPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-5 h-5 border-2 border-neutral-700 border-t-white rounded-full animate-spin" />
+            <div
+              className="w-5 h-5 border-2 animate-spin"
+              style={{ borderColor: '#353534', borderTopColor: '#FF3B3B' }}
+            />
           </div>
         ) : error ? (
-          <div className="rounded bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+          <div
+            className="px-4 py-3 text-sm"
+            style={{ background: 'rgba(255,59,59,0.08)', borderLeft: '2px solid #FF3B3B', color: '#ffb3ac' }}
+          >
             {error}{' '}
-            <button onClick={fetchEpisodes} className="underline hover:no-underline ml-1">
+            <button
+              onClick={fetchEpisodes}
+              className="underline hover:no-underline ml-1"
+              style={{ color: '#FF3B3B' }}
+            >
               Retry
             </button>
           </div>

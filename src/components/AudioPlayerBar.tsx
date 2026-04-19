@@ -83,25 +83,20 @@ export default function AudioPlayerBar() {
     <div
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(12, 8, 3, 0.96)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(160,80,40,0.4)',
-        boxShadow: '0 -2px 20px rgba(160,60,20,0.18), 0 -1px 0 rgba(120,50,20,0.2)',
+        background: 'rgba(19, 19, 19, 0.7)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 -20px 50px rgba(0,0,0,0.5)',
       }}
     >
-      {/* Top accent line */}
-      <div className="h-px"
-           style={{ background: 'linear-gradient(to right, transparent, rgba(200,70,30,0.5), rgba(180,110,50,0.3), transparent)' }} />
-
-      {/* Scrub bar */}
-      <div className="relative h-1.5 cursor-pointer" style={{ background: 'rgba(40,20,8,0.8)' }}>
+      {/* Scrub bar — tonal separation, no border */}
+      <div className="relative h-1.5 cursor-pointer" style={{ background: '#1c1b1b' }}>
         <div
-          className="absolute left-0 top-0 h-full transition-all"
+          className="absolute left-0 top-0 h-full"
           style={{
             width: `${progress}%`,
-            background: '#cc2810',
-            boxShadow: '0 0 6px rgba(204,40,16,0.7)',
+            background: '#FF3B3B',
+            boxShadow: '0 0 6px rgba(255,59,59,0.7)',
           }}
         />
         <input
@@ -128,57 +123,57 @@ export default function AudioPlayerBar() {
             src={currentEpisode.thumbnailUrl}
             alt={currentEpisode.title}
             className="w-10 h-10 object-cover flex-shrink-0"
-            style={{ border: '1px solid rgba(160,80,40,0.5)' }}
           />
         ) : (
           <div
             className="w-10 h-10 flex-shrink-0 flex items-center justify-center"
-            style={{ background: '#0e0803', border: '1px solid rgba(122,60,30,0.5)' }}
+            style={{ background: '#1c1b1b' }}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="7" width="20" height="12" rx="1" stroke="#7a5030" strokeWidth="1" fill="#060401"/>
-              <rect x="5" y="11" width="14" height="5" rx="0.5" stroke="#5a3820" strokeWidth="0.8" fill="#030200"/>
-              <circle cx="8.5" cy="13.5" r="2.2" stroke="#a07040" strokeWidth="1" fill="#060401"/>
-              <circle cx="8.5" cy="13.5" r="0.8" stroke="#c49060" strokeWidth="0.8" fill="#030200"/>
-              <circle cx="15.5" cy="13.5" r="2.2" stroke="#a07040" strokeWidth="1" fill="#060401"/>
-              <circle cx="15.5" cy="13.5" r="0.8" stroke="#c49060" strokeWidth="0.8" fill="#030200"/>
-              <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#cc3020" strokeWidth="1" fill="none"/>
+              <rect x="2" y="7" width="20" height="12" stroke="#353534" strokeWidth="1" fill="#131313"/>
+              <rect x="5" y="11" width="14" height="5" stroke="#353534" strokeWidth="0.8" fill="#1c1b1b"/>
+              <circle cx="8.5" cy="13.5" r="2.2" stroke="#67d7e1" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
+              <circle cx="8.5" cy="13.5" r="0.8" stroke="#67d7e1" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
+              <circle cx="15.5" cy="13.5" r="2.2" stroke="#67d7e1" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
+              <circle cx="15.5" cy="13.5" r="0.8" stroke="#67d7e1" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
+              <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#FF3B3B" strokeWidth="1" fill="none"/>
             </svg>
           </div>
         )}
 
         {/* Episode info */}
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-mono truncate tracking-wide" style={{ color: '#e8d8c0' }}>
+          <p className="text-xs truncate tracking-wide" style={{ color: '#e5e2e1' }}>
             {currentEpisode.title}
           </p>
-          <p className="text-xs truncate tracking-widest" style={{ color: '#a07850' }}>
+          <p
+            className="text-xs truncate tracking-widest uppercase"
+            style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}
+          >
             {currentEpisode.showName}
           </p>
         </div>
 
-        {/* Time display */}
+        {/* Time display — tertiary cyan, Space Grotesk */}
         <div
-          className="text-xs tabular-nums hidden sm:block px-2 py-1 font-mono"
+          className="text-xs tabular-nums hidden sm:block px-2 py-1"
           style={{
-            color: '#e83020',
-            textShadow: '0 0 6px rgba(232,48,32,0.6)',
-            background: '#080503',
-            border: '1px solid rgba(120,40,20,0.5)',
+            color: '#67d7e1',
+            background: '#1c1b1b',
+            fontFamily: "'Space Grotesk', sans-serif",
           }}
         >
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
 
-        {/* Play/Pause button */}
+        {/* Play/Pause — primary solid, phosphor glow */}
         <button
           onClick={togglePlayPause}
           className="flex-shrink-0 w-10 h-10 flex items-center justify-center transition-all"
           style={{
-            background: '#cc2810',
-            border: '1px solid rgba(220,80,40,0.7)',
-            boxShadow: '0 0 12px rgba(204,40,16,0.5)',
-            color: '#f5ead0',
+            background: '#FF3B3B',
+            boxShadow: '0 0 12px rgba(255,59,59,0.3)',
+            color: '#410003',
           }}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >

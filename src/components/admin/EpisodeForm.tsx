@@ -11,14 +11,34 @@ interface EpisodeFormProps {
   categories?: string[]
 }
 
-const emptyForm = {
-  title: '',
-  showName: '',
-  description: '',
-  audioUrl: '',
-  thumbnailUrl: '',
-  category: '',
-  audioType: 'url' as 'upload' | 'url',
+const inputStyle: React.CSSProperties = {
+  background: 'transparent',
+  borderBottom: '1px solid rgba(93,63,60,0.5)',
+  color: '#e5e2e1',
+  outline: 'none',
+  width: '100%',
+  padding: '8px 0',
+  fontSize: '0.875rem',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.7rem',
+  textTransform: 'uppercase',
+  letterSpacing: '0.1em',
+  color: '#67d7e1',
+  marginBottom: '4px',
+  fontFamily: "'Space Grotesk', sans-serif",
+}
+
+function onFocusGlow(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  e.target.style.borderBottomColor = '#FF3B3B'
+  e.target.style.boxShadow = '0 4px 0 rgba(255,59,59,0.12)'
+}
+
+function onBlurGlow(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  e.target.style.borderBottomColor = 'rgba(93,63,60,0.5)'
+  e.target.style.boxShadow = 'none'
 }
 
 export default function EpisodeForm({ episode, onSuccess, onCancel, categories = [] }: EpisodeFormProps) {
@@ -65,7 +85,6 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
     try {
       let audioUrl = form.audioUrl
 
-      // Step 1: Upload file directly to Vercel Blob CDN from the browser
       if (form.audioType === 'upload' && file) {
         setUploading(true)
         const blob = await upload(file.name, file, {
@@ -77,7 +96,6 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
         setUploading(false)
       }
 
-      // Step 2: Save episode metadata to Redis
       setSaving(true)
       const url = isEditing ? `/api/episodes/${episode!.id}` : '/api/episodes'
       const method = isEditing ? 'PUT' : 'POST'
@@ -114,10 +132,10 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
   const isLoading = uploading || saving
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Audio source toggle */}
       {!isEditing && (
-        <div className="flex rounded-lg overflow-hidden border border-neutral-700">
+        <div className="flex overflow-hidden" style={{ borderBottom: '1px solid rgba(93,63,60,0.5)' }}>
           {(['url', 'upload'] as const).map((type) => (
             <button
               key={type}
@@ -127,11 +145,13 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
                 setFile(null)
                 update('audioUrl', '')
               }}
-              className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                form.audioType === type
-                  ? 'bg-white text-neutral-950'
-                  : 'bg-neutral-900 text-neutral-400 hover:text-white'
-              }`}
+              className="flex-1 py-2 text-xs font-medium uppercase tracking-wider transition-colors"
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                background: form.audioType === type ? '#FF3B3B' : 'transparent',
+                color: form.audioType === type ? '#410003' : '#e5e2e1',
+                boxShadow: form.audioType === type ? '0 0 8px rgba(255,59,59,0.3)' : undefined,
+              }}
             >
               {type === 'url' ? 'Paste URL' : 'Upload File'}
             </button>
@@ -142,93 +162,107 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
       {/* Audio source input */}
       {form.audioType === 'url' ? (
         <div>
-          <label className="block text-xs text-neutral-400 mb-1">Audio URL</label>
+          <label style={labelStyle}>Audio URL</label>
           <input
             type="url"
             value={form.audioUrl}
             onChange={(e) => update('audioUrl', e.target.value)}
             placeholder="https://example.com/episode.mp3"
-            className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+            style={inputStyle}
             required={!isEditing}
+            onFocus={onFocusGlow}
+            onBlur={onBlurGlow}
           />
-          <p className="text-xs text-neutral-600 mt-1">
-            Note: Some podcast CDNs block cross-origin requests — if playback fails, download and
-            re-upload the file instead.
+          <p className="text-xs mt-1" style={{ color: '#e5e2e1', opacity: 0.3, fontFamily: "'Space Grotesk', sans-serif" }}>
+            Note: Some podcast CDNs block cross-origin requests.
           </p>
         </div>
       ) : (
         <div>
-          <label className="block text-xs text-neutral-400 mb-1">Audio File</label>
+          <label style={labelStyle}>Audio File</label>
           <input
             type="file"
             accept="audio/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full text-sm text-neutral-300 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-neutral-700 file:text-white hover:file:bg-neutral-600 cursor-pointer"
+            className="w-full text-sm cursor-pointer"
+            style={{ color: '#e5e2e1' }}
           />
-          <p className="text-xs text-neutral-600 mt-1">Max 200 MB. MP3, M4A, OGG, WAV, AAC, FLAC.</p>
+          <p className="text-xs mt-1" style={{ color: '#e5e2e1', opacity: 0.3, fontFamily: "'Space Grotesk', sans-serif" }}>
+            Max 200 MB. MP3, M4A, OGG, WAV, AAC, FLAC.
+          </p>
         </div>
       )}
 
       {/* Title */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Title</label>
+        <label style={labelStyle}>Title</label>
         <input
           type="text"
           value={form.title}
           onChange={(e) => update('title', e.target.value)}
           placeholder="Episode title"
-          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+          style={inputStyle}
           required
+          onFocus={onFocusGlow}
+          onBlur={onBlurGlow}
         />
       </div>
 
       {/* Show Name */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Show Name</label>
+        <label style={labelStyle}>Show Name</label>
         <input
           type="text"
           value={form.showName}
           onChange={(e) => update('showName', e.target.value)}
           placeholder="Podcast show name"
-          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+          style={inputStyle}
           required
+          onFocus={onFocusGlow}
+          onBlur={onBlurGlow}
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Description</label>
+        <label style={labelStyle}>Description</label>
         <textarea
           value={form.description}
           onChange={(e) => update('description', e.target.value)}
           placeholder="Short description (optional)"
           rows={3}
-          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400 resize-none"
+          style={{ ...inputStyle, resize: 'none' }}
+          onFocus={onFocusGlow}
+          onBlur={onBlurGlow}
         />
       </div>
 
       {/* Thumbnail URL */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Thumbnail URL (optional)</label>
+        <label style={labelStyle}>Thumbnail URL (optional)</label>
         <input
           type="url"
           value={form.thumbnailUrl}
           onChange={(e) => update('thumbnailUrl', e.target.value)}
           placeholder="https://example.com/cover.jpg"
-          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+          style={inputStyle}
+          onFocus={onFocusGlow}
+          onBlur={onBlurGlow}
         />
       </div>
 
       {/* Category */}
       <div>
-        <label className="block text-xs text-neutral-400 mb-1">Category (optional)</label>
+        <label style={labelStyle}>Category (optional)</label>
         <input
           type="text"
           list="episode-categories"
           value={form.category}
           onChange={(e) => update('category', e.target.value)}
-          placeholder="e.g. Technology, True Crime, Business…"
-          className="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-400"
+          placeholder="e.g. Technology, True Crime…"
+          style={inputStyle}
+          onFocus={onFocusGlow}
+          onBlur={onBlurGlow}
         />
         {categories.length > 0 && (
           <datalist id="episode-categories">
@@ -241,17 +275,26 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
 
       {/* Error */}
       {error && (
-        <div className="rounded bg-red-950 border border-red-800 px-3 py-2 text-sm text-red-300">
+        <div
+          className="px-3 py-2 text-sm"
+          style={{ background: 'rgba(255,59,59,0.08)', borderLeft: '2px solid #FF3B3B', color: '#ffb3ac' }}
+        >
           {error}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 pt-1">
+      <div className="flex gap-3 pt-2">
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 py-2 px-4 bg-white text-neutral-950 text-sm font-medium rounded hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 py-2 px-4 text-sm font-medium uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: '#FF3B3B',
+            color: '#410003',
+            fontFamily: "'Space Grotesk', sans-serif",
+            boxShadow: '0 0 8px rgba(255,59,59,0.3)',
+          }}
         >
           {uploading ? 'Uploading…' : saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Add Episode'}
         </button>
@@ -260,7 +303,13 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="py-2 px-4 bg-neutral-800 text-neutral-300 text-sm rounded hover:bg-neutral-700 disabled:opacity-50 transition-colors"
+            className="py-2 px-4 text-sm uppercase tracking-wider transition-colors disabled:opacity-50"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(93,63,60,0.5)',
+              color: '#e5e2e1',
+              fontFamily: "'Space Grotesk', sans-serif",
+            }}
           >
             Cancel
           </button>

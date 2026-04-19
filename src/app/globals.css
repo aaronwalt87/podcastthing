@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -13,19 +13,12 @@ html {
 }
 
 body {
-  font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
-  background-color: #0e0a05;
-  background-image:
-    linear-gradient(rgba(122, 90, 56, 0.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(122, 90, 56, 0.10) 1px, transparent 1px),
-    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(160, 60, 20, 0.16) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(100, 50, 20, 0.10) 0%, transparent 60%);
-  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
-  background-attachment: fixed;
-  color: #e8d8c0;
+  font-family: 'Manrope', sans-serif;
+  background-color: #131313;
+  color: #e5e2e1;
 }
 
-/* CRT scanline overlay */
+/* CRT scanline overlay — 2px repeating at 3% opacity */
 body::after {
   content: '';
   position: fixed;
@@ -36,47 +29,24 @@ body::after {
   background: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 3px,
-    rgba(0, 0, 0, 0.10) 3px,
-    rgba(0, 0, 0, 0.10) 4px
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
   );
   pointer-events: none;
   z-index: 9998;
 }
 
-/* Custom scrollbar — warm tan/red */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0e0a05;
-}
-::-webkit-scrollbar-thumb {
-  background: #7a3a20;
-  border-radius: 0px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #cc3020;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #131313; }
+::-webkit-scrollbar-thumb { background: #353534; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #FF3B3B; }
 
-/* Neon glow utilities */
-.neon-text {
-  text-shadow: 0 0 8px rgba(232, 48, 32, 0.9), 0 0 20px rgba(180, 40, 20, 0.5);
-}
-.neon-tan {
-  text-shadow: 0 0 8px rgba(196, 144, 80, 0.9), 0 0 20px rgba(160, 112, 56, 0.5);
-}
+/* Placeholder */
+::placeholder { color: rgba(229, 226, 225, 0.3); }
 
-/* Retro blink animation */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.blink {
-  animation: blink 1.2s step-end infinite;
-}
-
-/* Range input */
+/* Range input — 0px radius, primary red */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -87,17 +57,26 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
   height: 12px;
-  border-radius: 0px;
-  background: #e83020;
+  border-radius: 0;
+  background: #FF3B3B;
   cursor: pointer;
   margin-top: -4px;
-  box-shadow: 0 0 6px rgba(232, 48, 32, 0.8);
+  box-shadow: 0 0 6px rgba(255, 59, 59, 0.8);
 }
 input[type="range"]::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  border-radius: 0px;
-  background: #e83020;
+  border-radius: 0;
+  background: #FF3B3B;
   border: none;
   cursor: pointer;
+}
+
+/* Blink animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.blink {
+  animation: blink 1.2s step-end infinite;
 }

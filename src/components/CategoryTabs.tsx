@@ -18,16 +18,20 @@ export default function CategoryTabs({ categories, selected }: CategoryTabsProps
     }
   }
 
+  const chipStyle = (active: boolean): React.CSSProperties => ({
+    fontFamily: "'Space Grotesk', sans-serif",
+    background: active ? '#FF3B3B' : '#1c1b1b',
+    color: active ? '#410003' : '#e5e2e1',
+    borderLeft: active ? '1px solid #FF3B3B' : '1px solid #67d7e1',
+    boxShadow: active ? '0 0 8px rgba(255,59,59,0.3)' : undefined,
+  })
+
   return (
-    <div className="flex items-center gap-0 flex-wrap w-fit"
-         style={{ border: '1px solid rgba(122,80,40,0.4)' }}>
+    <div className="flex items-center gap-2 flex-wrap">
       <button
         onClick={() => navigate(undefined)}
-        className="px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150"
-        style={!selected
-          ? { background: '#cc2810', color: '#f5ead0', fontWeight: 700, boxShadow: '0 0 10px rgba(204,40,16,0.4)', borderRight: '1px solid rgba(122,80,40,0.4)' }
-          : { background: 'transparent', color: '#a07850', borderRight: '1px solid rgba(122,80,40,0.4)' }
-        }
+        className="px-3 py-1 text-xs tracking-widest uppercase transition-all duration-150"
+        style={chipStyle(!selected)}
       >
         ALL
       </button>
@@ -35,11 +39,8 @@ export default function CategoryTabs({ categories, selected }: CategoryTabsProps
         <button
           key={cat}
           onClick={() => navigate(cat)}
-          className="px-4 py-1.5 text-xs tracking-widest font-mono transition-all duration-150"
-          style={selected === cat
-            ? { background: '#cc2810', color: '#f5ead0', fontWeight: 700, boxShadow: '0 0 10px rgba(204,40,16,0.4)', borderRight: '1px solid rgba(122,80,40,0.4)' }
-            : { background: 'transparent', color: '#a07850', borderRight: '1px solid rgba(122,80,40,0.4)' }
-          }
+          className="px-3 py-1 text-xs tracking-widest uppercase transition-all duration-150"
+          style={chipStyle(selected === cat)}
         >
           {cat.toUpperCase()}
         </button>
