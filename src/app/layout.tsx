@@ -3,6 +3,7 @@ import './globals.css'
 import { PlayerProvider } from '@/context/PlayerContext'
 import AudioPlayerBar from '@/components/AudioPlayerBar'
 import TopNav from '@/components/TopNav'
+import ShaderBackground from '@/components/ShaderBackground'
 
 export const metadata: Metadata = {
   title: 'PODCAST//TERM — AI Tech Terminal',
@@ -18,8 +19,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <PlayerProvider>
+          <ShaderBackground />
           <TopNav />
-          <div className="min-h-screen">
+          <div className="min-h-screen" style={{ position: 'relative', zIndex: 1 }}>
             {children}
           </div>
           <AudioPlayerBar />
