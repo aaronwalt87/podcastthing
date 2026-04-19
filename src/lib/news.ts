@@ -6,14 +6,14 @@ const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 7200)
 const MAX_ITEMS = 30
 
 const RSS_SOURCES = [
-  { url: 'https://www.anthropic.com/rss.xml',                                    name: 'Anthropic',    type: 'rss' as const },
-  { url: 'https://openai.com/news/rss.xml',                                      name: 'OpenAI',       type: 'rss' as const },
-  { url: 'https://venturebeat.com/category/ai/feed/',                            name: 'VentureBeat',  type: 'rss' as const },
-  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml',    name: 'The Verge',    type: 'rss' as const },
-  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/',        name: 'TechCrunch',   type: 'rss' as const },
+  { url: 'https://openai.com/news/rss.xml',                                   name: 'OpenAI',      type: 'rss' as const },
+  { url: 'https://venturebeat.com/category/ai/feed/',                         name: 'VentureBeat', type: 'rss' as const },
+  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', name: 'The Verge',   type: 'rss' as const },
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/',     name: 'TechCrunch',  type: 'rss' as const },
+  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab',          name: 'Ars Technica', type: 'rss' as const },
 ]
 
-// Reddit subreddits — fetched via JSON API, displayed as 'social' type
+// Reddit subreddits covering AI/Claude/ChatGPT community
 const REDDIT_SUBS = [
   'ClaudeAI',
   'ChatGPT',
@@ -24,6 +24,11 @@ const REDDIT_SUBS = [
   'singularity',
   'OpenAI',
 ]
+
+// AI-related keywords for filtering Hacker News stories
+const HN_AI_TERMS = ['ai', 'llm', 'claude', 'chatgpt', 'gpt', 'anthropic', 'openai', 'gemini', 'mistral', 'llama', 'machine learning', 'neural', 'model', 'agent', 'transformer']
+
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 
 function extractField(block: string, tag: string): string {
   const cdataMatch = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))
@@ -72,8 +77,7 @@ export function parseRssFeed(xml: string, sourceName: string, sourceType: 'rss' 
     const publishedAt = pubDate ? new Date(pubDate).getTime() : Date.now()
 
     if (!title || !link) continue
-    // Skip error pages masquerading as feeds
-    if (title.toLowerCase().includes('whitelisted') || title.toLowerCase().includes('not found') || title.toLowerCase().includes('error')) continue
+    if (title.toLowerCase().includes('whitelisted') || title.toLowerCase().includes('error')) continue
 
     items.push({
       id: makeId(sourceName, link),
@@ -95,20 +99,16 @@ async function fetchWithTimeout(url: string, timeoutMs: number, headers?: Record
   try {
     return await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'PodcastShowcase/1.0', ...headers },
+      headers: { 'User-Agent': BROWSER_UA, ...headers },
     })
   } finally {
     clearTimeout(timer)
   }
 }
 
-async function fetchRssSource(
-  url: string,
-  name: string,
-  sourceType: 'rss' | 'social'
-): Promise<NewsItem[]> {
+async function fetchRssSource(url: string, name: string, sourceType: 'rss' | 'social'): Promise<NewsItem[]> {
   try {
-    const res = await fetchWithTimeout(url, 5000)
+    const res = await fetchWithTimeout(url, 6000)
     if (!res.ok) return []
     const xml = await res.text()
     return parseRssFeed(xml, name, sourceType)
@@ -130,28 +130,22 @@ interface RedditPost {
 }
 
 interface RedditResponse {
-  data: {
-    children: RedditPost[]
-  }
+  data: { children: RedditPost[] }
 }
 
 async function fetchRedditSubreddit(subreddit: string): Promise<NewsItem[]> {
   try {
     const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10`
-    const res = await fetchWithTimeout(url, 5000, {
-      'User-Agent': 'PodcastShowcase/1.0 (news aggregator)',
+    const res = await fetchWithTimeout(url, 6000, {
+      Accept: 'application/json',
     })
     if (!res.ok) return []
     const json = (await res.json()) as RedditResponse
-    const posts = json?.data?.children ?? []
-
-    return posts
-      .filter((p) => p.data.score > 10)
+    return (json?.data?.children ?? [])
+      .filter((p) => p.data.score > 5)
       .map((p) => {
         const d = p.data
-        const link = d.is_self
-          ? `https://www.reddit.com${d.permalink}`
-          : d.url
+        const link = d.is_self ? `https://www.reddit.com${d.permalink}` : d.url
         return {
           id: makeId(`r/${subreddit}`, link),
           title: d.title,
@@ -167,15 +161,62 @@ async function fetchRedditSubreddit(subreddit: string): Promise<NewsItem[]> {
   }
 }
 
+interface HNItem {
+  id: number
+  title: string
+  url?: string
+  score: number
+  time: number
+  descendants?: number
+}
+
+async function fetchHackerNewsAI(): Promise<NewsItem[]> {
+  try {
+    const res = await fetchWithTimeout('https://hacker-news.firebaseio.com/v0/topstories.json', 5000)
+    if (!res.ok) return []
+    const ids = (await res.json()) as number[]
+
+    const top50 = ids.slice(0, 50)
+    const stories = await Promise.allSettled(
+      top50.map(async (id) => {
+        const r = await fetchWithTimeout(`https://hacker-news.firebaseio.com/v0/item/${id}.json`, 4000)
+        return r.ok ? (await r.json()) as HNItem : null
+      })
+    )
+
+    return stories
+      .flatMap((r) => (r.status === 'fulfilled' && r.value ? [r.value] : []))
+      .filter((item) => {
+        if (!item.title || !item.url) return false
+        const lower = item.title.toLowerCase()
+        return HN_AI_TERMS.some((term) => lower.includes(term))
+      })
+      .slice(0, 8)
+      .map((item) => ({
+        id: makeId('HackerNews', item.url!),
+        title: item.title,
+        link: item.url!,
+        source: 'Hacker News',
+        sourceType: 'social' as const,
+        publishedAt: item.time * 1000,
+        summary: '',
+      }))
+  } catch {
+    return []
+  }
+}
+
 export async function refreshNews(): Promise<NewsItem[]> {
-  const [rssResults, redditResults] = await Promise.all([
+  const [rssResults, redditResults, hnItems] = await Promise.all([
     Promise.allSettled(RSS_SOURCES.map((s) => fetchRssSource(s.url, s.name, s.type))),
     Promise.allSettled(REDDIT_SUBS.map(fetchRedditSubreddit)),
+    fetchHackerNewsAI(),
   ])
 
   const allItems = [
     ...rssResults.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
     ...redditResults.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
+    ...hnItems,
   ]
 
   const seen = new Set<string>()
