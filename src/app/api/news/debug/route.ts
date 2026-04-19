@@ -21,12 +21,7 @@ async function probe(label: string, url: string, headers?: Record<string, string
   }
 }
 
-export async function GET(request: Request) {
-  const auth = request.headers.get('Authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export async function GET() {
   const results = await Promise.all([
     probe('OpenAI RSS',      'https://openai.com/news/rss.xml'),
     probe('VentureBeat RSS', 'https://venturebeat.com/category/ai/feed/'),
