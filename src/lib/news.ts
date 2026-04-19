@@ -14,7 +14,16 @@ const RSS_SOURCES = [
 ]
 
 // Reddit subreddits — fetched via JSON API, displayed as 'social' type
-const REDDIT_SUBS = ['ClaudeAI', 'ChatGPT', 'artificial', 'MachineLearning']
+const REDDIT_SUBS = [
+  'ClaudeAI',
+  'ChatGPT',
+  'artificial',
+  'MachineLearning',
+  'agentsofai',
+  'LocalLLaMA',
+  'singularity',
+  'OpenAI',
+]
 
 function extractField(block: string, tag: string): string {
   const cdataMatch = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))
