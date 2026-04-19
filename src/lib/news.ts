@@ -6,17 +6,15 @@ const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 7200)
 const MAX_ITEMS = 30
 
 const RSS_SOURCES = [
-  { url: 'https://www.anthropic.com/rss.xml', name: 'Anthropic', type: 'rss' as const },
-  { url: 'https://openai.com/news/rss.xml',   name: 'OpenAI',    type: 'rss' as const },
+  { url: 'https://www.anthropic.com/rss.xml',                                    name: 'Anthropic',    type: 'rss' as const },
+  { url: 'https://openai.com/news/rss.xml',                                      name: 'OpenAI',       type: 'rss' as const },
+  { url: 'https://venturebeat.com/category/ai/feed/',                            name: 'VentureBeat',  type: 'rss' as const },
+  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml',    name: 'The Verge',    type: 'rss' as const },
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/',        name: 'TechCrunch',   type: 'rss' as const },
 ]
 
-const SOCIAL_ACCOUNTS = ['AnthropicAI', 'OpenAI', 'sama', 'karpathy']
-
-const NITTER_INSTANCES = [
-  'https://nitter.privacydev.net',
-  'https://nitter.poast.org',
-  'https://xcancel.com',
-]
+// Reddit subreddits — fetched via JSON API, displayed as 'social' type
+const REDDIT_SUBS = ['ClaudeAI', 'ChatGPT', 'artificial', 'MachineLearning']
 
 function extractField(block: string, tag: string): string {
   const cdataMatch = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))
@@ -26,16 +24,22 @@ function extractField(block: string, tag: string): string {
 }
 
 function extractLink(block: string): string {
-  // Prefer <link> that is not an atom:link or rss:link
   const match = block.match(/<link>([^<]+)<\/link>/)
   if (match) return match[1].trim()
-  // Nitter sometimes uses <link rel="alternate" ...> — fall back to guid
   const guid = block.match(/<guid[^>]*>([^<]+)<\/guid>/)
   return guid ? guid[1].trim() : ''
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').trim()
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .trim()
 }
 
 function makeId(source: string, link: string): string {
@@ -59,6 +63,8 @@ export function parseRssFeed(xml: string, sourceName: string, sourceType: 'rss' 
     const publishedAt = pubDate ? new Date(pubDate).getTime() : Date.now()
 
     if (!title || !link) continue
+    // Skip error pages masquerading as feeds
+    if (title.toLowerCase().includes('whitelisted') || title.toLowerCase().includes('not found') || title.toLowerCase().includes('error')) continue
 
     items.push({
       id: makeId(sourceName, link),
@@ -74,13 +80,13 @@ export function parseRssFeed(xml: string, sourceName: string, sourceType: 'rss' 
   return items
 }
 
-async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs: number, headers?: Record<string, string>): Promise<Response> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     return await fetch(url, {
       signal: controller.signal,
-      headers: { 'User-Agent': 'PodcastShowcase/1.0' },
+      headers: { 'User-Agent': 'PodcastShowcase/1.0', ...headers },
     })
   } finally {
     clearTimeout(timer)
@@ -102,31 +108,65 @@ async function fetchRssSource(
   }
 }
 
-async function fetchNitterAccount(handle: string): Promise<NewsItem[]> {
-  for (const instance of NITTER_INSTANCES) {
-    try {
-      const url = `${instance}/${handle}/rss`
-      const res = await fetchWithTimeout(url, 4000)
-      if (!res.ok) continue
-      const xml = await res.text()
-      const items = parseRssFeed(xml, `@${handle}`, 'social')
-      if (items.length > 0) return items
-    } catch {
-      // try next instance
-    }
+interface RedditPost {
+  data: {
+    title: string
+    url: string
+    permalink: string
+    created_utc: number
+    selftext: string
+    score: number
+    is_self: boolean
   }
-  return []
+}
+
+interface RedditResponse {
+  data: {
+    children: RedditPost[]
+  }
+}
+
+async function fetchRedditSubreddit(subreddit: string): Promise<NewsItem[]> {
+  try {
+    const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10`
+    const res = await fetchWithTimeout(url, 5000, {
+      'User-Agent': 'PodcastShowcase/1.0 (news aggregator)',
+    })
+    if (!res.ok) return []
+    const json = (await res.json()) as RedditResponse
+    const posts = json?.data?.children ?? []
+
+    return posts
+      .filter((p) => p.data.score > 10)
+      .map((p) => {
+        const d = p.data
+        const link = d.is_self
+          ? `https://www.reddit.com${d.permalink}`
+          : d.url
+        return {
+          id: makeId(`r/${subreddit}`, link),
+          title: d.title,
+          link,
+          source: `r/${subreddit}`,
+          sourceType: 'social' as const,
+          publishedAt: d.created_utc * 1000,
+          summary: d.is_self ? stripHtml(d.selftext).slice(0, 200) : '',
+        }
+      })
+  } catch {
+    return []
+  }
 }
 
 export async function refreshNews(): Promise<NewsItem[]> {
-  const [rssResults, socialResults] = await Promise.all([
+  const [rssResults, redditResults] = await Promise.all([
     Promise.allSettled(RSS_SOURCES.map((s) => fetchRssSource(s.url, s.name, s.type))),
-    Promise.allSettled(SOCIAL_ACCOUNTS.map(fetchNitterAccount)),
+    Promise.allSettled(REDDIT_SUBS.map(fetchRedditSubreddit)),
   ])
 
   const allItems = [
     ...rssResults.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
-    ...socialResults.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
+    ...redditResults.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])),
   ]
 
   const seen = new Set<string>()
