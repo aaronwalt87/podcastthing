@@ -32,7 +32,7 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden cursor-pointer transition-all duration-200"
+      className={`group relative flex flex-col overflow-hidden cursor-pointer transition-all duration-200${featured ? ' h-full' : ''}`}
       style={{
         background: isCurrentEpisode ? '#353534' : '#1c1b1b',
         boxShadow: isCurrentEpisode
@@ -51,8 +51,11 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       aria-label={`${isThisPlaying ? 'Pause' : 'Play'} ${episode.title}`}
     >
-      {/* Thumbnail */}
-      <div className="relative aspect-video" style={{ background: '#131313' }}>
+      {/* Thumbnail — fills available height when featured, fixed 16:9 otherwise */}
+      <div
+        className={featured ? 'relative flex-1 overflow-hidden' : 'relative aspect-video'}
+        style={{ background: '#131313', minHeight: featured ? '200px' : undefined }}
+      >
         {episode.thumbnailUrl ? (
           <img
             src={episode.thumbnailUrl}
@@ -124,8 +127,8 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
         )}
       </div>
 
-      {/* Metadata */}
-      <div className={`flex flex-col gap-1.5 flex-1 ${featured ? 'p-4' : 'p-3'}`}>
+      {/* Metadata — flex-1 only when not featured (featured lets image expand instead) */}
+      <div className={`flex flex-col gap-1.5 ${featured ? 'p-4 flex-shrink-0' : 'p-3 flex-1'}`}>
         {/* Category + date row */}
         <div className="flex items-center justify-between gap-2">
           {episode.category ? (

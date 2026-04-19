@@ -73,7 +73,7 @@ export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridP
         <SectionHeader label=">> FEATURED_LOG" />
 
         {/* Featured + secondary row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
           {/* Featured — spans full width on mobile, left col on sm+ */}
           <EpisodeCard episode={featured} featured />
           {/* Secondary pair */}
