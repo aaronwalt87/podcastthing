@@ -1,7 +1,9 @@
 import Image from 'next/image'
 import { getAllEpisodes, getAllCategories } from '@/lib/episodes'
+import { getCachedNews } from '@/lib/news'
 import EpisodeGrid from '@/components/EpisodeGrid'
 import CategoryTabs from '@/components/CategoryTabs'
+import NewsReadout from '@/components/NewsReadout'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,9 +12,10 @@ interface HomePageProps {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const [allEpisodes, categories] = await Promise.all([
+  const [allEpisodes, categories, newsItems] = await Promise.all([
     getAllEpisodes(),
     getAllCategories(),
+    getCachedNews(),
   ])
 
   const selectedCategory = searchParams.category
@@ -73,6 +76,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
         </div>
       </header>
+
+      <div className="mb-8">
+        <NewsReadout initialItems={newsItems} />
+      </div>
 
       {categories.length > 0 && (
         <div className="mb-8">
