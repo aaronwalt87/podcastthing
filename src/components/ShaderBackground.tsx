@@ -77,7 +77,7 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`
 
-// Light mode: macOS Terminal — white base, subtle green-gray wisps, dark green click burst
+// Light mode: cool white base with teal (#0E7490) coastal mist and click bloom
 const FRAG_LIGHT = `
 precision highp float;
 uniform vec2 u_res;
@@ -112,42 +112,40 @@ void main() {
   float ar = u_res.x / u_res.y;
   vec2 p   = vec2(uv.x * ar, uv.y);
   vec2 m   = vec2(u_mouse.x * ar, u_mouse.y);
-  float t  = u_time * 0.040;
+  float t  = u_time * 0.032;
 
   vec2 diff = m - p;
   float md  = length(diff);
-  vec2 flow = normalize(diff + 0.0001) * exp(-md * 3.0) * 0.08;
+  vec2 flow = normalize(diff + 0.0001) * exp(-md * 3.5) * 0.06;
 
   vec2 q = p + flow;
-  float n1 = fbm(q * 1.6 + vec2(t,        t * 0.65));
-  float n2 = fbm(q * 2.4 + vec2(n1, n1)  - vec2(t * 0.5, 0.0));
-  float smoke = fbm(q * 1.1 + vec2(n2, n1 * 0.7) + vec2(0.0, t * 0.28));
+  float n1 = fbm(q * 1.4 + vec2(t,       t * 0.55));
+  float n2 = fbm(q * 2.2 + vec2(n1, n1) - vec2(t * 0.4, 0.0));
+  float mist = fbm(q * 0.9 + vec2(n2, n1 * 0.6) + vec2(0.0, t * 0.22));
 
-  float glow  = exp(-md * md * 3.5);
-  float core  = exp(-md * md * 16.0);
+  float glow  = exp(-md * md * 4.0);
+  float core  = exp(-md * md * 18.0);
 
   vec2  cp    = vec2(u_click.x * ar, u_click.y);
   float cd    = length(p - cp);
-  float ring  = exp(-abs(cd - u_click_age * 1.1) * 14.0) * exp(-u_click_age * 2.5);
-  float burst = exp(-cd * 5.0) * exp(-u_click_age * 5.0);
+  float ring  = exp(-abs(cd - u_click_age * 1.0) * 16.0) * exp(-u_click_age * 2.8);
+  float burst = exp(-cd * 6.0) * exp(-u_click_age * 5.5);
 
-  // macOS Terminal paper white with faint green haze
-  vec3 bg    = vec3(0.953, 0.976, 0.953);
-  vec3 haze  = vec3(0.865, 0.915, 0.870);
-  vec3 green = vec3(0.012, 0.490, 0.090);
+  // teal #0E7490 = (0.055, 0.455, 0.565)
+  vec3 bg   = vec3(0.975, 0.980, 0.985);
+  vec3 haze = vec3(0.880, 0.930, 0.945);
+  vec3 teal = vec3(0.055, 0.455, 0.565);
 
-  vec3 col = mix(bg, haze, pow(smoke, 2.4) * 0.38);
-  // Mouse proximity: pull toward green-white
-  col = mix(col, vec3(0.82, 0.94, 0.84), glow * 0.22);
-  col = mix(col, vec3(0.76, 0.92, 0.78), core * 0.30);
-  // Click: dark green ring + burst on white
-  col = mix(col, green * 0.65 + vec3(0.22), ring * 0.60);
-  col = mix(col, green * 0.55 + vec3(0.28), burst * 0.55);
+  vec3 col = mix(bg, haze, pow(mist, 2.6) * 0.32);
+  col = mix(col, bg + teal * 0.08, glow * 0.20);
+  col = mix(col, bg + teal * 0.14, core * 0.25);
+  col += teal * ring  * 0.28;
+  col += teal * burst * 0.20;
 
   col = clamp(col, 0.0, 1.0);
 
-  float vign = 1.0 - dot((uv - 0.5) * 1.4, (uv - 0.5) * 1.4);
-  col = mix(vec3(0.97, 0.99, 0.97), col, clamp(vign, 0.0, 1.0) * 0.88 + 0.12);
+  float vign = 1.0 - dot((uv - 0.5) * 1.3, (uv - 0.5) * 1.3);
+  col = mix(vec3(0.96, 0.965, 0.97), col, clamp(vign, 0.0, 1.0) * 0.85 + 0.15);
 
   gl_FragColor = vec4(col, 1.0);
 }`
@@ -192,7 +190,7 @@ export default function ShaderBackground() {
     const applyOverlay = (light: boolean) => {
       if (overlayRef.current) {
         overlayRef.current.style.background = light
-          ? 'rgba(245,255,245,0.10)'
+          ? 'rgba(240,250,255,0.05)'
           : 'rgba(5,8,5,0.60)'
       }
     }

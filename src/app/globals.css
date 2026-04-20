@@ -92,13 +92,13 @@ input[type="range"]::-moz-range-thumb {
 }
 .blink { animation: blink 1.2s step-end infinite; }
 
-/* ─── Light mode — macOS Terminal "Basic" profile ───────────────────────────── */
+/* ─── Light mode — teal accent, white bg ────────────────────────────────────── */
 body.light-mode {
   background-color: #ffffff;
   color: #1a1a1a;
   --text-primary: #1a1a1a;
-  --text-accent: #00A600;
-  --text-muted: rgba(0,0,0,0.38);
+  --text-accent:  #0E7490;
+  --text-muted:   rgba(0,0,0,0.38);
 }
 
 body.light-mode .glass      { background: rgba(255,255,255,0.93); border-color: rgba(0,0,0,0.09); }
@@ -107,44 +107,31 @@ body.light-mode::after { display: none; }
 body.light-mode ::-webkit-scrollbar-track { background: #f0f0f0; }
 body.light-mode ::-webkit-scrollbar-thumb { background: #aaa; }
 
-/* White text → near black */
-body.light-mode [style*="color:#ffffff"]  { color: #1a1a1a !important; }
-body.light-mode [style*="color: #ffffff"] { color: #1a1a1a !important; }
+/* White text → near black (browser normalizes hex → rgb() in style attr) */
+body.light-mode [style*="color: rgb(255, 255, 255)"] { color: #1a1a1a !important; }
 
 /* Muted off-white → muted gray */
-body.light-mode [style*="color:#b9ccb2"]           { color: rgba(0,0,0,0.48) !important; }
-body.light-mode [style*="color: #b9ccb2"]          { color: rgba(0,0,0,0.48) !important; }
-body.light-mode [style*="color:rgba(185,204,178"]  { color: rgba(0,0,0,0.38) !important; }
-body.light-mode [style*="color: rgba(185,204,178"] { color: rgba(0,0,0,0.38) !important; }
+body.light-mode [style*="color: rgba(185, 204, 178"] { color: rgba(0,0,0,0.38) !important; }
 
-/* Neon green → ANSI terminal green #00A600 */
-body.light-mode [style*="color:#00FF41"]           { color: #00A600 !important; }
-body.light-mode [style*="color: #00FF41"]          { color: #00A600 !important; }
-body.light-mode [style*="color:rgba(0,255,65"]     { color: rgba(0,140,0,0.80) !important; }
-body.light-mode [style*="color: rgba(0,255,65"]    { color: rgba(0,140,0,0.80) !important; }
+/* Neon green → teal */
+body.light-mode [style*="color: rgb(0, 255, 65)"]  { color: #0E7490 !important; }
+body.light-mode [style*="color: rgba(0, 255, 65"]  { color: rgba(14,116,144,0.80) !important; }
 
-/* Green button/chip backgrounds → ANSI green */
-body.light-mode [style*="background:#00FF41"]          { background: #00A600 !important; }
-body.light-mode [style*="background: #00FF41"]         { background: #00A600 !important; }
-body.light-mode [style*="background:rgba(0,255,65"]    { background: rgba(0,140,0,0.09) !important; }
-body.light-mode [style*="background: rgba(0,255,65"]   { background: rgba(0,140,0,0.09) !important; }
+/* Green backgrounds → teal-tinted */
+body.light-mode [style*="background: rgb(0, 255, 65)"]  { background: #0E7490 !important; color: #fff !important; }
+body.light-mode [style*="background: rgba(0, 255, 65"]  { background: rgba(14,116,144,0.08) !important; }
 
 /* Dark card backgrounds → white */
-body.light-mode [style*="background:rgba(20,20,20"]    { background: rgba(255,255,255,0.92) !important; }
-body.light-mode [style*="background: rgba(20,20,20"]   { background: rgba(255,255,255,0.92) !important; }
-body.light-mode [style*="background:rgba(14,14,14"]    { background: rgba(246,246,246,0.95) !important; }
-body.light-mode [style*="background: rgba(14,14,14"]   { background: rgba(246,246,246,0.95) !important; }
-body.light-mode [style*="background:rgba(30,30,30"]    { background: rgba(240,240,240,0.96) !important; }
-body.light-mode [style*="background: rgba(30,30,30"]   { background: rgba(240,240,240,0.96) !important; }
+body.light-mode [style*="background: rgba(20, 20, 20"]  { background: rgba(255,255,255,0.92) !important; }
+body.light-mode [style*="background: rgba(14, 14, 14"]  { background: rgba(246,246,246,0.95) !important; }
+body.light-mode [style*="background: rgba(30, 30, 30"]  { background: rgba(240,240,240,0.96) !important; }
 
-/* Remove neon glows */
-body.light-mode [style*="boxShadow:0 0"]   { box-shadow: none !important; }
-body.light-mode [style*="box-shadow:0 0"]  { box-shadow: none !important; }
-body.light-mode [style*="textShadow"]      { text-shadow: none !important; }
+/* Remove neon glows (React serializes boxShadow as box-shadow with px units) */
+body.light-mode [style*="box-shadow: 0px 0px"] { box-shadow: none !important; }
+body.light-mode [style*="text-shadow"]          { text-shadow: none !important; }
 
-/* Green borders → ANSI green */
-body.light-mode [style*="borderLeft:2px solid rgba(0,255,65"]  { border-left-color: #00A600 !important; }
-body.light-mode [style*="border-left:2px solid rgba(0,255,65"] { border-left-color: #00A600 !important; }
-body.light-mode [style*="borderLeft:2px solid #00FF41"]        { border-left-color: #00A600 !important; }
+/* Green borders → teal (React serializes borderLeft as border-left) */
+body.light-mode [style*="border-left: 2px solid rgba(0, 255, 65"] { border-left-color: #0E7490 !important; }
+body.light-mode [style*="border-left: 2px solid rgb(0, 255, 65"]  { border-left-color: #0E7490 !important; }
 
-body.light-mode .blink { color: #00A600 !important; }
+body.light-mode .blink { color: #0E7490 !important; }
