@@ -20,10 +20,10 @@ export default function CategoryTabs({ categories, selected }: CategoryTabsProps
 
   const chipStyle = (active: boolean): React.CSSProperties => ({
     fontFamily: "'Space Grotesk', sans-serif",
-    background: active ? '#FF3B3B' : '#1c1b1b',
-    color: active ? '#410003' : '#e5e2e1',
-    borderLeft: active ? '1px solid #FF3B3B' : '1px solid #67d7e1',
-    boxShadow: active ? '0 0 8px rgba(255,59,59,0.3)' : undefined,
+    background: active ? '#00FF41' : 'rgba(20,20,20,0.7)',
+    color: active ? '#131313' : '#b9ccb2',
+    border: active ? '1px solid #00FF41' : '1px solid rgba(255,255,255,0.1)',
+    boxShadow: active ? '0 0 8px rgba(0,255,65,0.35)' : undefined,
   })
 
   return (

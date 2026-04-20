@@ -6,21 +6,6 @@ interface EpisodeGridProps {
   selectedCategory?: string
 }
 
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <div
-      className="flex items-center gap-3 mb-4"
-      style={{ borderLeft: '2px solid #FF3B3B', paddingLeft: '10px' }}
-    >
-      <span
-        className="text-xs tracking-widest uppercase"
-        style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.8 }}
-      >
-        {label}
-      </span>
-    </div>
-  )
-}
 
 export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridProps) {
   if (episodes.length === 0) {
@@ -37,21 +22,21 @@ export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridP
         </svg>
         {selectedCategory ? (
           <>
-            <p className="text-sm tracking-widest uppercase" style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-sm tracking-widest uppercase" style={{ color: '#00FF41', fontFamily: "'Space Grotesk', sans-serif" }}>
               NO SIGNAL IN &ldquo;{selectedCategory}&rdquo;
             </p>
-            <p className="text-xs mt-2 tracking-wider uppercase" style={{ color: '#e5e2e1', opacity: 0.4, fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-xs mt-2 tracking-wider uppercase" style={{ color: '#b9ccb2', opacity: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
               TRY DIFFERENT FREQUENCY
             </p>
           </>
         ) : (
           <>
-            <p className="text-sm tracking-widest uppercase" style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-sm tracking-widest uppercase" style={{ color: '#00FF41', fontFamily: "'Space Grotesk', sans-serif" }}>
               ARCHIVE EMPTY
             </p>
-            <p className="text-xs mt-2 tracking-wider uppercase" style={{ color: '#e5e2e1', opacity: 0.4, fontFamily: "'Space Grotesk', sans-serif" }}>
+            <p className="text-xs mt-2 tracking-wider uppercase" style={{ color: '#b9ccb2', opacity: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
               ACCESS{' '}
-              <a href="/admin" style={{ color: '#FF3B3B' }} className="hover:opacity-80 transition-opacity">
+              <a href="/admin" style={{ color: '#00FF41' }} className="hover:opacity-80 transition-opacity">
                 /ADMIN
               </a>{' '}
               TO UPLOAD RECORDINGS
@@ -62,48 +47,9 @@ export default function EpisodeGrid({ episodes, selectedCategory }: EpisodeGridP
     )
   }
 
-  // Featured layout when 3+ episodes
-  if (episodes.length >= 3) {
-    const [featured, ...rest] = episodes
-    const secondary = rest.slice(0, 2)
-    const archive = rest.slice(2)
-
-    return (
-      <div className="flex flex-col gap-6">
-        <SectionHeader label=">> FEATURED_LOG" />
-
-        {/* Featured + secondary row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-          {/* Featured — spans full width on mobile, left col on sm+ */}
-          <EpisodeCard episode={featured} featured />
-          {/* Secondary pair */}
-          <div className="flex flex-col gap-4">
-            {secondary.map((ep) => (
-              <EpisodeCard key={ep.id} episode={ep} />
-            ))}
-          </div>
-        </div>
-
-        {/* Archive grid */}
-        {archive.length > 0 && (
-          <>
-            <SectionHeader label=">> EPISODE_ARCHIVE" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {archive.map((ep) => (
-                <EpisodeCard key={ep.id} episode={ep} />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  // Fallback: fewer than 3 episodes
   return (
     <div className="flex flex-col gap-6">
-      <SectionHeader label=">> EPISODE_ARCHIVE" />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
         {episodes.map((ep) => (
           <EpisodeCard key={ep.id} episode={ep} />
         ))}

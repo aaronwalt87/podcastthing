@@ -3,23 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const inputStyle: React.CSSProperties = {
-  background: 'transparent',
-  borderBottom: '1px solid rgba(93,63,60,0.5)',
-  color: '#e5e2e1',
-  outline: 'none',
-  width: '100%',
-  padding: '8px 0',
-  fontSize: '0.875rem',
-}
-
 const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '0.7rem',
   textTransform: 'uppercase',
-  letterSpacing: '0.1em',
-  color: '#67d7e1',
-  marginBottom: '4px',
+  letterSpacing: '0.12em',
+  color: 'rgba(0,255,65,0.7)',
+  marginBottom: '6px',
   fontFamily: "'Space Grotesk', sans-serif",
 }
 
@@ -65,13 +55,19 @@ export default function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoFocus
           required
-          style={inputStyle}
+          className="w-full px-3 py-2.5 text-sm font-mono transition-all duration-150 outline-none"
+          style={{
+            background: 'rgba(0,255,65,0.04)',
+            border: '1px solid rgba(0,255,65,0.2)',
+            color: '#ffffff',
+            borderRadius: '4px',
+          }}
           onFocus={(e) => {
-            e.target.style.borderBottomColor = '#FF3B3B'
-            e.target.style.boxShadow = '0 4px 0 rgba(255,59,59,0.12)'
+            e.target.style.borderColor = 'rgba(0,255,65,0.6)'
+            e.target.style.boxShadow = '0 0 0 3px rgba(0,255,65,0.08)'
           }}
           onBlur={(e) => {
-            e.target.style.borderBottomColor = 'rgba(93,63,60,0.5)'
+            e.target.style.borderColor = 'rgba(0,255,65,0.2)'
             e.target.style.boxShadow = 'none'
           }}
         />
@@ -79,8 +75,8 @@ export default function LoginForm() {
 
       {error && (
         <div
-          className="px-3 py-2 text-sm"
-          style={{ background: 'rgba(255,59,59,0.08)', borderLeft: '2px solid #FF3B3B', color: '#ffb3ac' }}
+          className="px-3 py-2 text-xs font-mono"
+          style={{ background: 'rgba(255,59,59,0.08)', border: '1px solid rgba(255,59,59,0.25)', color: '#ff8080', borderRadius: '4px' }}
         >
           {error}
         </div>
@@ -89,16 +85,18 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 px-4 text-sm font-medium uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-2.5 px-4 text-sm font-bold uppercase tracking-widest transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
         style={{
-          background: '#FF3B3B',
-          color: '#410003',
+          background: '#00FF41',
+          color: '#131313',
           fontFamily: "'Space Grotesk', sans-serif",
-          boxShadow: '0 0 8px rgba(255,59,59,0.3)',
-          letterSpacing: '0.12em',
+          boxShadow: '0 0 12px rgba(0,255,65,0.35)',
+          borderRadius: '4px',
         }}
+        onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(0,255,65,0.6)' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 12px rgba(0,255,65,0.35)' }}
       >
-        {loading ? 'Authenticating…' : 'Authenticate >>'}
+        {loading ? 'AUTHENTICATING…' : 'AUTHENTICATE >>'}
       </button>
     </form>
   )

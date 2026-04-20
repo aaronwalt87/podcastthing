@@ -81,22 +81,23 @@ export default function AudioPlayerBar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50"
+      className="fixed bottom-8 left-0 right-0 z-50"
       style={{
-        background: 'rgba(19, 19, 19, 0.7)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'rgba(14,14,14,0.92)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderTop: '1px solid rgba(255,255,255,0.07)',
         boxShadow: '0 -20px 50px rgba(0,0,0,0.5)',
       }}
     >
       {/* Scrub bar — tonal separation, no border */}
-      <div className="relative h-1.5 cursor-pointer" style={{ background: '#1c1b1b' }}>
+      <div className="relative h-1.5 cursor-pointer" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div
           className="absolute left-0 top-0 h-full"
           style={{
             width: `${progress}%`,
-            background: '#FF3B3B',
-            boxShadow: '0 0 6px rgba(255,59,59,0.7)',
+            background: '#00FF41',
+            boxShadow: '0 0 6px rgba(0,255,65,0.7)',
           }}
         />
         <input
@@ -132,10 +133,10 @@ export default function AudioPlayerBar() {
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
               <rect x="2" y="7" width="20" height="12" stroke="#353534" strokeWidth="1" fill="#131313"/>
               <rect x="5" y="11" width="14" height="5" stroke="#353534" strokeWidth="0.8" fill="#1c1b1b"/>
-              <circle cx="8.5" cy="13.5" r="2.2" stroke="#67d7e1" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
-              <circle cx="8.5" cy="13.5" r="0.8" stroke="#67d7e1" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
-              <circle cx="15.5" cy="13.5" r="2.2" stroke="#67d7e1" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
-              <circle cx="15.5" cy="13.5" r="0.8" stroke="#67d7e1" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
+              <circle cx="8.5" cy="13.5" r="2.2" stroke="rgba(0,255,65,0.5)" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
+              <circle cx="8.5" cy="13.5" r="0.8" stroke="rgba(0,255,65,0.5)" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
+              <circle cx="15.5" cy="13.5" r="2.2" stroke="rgba(0,255,65,0.5)" strokeWidth="1" fill="#131313" strokeOpacity="0.5"/>
+              <circle cx="15.5" cy="13.5" r="0.8" stroke="rgba(0,255,65,0.5)" strokeWidth="0.8" fill="#1c1b1b" strokeOpacity="0.5"/>
               <path d="M11 13.5 Q12 14.5 13 13.5" stroke="#FF3B3B" strokeWidth="1" fill="none"/>
             </svg>
           </div>
@@ -143,23 +144,23 @@ export default function AudioPlayerBar() {
 
         {/* Episode info */}
         <div className="flex-1 min-w-0">
-          <p className="text-xs truncate tracking-wide" style={{ color: '#e5e2e1' }}>
+          <p className="text-xs truncate tracking-wide" style={{ color: 'var(--text-primary)' }}>
             {currentEpisode.title}
           </p>
           <p
             className="text-xs truncate tracking-widest uppercase"
-            style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ color: 'rgba(0,255,65,0.7)', fontFamily: "'Space Grotesk', sans-serif" }}
           >
             {currentEpisode.showName}
           </p>
         </div>
 
-        {/* Time display — tertiary cyan, Space Grotesk */}
+        {/* Time display */}
         <div
           className="text-xs tabular-nums hidden sm:block px-2 py-1"
           style={{
-            color: '#67d7e1',
-            background: '#1c1b1b',
+            color: 'rgba(0,255,65,0.7)',
+            background: 'rgba(255,255,255,0.04)',
             fontFamily: "'Space Grotesk', sans-serif",
           }}
         >
@@ -171,9 +172,9 @@ export default function AudioPlayerBar() {
           onClick={togglePlayPause}
           className="flex-shrink-0 w-10 h-10 flex items-center justify-center transition-all"
           style={{
-            background: '#FF3B3B',
-            boxShadow: '0 0 12px rgba(255,59,59,0.3)',
-            color: '#410003',
+            background: '#00FF41',
+            boxShadow: '0 0 12px rgba(0,255,65,0.3)',
+            color: '#131313',
           }}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >

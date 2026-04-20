@@ -32,18 +32,21 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
 
   return (
     <div
-      className={`group relative flex flex-col overflow-hidden cursor-pointer transition-all duration-200${featured ? ' h-full' : ''}`}
+      className={`group relative flex flex-col overflow-hidden cursor-pointer transition-all duration-200 h-full`}
       style={{
-        background: isCurrentEpisode ? '#353534' : '#1c1b1b',
+        background: isCurrentEpisode ? 'rgba(0,255,65,0.08)' : 'rgba(20,20,20,0.82)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: `1px solid ${isCurrentEpisode ? 'rgba(0,255,65,0.3)' : 'rgba(255,255,255,0.07)'}`,
         boxShadow: isCurrentEpisode
-          ? '0 0 20px rgba(255,59,59,0.15), 0 20px 50px rgba(0,0,0,0.5)'
+          ? '0 0 20px rgba(0,255,65,0.12), 0 20px 50px rgba(0,0,0,0.5)'
           : '0 20px 50px rgba(0,0,0,0.3)',
       }}
       onMouseEnter={(e) => {
-        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = '#222220'
+        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = 'rgba(30,30,30,0.9)'
       }}
       onMouseLeave={(e) => {
-        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = '#1c1b1b'
+        if (!isCurrentEpisode) (e.currentTarget as HTMLDivElement).style.background = 'rgba(20,20,20,0.82)'
       }}
       onClick={handleClick}
       role="button"
@@ -85,14 +88,14 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
         >
           <div
             className="w-12 h-12 flex items-center justify-center"
-            style={{ background: '#FF3B3B', boxShadow: '0 0 14px rgba(255,59,59,0.5)' }}
+            style={{ background: '#00FF41', boxShadow: '0 0 14px rgba(0,255,65,0.5)' }}
           >
             {isThisPlaying ? (
-              <svg className="w-5 h-5" fill="#410003" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="#131313" viewBox="0 0 24 24">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
               </svg>
             ) : (
-              <svg className="w-5 h-5 ml-0.5" fill="#410003" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 ml-0.5" fill="#131313" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
@@ -109,8 +112,8 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
                 style={{
                   width: 3,
                   height: `${[55, 100, 70, 85][i - 1]}%`,
-                  background: isThisPlaying ? '#FF3B3B' : '#353534',
-                  boxShadow: isThisPlaying ? '0 0 4px rgba(255,59,59,0.8)' : undefined,
+                  background: isThisPlaying ? '#00FF41' : 'rgba(255,255,255,0.15)',
+                  boxShadow: isThisPlaying ? '0 0 4px rgba(0,255,65,0.8)' : undefined,
                   animationDelay: `${(i - 1) * 0.12}s`,
                 }}
               />
@@ -122,7 +125,7 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
         {isCurrentEpisode && (
           <div
             className="absolute bottom-0 left-0 right-0 h-0.5"
-            style={{ background: '#FF3B3B', boxShadow: '0 0 6px rgba(255,59,59,0.9)' }}
+            style={{ background: '#00FF41', boxShadow: '0 0 6px rgba(0,255,65,0.9)' }}
           />
         )}
       </div>
@@ -136,9 +139,9 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
               className="text-xs px-1.5 py-0.5 tracking-wider uppercase flex-shrink-0"
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                background: '#353534',
-                borderLeft: '1px solid #67d7e1',
-                color: '#67d7e1',
+                background: 'rgba(0,255,65,0.08)',
+                borderLeft: '1px solid rgba(0,255,65,0.4)',
+                color: '#00FF41',
                 fontSize: '9px',
               }}
             >
@@ -149,7 +152,7 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
           )}
           <span
             className="font-mono text-xs tabular-nums flex-shrink-0"
-            style={{ color: '#67d7e1', opacity: 0.6, fontSize: '9px' }}
+            style={{ color: 'rgba(185,204,178,0.5)', fontSize: '9px' }}
           >
             {formatDate(episode.addedAt)}
           </span>
@@ -158,7 +161,7 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
         {/* Title */}
         <h3
           className={`font-semibold leading-snug line-clamp-2 ${featured ? 'text-base' : 'text-sm'}`}
-          style={{ color: '#e5e2e1' }}
+          style={{ color: 'var(--text-primary)' }}
         >
           {episode.title}
         </h3>
@@ -166,14 +169,14 @@ export default function EpisodeCard({ episode, featured = false }: EpisodeCardPr
         {/* Show name */}
         <p
           className="text-xs uppercase tracking-wider truncate"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1', opacity: 0.8 }}
+          style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'rgba(0,255,65,0.7)' }}
         >
           {episode.showName}
         </p>
 
         {/* Description */}
         {episode.description && (
-          <p className="text-xs line-clamp-1 mt-0.5" style={{ color: '#e5e2e1', opacity: 0.4 }}>
+          <p className="text-xs line-clamp-1 mt-0.5" style={{ color: 'rgba(185,204,178,0.4)' }}>
             {episode.description}
           </p>
         )}

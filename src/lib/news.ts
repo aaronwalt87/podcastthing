@@ -1,23 +1,48 @@
 import redis from './redis'
-import type { NewsItem } from '@/types/news'
+import type { NewsItem, NewsCategory } from '@/types/news'
 
 const NEWS_KEY = 'news:cache'
 const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 7200)
-const MAX_ITEMS = 30
+const MAX_ITEMS = 60
 
-const RSS_SOURCES = [
-  { url: 'https://openai.com/news/rss.xml',                                   name: 'OpenAI',      type: 'rss' as const },
-  { url: 'https://venturebeat.com/category/ai/feed/',                         name: 'VentureBeat', type: 'rss' as const },
-  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', name: 'The Verge',   type: 'rss' as const },
-  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/',     name: 'TechCrunch',  type: 'rss' as const },
-  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab',          name: 'Ars Technica', type: 'rss' as const },
-  { url: 'https://www.wired.com/feed/tag/ai/latest/rss',                      name: 'Wired',       type: 'rss' as const },
+const RSS_SOURCES: { url: string; name: string; type: 'rss'; category: NewsCategory }[] = [
+  // ── AI ──────────────────────────────────────────────────────────────────────
+  { url: 'https://openai.com/news/rss.xml',                                    name: 'OpenAI',       type: 'rss', category: 'AI' },
+  { url: 'https://venturebeat.com/category/ai/feed/',                          name: 'VentureBeat',  type: 'rss', category: 'AI' },
+  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml',  name: 'The Verge',    type: 'rss', category: 'AI' },
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/',      name: 'TechCrunch',   type: 'rss', category: 'AI' },
+
+  // ── Misc Tech News ───────────────────────────────────────────────────────────
+  { url: 'https://news.ycombinator.com/rss',                                   name: 'HN',           type: 'rss', category: 'Misc' },
+  { url: 'https://feeds.arstechnica.com/arstechnica/technology-lab',           name: 'Ars Technica', type: 'rss', category: 'Misc' },
+  { url: 'https://www.wired.com/feed/rss',                                     name: 'Wired',        type: 'rss', category: 'Misc' },
+
+  // ── Hardware ─────────────────────────────────────────────────────────────────
+  { url: 'https://www.tomshardware.com/feeds/all',                             name: "Tom's HW",     type: 'rss', category: 'Hardware' },
+  { url: 'https://www.servethehome.com/feed/',                                 name: 'ServeTheHome', type: 'rss', category: 'Hardware' },
+  { url: 'https://www.phoronix.com/rss.php',                                   name: 'Phoronix',     type: 'rss', category: 'Hardware' },
+
+  // ── IT / Sysadmin ────────────────────────────────────────────────────────────
+  { url: 'https://www.bleepingcomputer.com/feed/',                             name: 'BleepingComp', type: 'rss', category: 'IT' },
+  { url: 'https://www.theregister.com/headlines.atom',                         name: 'The Register', type: 'rss', category: 'IT' },
+  { url: 'https://isc.sans.edu/rssfeed.xml',                                   name: 'SANS ISC',     type: 'rss', category: 'IT' },
+
+  // ── Tech Finance ─────────────────────────────────────────────────────────────
+  { url: 'https://techcrunch.com/category/startups/feed/',                     name: 'TC Startups',  type: 'rss', category: 'Finance' },
+  { url: 'https://www.theverge.com/rss/business/index.xml',                    name: 'Verge Biz',    type: 'rss', category: 'Finance' },
+  { url: 'https://feeds.reuters.com/reuters/technologyNews',                   name: 'Reuters Tech', type: 'rss', category: 'Finance' },
 ]
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 
-// HN Algolia queries — each returns top AI stories matching that term
-const HN_QUERIES = ['claude anthropic', 'chatgpt openai', 'llm ai model']
+const HN_QUERIES: { query: string; category: NewsCategory }[] = [
+  { query: 'claude anthropic',           category: 'AI'       },
+  { query: 'chatgpt openai gpt',         category: 'AI'       },
+  { query: 'llm ai model',               category: 'AI'       },
+  { query: 'gpu cpu processor chip',     category: 'Hardware' },
+  { query: 'sysadmin devops kubernetes', category: 'IT'       },
+  { query: 'startup funding acquisition',category: 'Finance'  },
+]
 
 function extractField(block: string, tag: string): string {
   const cdataMatch = block.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))
@@ -43,6 +68,8 @@ function extractAtomLink(block: string): string {
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, '')
+    .replace(/&#x([0-9A-Fa-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
@@ -50,6 +77,19 @@ function stripHtml(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
     .trim()
+}
+
+const AI_KEYWORDS = /\b(ai|llm|gpt|claude|openai|anthropic|gemini|mistral|chatgpt|copilot|machine learning|neural|model|transformer|diffusion|inference|multimodal)\b/i
+const HW_KEYWORDS = /\b(gpu|cpu|processor|chip|silicon|benchmark|ram|ssd|nvme|nvidia|amd|intel|arm|risc|datacenter|data center)\b/i
+const IT_KEYWORDS = /\b(security|vulnerability|cve|patch|exploit|ransomware|breach|hack|malware|phishing|kubernetes|devops|linux|sysadmin|firewall|zero.?day)\b/i
+const FIN_KEYWORDS = /\b(funding|acquisition|ipo|startup|venture|billion|million|valuation|raise|merger|series [a-d])\b/i
+
+function classifyTitle(title: string, fallback: NewsCategory): NewsCategory {
+  if (AI_KEYWORDS.test(title)) return 'AI'
+  if (HW_KEYWORDS.test(title)) return 'Hardware'
+  if (IT_KEYWORDS.test(title)) return 'IT'
+  if (FIN_KEYWORDS.test(title)) return 'Finance'
+  return fallback
 }
 
 function makeId(source: string, link: string): string {
@@ -65,7 +105,7 @@ function makeId(source: string, link: string): string {
   return ((h2 >>> 0).toString(16) + (h1 >>> 0).toString(16)).padStart(16, '0')
 }
 
-function parseRss2Feed(xml: string, sourceName: string): NewsItem[] {
+function parseRss2Feed(xml: string, sourceName: string, category: NewsCategory): NewsItem[] {
   const items: NewsItem[] = []
   const blocks = xml.match(/<item[\s\S]*?<\/item>/g) ?? []
   for (const block of blocks) {
@@ -76,12 +116,12 @@ function parseRss2Feed(xml: string, sourceName: string): NewsItem[] {
     const summary = stripHtml(description).slice(0, 200)
     const publishedAt = pubDate ? new Date(pubDate).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary })
+    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
 
-function parseAtomFeed(xml: string, sourceName: string): NewsItem[] {
+function parseAtomFeed(xml: string, sourceName: string, category: NewsCategory): NewsItem[] {
   const items: NewsItem[] = []
   const blocks = xml.match(/<entry[\s\S]*?<\/entry>/g) ?? []
   for (const block of blocks) {
@@ -91,33 +131,32 @@ function parseAtomFeed(xml: string, sourceName: string): NewsItem[] {
     const summary = stripHtml(extractField(block, 'summary') || extractField(block, 'content')).slice(0, 200)
     const publishedAt = updated ? new Date(updated).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary })
+    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
 
-export function parseRssFeed(xml: string, sourceName: string, sourceType: 'rss' | 'social'): NewsItem[] {
-  void sourceType
-  if (xml.includes('<feed') && xml.includes('<entry')) return parseAtomFeed(xml, sourceName)
-  return parseRss2Feed(xml, sourceName)
+function parseRssFeed(xml: string, sourceName: string, category: NewsCategory): NewsItem[] {
+  if (xml.includes('<feed') && xml.includes('<entry')) return parseAtomFeed(xml, sourceName, category)
+  return parseRss2Feed(xml, sourceName, category)
 }
 
-async function fetchWithTimeout(url: string, timeoutMs: number, headers?: Record<string, string>): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    return await fetch(url, { signal: controller.signal, headers: { 'User-Agent': BROWSER_UA, ...headers } })
+    return await fetch(url, { signal: controller.signal, headers: { 'User-Agent': BROWSER_UA } })
   } finally {
     clearTimeout(timer)
   }
 }
 
-async function fetchRssSource(url: string, name: string): Promise<NewsItem[]> {
+async function fetchRssSource(url: string, name: string, category: NewsCategory): Promise<NewsItem[]> {
   try {
     const res = await fetchWithTimeout(url, 6000)
     if (!res.ok) return []
     const xml = await res.text()
-    return parseRssFeed(xml, name, 'rss')
+    return parseRssFeed(xml, name, category)
   } catch {
     return []
   }
@@ -136,7 +175,7 @@ interface HNAlgoliaResponse {
   hits: HNAlgoliaHit[]
 }
 
-async function fetchHNQuery(query: string): Promise<NewsItem[]> {
+async function fetchHNQuery(query: string, category: NewsCategory): Promise<NewsItem[]> {
   try {
     const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=8`
     const res = await fetchWithTimeout(url, 6000)
@@ -152,6 +191,7 @@ async function fetchHNQuery(query: string): Promise<NewsItem[]> {
         sourceType: 'social' as const,
         publishedAt: h.created_at_i * 1000,
         summary: stripHtml(h.story_text ?? '').slice(0, 200),
+        category: classifyTitle(h.title, category),
       }))
   } catch {
     return []
@@ -160,8 +200,8 @@ async function fetchHNQuery(query: string): Promise<NewsItem[]> {
 
 export async function refreshNews(): Promise<NewsItem[]> {
   const [rssResults, hnResults] = await Promise.all([
-    Promise.allSettled(RSS_SOURCES.map((s) => fetchRssSource(s.url, s.name))),
-    Promise.allSettled(HN_QUERIES.map(fetchHNQuery)),
+    Promise.allSettled(RSS_SOURCES.map((s) => fetchRssSource(s.url, s.name, s.category))),
+    Promise.allSettled(HN_QUERIES.map((q) => fetchHNQuery(q.query, q.category))),
   ])
 
   const allItems = [

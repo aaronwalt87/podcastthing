@@ -1,3 +1,5 @@
+export type NewsCategory = 'AI' | 'Hardware' | 'IT' | 'Finance' | 'Misc'
+
 export interface NewsItem {
   id: string
   title: string
@@ -6,4 +8,5 @@ export interface NewsItem {
   sourceType: 'rss' | 'social'
   publishedAt: number
   summary: string
+  category: NewsCategory
 }
