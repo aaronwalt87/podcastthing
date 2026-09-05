@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
-import { getCachedStocks } from '@/lib/stocks'
+import { getMarketSnapshot } from '@/lib/stocks'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const stocks = await getCachedStocks()
-  return NextResponse.json(stocks)
+  const snapshot = await getMarketSnapshot()
+  return NextResponse.json(snapshot, {
+    headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
+  })
 }

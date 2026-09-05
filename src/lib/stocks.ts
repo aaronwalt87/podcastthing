@@ -1,98 +1,247 @@
-import redis from './redis'
-import type { StockQuote } from '@/types/stocks'
+import { getRedis } from './redis'
+import { sampleMarket, sampleDataEnabled } from './sample-data'
+import type { MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
 
-const STOCK_KEY = 'stocks:cache'
+const STOCK_KEY = 'stocks:cache:v2'
 const STOCK_TTL = 3600
+const HISTORY_POINTS = 60
 
-// SPY used as S&P 500 proxy (GSPC not reliably available on Finnhub free tier)
-const TRACKED_SYMBOLS = ['SPY', 'NVDA', 'META', 'MSFT', 'AAPL', 'GOOGL', 'AMZN', 'TSLA', 'AMD', 'ARM', 'PLTR', 'AVGO']
-
-const DISPLAY_NAMES: Record<string, string> = {
-  'SPY':   'S&P 500',
-  'NVDA':  'NVIDIA',
-  'META':  'Meta',
-  'MSFT':  'Microsoft',
-  'AAPL':  'Apple',
-  'GOOGL': 'Alphabet',
-  'AMZN':  'Amazon',
-  'TSLA':  'Tesla',
-  'AMD':   'AMD',
-  'ARM':   'Arm Holdings',
-  'PLTR':  'Palantir',
-  'AVGO':  'Broadcom',
+interface Tracked {
+  symbol: string
+  name: string
+  sector: string
 }
 
-interface FinnhubQuote {
-  c: number  // current price
-  d: number  // change
-  dp: number // change percent
-  t: number  // timestamp (unix)
+/** SPY/QQQ stand in for the indices — index symbols are paywalled on free tiers. */
+const TRACKED: Tracked[] = [
+  { symbol: 'SPY', name: 'S&P 500', sector: 'Index' },
+  { symbol: 'QQQ', name: 'Nasdaq 100', sector: 'Index' },
+  { symbol: 'NVDA', name: 'NVIDIA', sector: 'Semiconductors' },
+  { symbol: 'AMD', name: 'AMD', sector: 'Semiconductors' },
+  { symbol: 'AVGO', name: 'Broadcom', sector: 'Semiconductors' },
+  { symbol: 'ARM', name: 'Arm Holdings', sector: 'Semiconductors' },
+  { symbol: 'MSFT', name: 'Microsoft', sector: 'Platforms' },
+  { symbol: 'GOOGL', name: 'Alphabet', sector: 'Platforms' },
+  { symbol: 'AAPL', name: 'Apple', sector: 'Platforms' },
+  { symbol: 'AMZN', name: 'Amazon', sector: 'Platforms' },
+  { symbol: 'META', name: 'Meta', sector: 'Platforms' },
+  { symbol: 'PLTR', name: 'Palantir', sector: 'Software' },
+  { symbol: 'CRWD', name: 'CrowdStrike', sector: 'Software' },
+  { symbol: 'NET', name: 'Cloudflare', sector: 'Infrastructure' },
+  { symbol: 'DDOG', name: 'Datadog', sector: 'Infrastructure' },
+  { symbol: 'TSLA', name: 'Tesla', sector: 'Hardware' },
+]
+
+const FETCH_TIMEOUT_MS = 6000
+
+async function fetchWithTimeout(url: string, timeoutMs = FETCH_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(url, { signal: controller.signal, cache: 'no-store' })
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
-function marketState(timestampSec: number): StockQuote['marketState'] {
-  const d = new Date(timestampSec * 1000)
-  const nyTime = new Date(d.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-  const h = nyTime.getHours()
-  const m = nyTime.getMinutes()
-  const day = nyTime.getDay()
-  const minsSinceMidnight = h * 60 + m
+/** US market session for a given instant, evaluated in America/New_York. */
+export function marketStateAt(date = new Date()): MarketState {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: 'numeric',
+    minute: 'numeric',
+    weekday: 'short',
+    hour12: false,
+  }).formatToParts(date)
 
-  if (day === 0 || day === 6) return 'CLOSED'
-  if (minsSinceMidnight >= 570 && minsSinceMidnight < 960) return 'REGULAR'  // 9:30–16:00
-  if (minsSinceMidnight >= 240 && minsSinceMidnight < 570) return 'PRE'       // 4:00–9:30
-  if (minsSinceMidnight >= 960 && minsSinceMidnight < 1200) return 'POST'     // 16:00–20:00
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
+  const weekday = get('weekday')
+  if (weekday === 'Sat' || weekday === 'Sun') return 'CLOSED'
+
+  // hour can come back as "24" at midnight in some runtimes
+  const hour = Number(get('hour')) % 24
+  const minutes = hour * 60 + Number(get('minute'))
+
+  if (minutes >= 570 && minutes < 960) return 'REGULAR' // 09:30–16:00
+  if (minutes >= 240 && minutes < 570) return 'PRE' //     04:00–09:30
+  if (minutes >= 960 && minutes < 1200) return 'POST' //   16:00–20:00
   return 'CLOSED'
 }
 
-async function fetchQuote(symbol: string, token: string): Promise<StockQuote | null> {
+/* ------------------------------------------------------------------ stooq -- */
+
+/**
+ * Daily closes from Stooq's CSV endpoint. No API key, so history (and a usable
+ * fallback quote) works even when FINNHUB_TOKEN is absent.
+ */
+async function fetchHistory(symbol: string): Promise<number[]> {
   try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 5000)
-    const res = await fetch(
-      `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`,
-      { signal: controller.signal }
-    )
-    clearTimeout(timer)
+    const url = `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&i=d`
+    const res = await fetchWithTimeout(url)
+    if (!res.ok) return []
+
+    const csv = await res.text()
+    const lines = csv.trim().split('\n')
+    if (lines.length < 2) return []
+
+    const header = lines[0].split(',')
+    const closeIdx = header.findIndex((h) => h.trim().toLowerCase() === 'close')
+    if (closeIdx === -1) return []
+
+    return lines
+      .slice(1)
+      .slice(-HISTORY_POINTS)
+      .map((line) => Number(line.split(',')[closeIdx]))
+      .filter((n) => Number.isFinite(n) && n > 0)
+  } catch {
+    return []
+  }
+}
+
+/* ---------------------------------------------------------------- finnhub -- */
+
+interface FinnhubQuote {
+  c: number // current
+  d: number // change
+  dp: number // change percent
+  pc: number // previous close
+}
+
+async function fetchFinnhubQuote(symbol: string, token: string): Promise<FinnhubQuote | null> {
+  try {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${token}`
+    const res = await fetchWithTimeout(url)
     if (!res.ok) return null
-
     const q = (await res.json()) as FinnhubQuote
-    if (!q.c || q.c === 0) return null
-
-    return {
-      symbol,
-      name: DISPLAY_NAMES[symbol] ?? symbol,
-      price: q.c,
-      change: q.d ?? 0,
-      changePercent: q.dp ?? 0,
-      marketState: marketState(q.t),
-      updatedAt: Date.now(),
-    }
+    return q && Number.isFinite(q.c) && q.c > 0 ? q : null
   } catch {
     return null
   }
 }
 
-export async function refreshStocks(): Promise<StockQuote[]> {
-  const token = process.env.FINNHUB_TOKEN
-  if (!token) return []
+/* ------------------------------------------------------------------ build -- */
 
-  const results = await Promise.all(TRACKED_SYMBOLS.map((s) => fetchQuote(s, token)))
-  const quotes = results.filter((q): q is StockQuote => q !== null)
+function buildQuote(
+  tracked: Tracked,
+  history: number[],
+  live: FinnhubQuote | null,
+  state: MarketState
+): StockQuote | null {
+  // Live quote wins; otherwise derive from the last two daily closes.
+  const lastClose = history.at(-1)
+  const priorClose = history.at(-2)
 
-  if (quotes.length > 0) {
-    await redis.set(STOCK_KEY, JSON.stringify(quotes), { ex: STOCK_TTL })
+  let price: number
+  let previousClose: number
+  let source: StockQuote['source']
+
+  if (live) {
+    price = live.c
+    previousClose = Number.isFinite(live.pc) && live.pc > 0 ? live.pc : (priorClose ?? live.c)
+    source = 'finnhub'
+  } else if (lastClose && priorClose) {
+    price = lastClose
+    previousClose = priorClose
+    source = 'stooq'
+  } else {
+    return null
   }
-  return quotes
+
+  const change = price - previousClose
+  const changePercent = previousClose > 0 ? (change / previousClose) * 100 : 0
+
+  return {
+    symbol: tracked.symbol,
+    name: tracked.name,
+    sector: tracked.sector,
+    price,
+    change,
+    changePercent,
+    previousClose,
+    // Append the live price so the sparkline ends where the headline number is.
+    history: live && lastClose && live.c !== lastClose ? [...history, live.c] : history,
+    marketState: state,
+    source,
+    updatedAt: Date.now(),
+  }
 }
 
-export async function getCachedStocks(): Promise<StockQuote[]> {
+export async function refreshStocks(): Promise<MarketSnapshot> {
+  const token = process.env.FINNHUB_TOKEN
+  const state = marketStateAt()
+
+  const results = await Promise.all(
+    TRACKED.map(async (tracked) => {
+      const [history, live] = await Promise.all([
+        fetchHistory(tracked.symbol),
+        token ? fetchFinnhubQuote(tracked.symbol, token) : Promise.resolve(null),
+      ])
+      return buildQuote(tracked, history, live, state)
+    })
+  )
+
+  const quotes = results.filter((q): q is StockQuote => q !== null)
+  const snapshot = summarize(quotes, state)
+
+  if (quotes.length > 0) {
+    const redis = getRedis()
+    if (redis) {
+      try {
+        await redis.set(STOCK_KEY, JSON.stringify(snapshot), { ex: STOCK_TTL })
+      } catch (err) {
+        console.error('[stocks] cache write failed', err)
+      }
+    }
+  }
+
+  return snapshot
+}
+
+function summarize(quotes: StockQuote[], state: MarketState): MarketSnapshot {
+  return {
+    quotes,
+    advancers: quotes.filter((q) => q.changePercent > 0).length,
+    decliners: quotes.filter((q) => q.changePercent < 0).length,
+    marketState: state,
+    updatedAt: Date.now(),
+  }
+}
+
+const EMPTY_SNAPSHOT: MarketSnapshot = {
+  quotes: [],
+  advancers: 0,
+  decliners: 0,
+  marketState: 'CLOSED',
+  updatedAt: 0,
+}
+
+export async function getMarketSnapshot(): Promise<MarketSnapshot> {
+  const redis = getRedis()
+  // Local dev with no credentials renders fixtures; production renders empty.
+  if (!redis) {
+    return sampleDataEnabled() ? sampleMarket() : { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+  }
+
   try {
     const raw = await redis.get(STOCK_KEY)
-    if (!raw) return []
-    if (Array.isArray(raw)) return raw as StockQuote[]
-    if (typeof raw === 'string') return JSON.parse(raw) as StockQuote[]
-    return []
-  } catch {
-    return []
+    if (!raw) return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+
+    const parsed = (typeof raw === 'string' ? JSON.parse(raw) : raw) as MarketSnapshot
+    if (!parsed || !Array.isArray(parsed.quotes)) {
+      return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+    }
+
+    // Session moves on even while the cache sits still.
+    return { ...parsed, marketState: marketStateAt() }
+  } catch (err) {
+    console.error('[stocks] cache read failed', err)
+    return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
   }
+}
+
+export const MARKET_STATE_LABEL: Record<MarketState, string> = {
+  REGULAR: 'Open',
+  PRE: 'Pre-market',
+  POST: 'After hours',
+  CLOSED: 'Closed',
 }

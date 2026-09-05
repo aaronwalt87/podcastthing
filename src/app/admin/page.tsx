@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import Link from 'next/link'
 import EpisodeForm from '@/components/admin/EpisodeForm'
 import EpisodeList from '@/components/admin/EpisodeList'
 import type { Episode } from '@/types/episode'
@@ -54,51 +54,35 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-4 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <Image src="/logo.svg" alt="Logo" width={48} height={48} />
-          <div>
-            <h1
-              className="text-xl font-bold tracking-widest uppercase"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#e5e2e1' }}
-            >
-              ADMIN
-            </h1>
-            <p className="text-sm mt-0.5" style={{ color: '#e5e2e1', opacity: 0.45 }}>
-              Manage your podcast episodes.
-            </p>
-          </div>
+    <div className="mx-auto flex max-w-3xl flex-col gap-10 px-5 py-12">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-hair pb-6">
+        <div>
+          <p className="eyebrow eyebrow-accent">Episode archive</p>
+          <h1 className="display mt-2 text-4xl">Admin</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <a
-            href="/"
-            className="text-sm uppercase tracking-wider transition-colors hover:opacity-100"
-            style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif", opacity: 0.8 }}
-          >
-            ← View site
-          </a>
-          <button
-            onClick={handleLogout}
-            className="text-sm uppercase tracking-wider transition-colors"
-            style={{ color: '#e5e2e1', opacity: 0.4, fontFamily: "'Space Grotesk', sans-serif" }}
-          >
+        <div className="flex items-center gap-2">
+          <Link href="/" className="btn btn-sm">
+            View site
+          </Link>
+          <button type="button" onClick={handleLogout} className="btn btn-ghost btn-sm">
             Log out
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Add episode section */}
-      <section className="mb-10">
+      <section aria-label="Add an episode">
         {showForm ? (
-          <div className="p-5" style={{ background: '#1c1b1b' }}>
-            <h2
-              className="text-xs font-medium uppercase tracking-wider mb-4"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
-            >
-              New Episode
-            </h2>
+          <div className="panel p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <p className="eyebrow eyebrow-accent">New episode</p>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="btn btn-ghost btn-sm"
+              >
+                Close
+              </button>
+            </div>
             <EpisodeForm
               onSuccess={handleAdded}
               onCancel={() => setShowForm(false)}
@@ -107,72 +91,43 @@ export default function AdminPage() {
           </div>
         ) : (
           <button
+            type="button"
             onClick={() => setShowForm(true)}
-            className="w-full py-3 text-sm uppercase tracking-wider transition-all"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(93,63,60,0.35)',
-              color: '#e5e2e1',
-              opacity: 0.6,
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              const btn = e.currentTarget
-              btn.style.opacity = '1'
-              btn.style.borderColor = 'rgba(255,59,59,0.5)'
-              btn.style.color = '#FF3B3B'
-            }}
-            onMouseLeave={(e) => {
-              const btn = e.currentTarget
-              btn.style.opacity = '0.6'
-              btn.style.borderColor = 'rgba(93,63,60,0.35)'
-              btn.style.color = '#e5e2e1'
-            }}
+            className="btn w-full border-dashed"
+            style={{ height: 52 }}
           >
-            + ADD EPISODE
+            <span aria-hidden="true">+</span> Add an episode
           </button>
         )}
       </section>
 
-      {/* Episode list */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2
-            className="text-xs font-medium uppercase tracking-wider"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#67d7e1' }}
-          >
-            Episodes ({episodes.length})
-          </h2>
-          <button
-            onClick={fetchEpisodes}
-            className="text-xs uppercase tracking-wider transition-colors"
-            style={{ color: '#e5e2e1', opacity: 0.35, fontFamily: "'Space Grotesk', sans-serif" }}
-          >
+      <section aria-label="Episodes">
+        <div className="mb-5 flex items-center justify-between">
+          <p className="eyebrow">
+            {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
+          </p>
+          <button type="button" onClick={fetchEpisodes} className="btn btn-ghost btn-sm">
             Refresh
           </button>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div
-              className="w-5 h-5 border-2 animate-spin"
-              style={{ borderColor: '#353534', borderTopColor: '#FF3B3B' }}
-            />
-          </div>
+          <p className="panel-flat px-6 py-12 text-center text-sm text-paper-3">Loading episodes…</p>
         ) : error ? (
-          <div
-            className="px-4 py-3 text-sm"
-            style={{ background: 'rgba(255,59,59,0.08)', borderLeft: '2px solid #FF3B3B', color: '#ffb3ac' }}
+          <p
+            role="alert"
+            className="rounded-sm px-4 py-3 text-sm"
+            style={{
+              background: 'rgba(240,90,82,0.1)',
+              border: '1px solid rgba(240,90,82,0.3)',
+              color: '#ff9d97',
+            }}
           >
             {error}{' '}
-            <button
-              onClick={fetchEpisodes}
-              className="underline hover:no-underline ml-1"
-              style={{ color: '#FF3B3B' }}
-            >
+            <button type="button" onClick={fetchEpisodes} className="link-draw ml-1">
               Retry
             </button>
-          </div>
+          </p>
         ) : (
           <EpisodeList
             episodes={episodes}
@@ -182,6 +137,6 @@ export default function AdminPage() {
           />
         )}
       </section>
-    </main>
+    </div>
   )
 }

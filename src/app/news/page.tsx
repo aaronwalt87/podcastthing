@@ -1,0 +1,67 @@
+import type { Metadata } from 'next'
+import { getCachedNews } from '@/lib/news'
+import NewsFeed from '@/components/news/NewsFeed'
+import Reveal from '@/components/ui/Reveal'
+import { timeAgo } from '@/lib/format'
+
+export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'News',
+  description: 'AI, hardware, infrastructure and tech-finance headlines from sixteen sources.',
+}
+
+export default async function NewsPage() {
+  const items = await getCachedNews()
+  const now = Date.now()
+
+  const newest = items.length > 0 ? Math.max(...items.map((i) => i.publishedAt)) : 0
+  const sources = new Set(items.map((i) => i.source)).size
+
+  return (
+    <div className="shell" style={{ paddingTop: 'calc(var(--header-h) + 56px)' }}>
+      <header className="max-w-3xl">
+        <p className="eyebrow eyebrow-accent">Live intelligence</p>
+        <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">News</h1>
+        <p className="mt-5 text-[16px] leading-relaxed text-paper-2">
+          RSS, Atom and the Hacker News index, parsed server-side, deduplicated by content hash, and
+          sorted newest first. Headlines are classified by keyword, so a story lands in the section
+          it belongs to rather than the one its publisher sits in.
+        </p>
+
+        {items.length > 0 && (
+          <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-4">
+            <div>
+              <dt className="eyebrow">Headlines</dt>
+              <dd className="num m-0 mt-1 text-lg text-paper">{items.length}</dd>
+            </div>
+            <div>
+              <dt className="eyebrow">Sources</dt>
+              <dd className="num m-0 mt-1 text-lg text-paper">{sources}</dd>
+            </div>
+            <div>
+              <dt className="eyebrow">Newest</dt>
+              <dd className="num m-0 mt-1 text-lg text-paper">{timeAgo(newest, now)} ago</dd>
+            </div>
+          </dl>
+        )}
+      </header>
+
+      <div className="mt-12 pb-8">
+        {items.length === 0 ? (
+          <div className="panel-flat px-6 py-20 text-center">
+            <p className="display text-2xl text-paper">The feed is idle.</p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-paper-2">
+              Headlines are refreshed by a scheduled job and cached in Redis. Nothing is cached right
+              now — check back after the next run.
+            </p>
+          </div>
+        ) : (
+          <Reveal>
+            <NewsFeed items={items} now={now} />
+          </Reveal>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1,4 +1,5 @@
-import redis from './redis'
+import { getRedis } from './redis'
+import { sampleNews, sampleDataEnabled } from './sample-data'
 import type { NewsItem, NewsCategory } from '@/types/news'
 
 const NEWS_KEY = 'news:cache'
@@ -219,18 +220,35 @@ export async function refreshNews(): Promise<NewsItem[]> {
     .sort((a, b) => b.publishedAt - a.publishedAt)
     .slice(0, MAX_ITEMS)
 
-  await redis.set(NEWS_KEY, JSON.stringify(deduped), { ex: NEWS_TTL_SECONDS })
+  const redis = getRedis()
+  if (redis) {
+    try {
+      await redis.set(NEWS_KEY, JSON.stringify(deduped), { ex: NEWS_TTL_SECONDS })
+    } catch (err) {
+      console.error('[news] cache write failed', err)
+    }
+  }
   return deduped
 }
 
 export async function getCachedNews(): Promise<NewsItem[]> {
+  const redis = getRedis()
+  // Local dev with no credentials renders fixtures; production renders empty.
+  if (!redis) return sampleDataEnabled() ? sampleNews() : []
+
   try {
     const raw = await redis.get(NEWS_KEY)
     if (!raw) return []
     if (Array.isArray(raw)) return raw as NewsItem[]
     if (typeof raw === 'string') return JSON.parse(raw) as NewsItem[]
     return []
-  } catch {
+  } catch (err) {
+    console.error('[news] cache read failed', err)
     return []
   }
+}
+
+/** Distinct source names present in the cache, for the news source filter. */
+export function newsSources(items: NewsItem[]): string[] {
+  return Array.from(new Set(items.map((i) => i.source))).sort()
 }

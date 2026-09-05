@@ -1,219 +1,188 @@
-# Design System Document
+# SIGNAL — Design System
 
-## Active System: **Kernel Glass**
-*(Supersedes "The Analog Frontier" — 2026-04-19)*
+**Status:** active. Supersedes *Kernel Glass* (2026-04-19) and *The Analog Frontier*.
 
----
+This document describes what is actually implemented. The tokens below live in
+`src/app/globals.css` under `:root`, and `tailwind.config.ts` maps them to
+utilities. **A component must never hard-code a hex value** — if a colour is
+missing, add a token rather than a literal.
 
-## 1. Overview & Creative North Star
-
-### Creative North Star: "Kernel Glass"
-A high-fidelity macOS Terminal aesthetic blending retro command-center authority with modern glassmorphism. The goal is a mission-control UI that feels like you're operating real infrastructure — not browsing a website. Dark surfaces, electric Matrix Green, and frosted-glass containers create an OS-level experience inside the browser.
-
-The design references:
-- **macOS terminal windows** — traffic light controls, sidebar navigation, status bars
-- **Matrix-era hacker aesthetics** — monochrome green phosphor on black
-- **Modern glassmorphism** — heavy backdrop blur on semi-transparent surfaces
+> Two previous systems were only ever half-applied, which left the site
+> overriding one palette with another at runtime. That is the failure this
+> document exists to prevent.
 
 ---
 
-## 2. Color Palette
+## 1. North star
 
-### Core Tokens
+An **instrument**, not a website.
 
-| Token | Hex | Usage |
+Aviation panels, spectrum analysers, and well-made mechanical tools — things
+built to be read at a glance and trusted. Dark surfaces so data can glow, one
+warm accent so hierarchy is unambiguous, and typography with an editorial voice
+so the page reads as a publication rather than a dashboard template.
+
+Deliberately **not**: Matrix-green hacker cliché, glassmorphism-everywhere, or
+a landscape-photography blog wrapped around tech content.
+
+---
+
+## 2. Colour
+
+### Canvas
+
+| Token | Value | Use |
 |---|---|---|
-| `--bg` | `#131313` | Base void — all surfaces emerge from this |
-| `--surface` | `#1a1a1a` | Glassmorphism container base (before blur) |
-| `--surface-border` | `rgba(255,255,255,0.08)` | Subtle 1px borders on glass panels |
-| `--accent` | `#00FF41` | Matrix Green — CTAs, active states, glows, cursors |
-| `--accent-dim` | `#b9ccb2` | Muted green for metadata, secondary labels |
-| `--amber` | `#fdbb2c` | System accent — warnings, traffic light (yellow) |
-| `--red` | `#ff5f57` | System accent — errors, traffic light (red) |
-| `--green-tl` | `#28c840` | Traffic light (green close/maximize) |
-| `--text` | `#ffffff` | Primary headers and body text |
-| `--text-muted` | `#b9ccb2` | Secondary text, timestamps, metadata |
-| `--text-dim` | `rgba(255,255,255,0.35)` | Placeholder text, disabled states |
+| `--ink-950` | `#07080a` | Page ground |
+| `--ink-900` | `#0b0d10` | Panel base (gradient bottom) |
+| `--ink-850` | `#101318` | Panel top, flat surfaces |
+| `--ink-800` | `#14181e` | Artwork wells, image backgrounds |
+| `--ink-700` | `#1b2027` | Track backgrounds, inactive bars |
+| `--ink-600` | `#262c35` | Scrollbar thumb, sparkline baselines |
 
-### Glass Surface Recipe
-The signature container style — use on all major panels, cards, and the main terminal window:
-```css
-background: rgba(20, 20, 20, 0.80);
-backdrop-filter: blur(24px) saturate(1.4);
--webkit-backdrop-filter: blur(24px) saturate(1.4);
-border: 1px solid rgba(255, 255, 255, 0.08);
-```
+### Ink
 
-### Accent Glow Recipe
-Applied to primary buttons, active nav items, and focused inputs:
-```css
-box-shadow: 0 0 12px rgba(0, 255, 65, 0.35), 0 0 24px rgba(0, 255, 65, 0.15);
-```
+| Token | Value | Use |
+|---|---|---|
+| `--paper` | `#f2f0ec` | Primary text — a warm white, never pure `#fff` |
+| `--paper-2` | `#9aa4ae` | Body copy, secondary labels |
+| `--paper-3` | `#646d79` | Metadata, timestamps, placeholders |
 
-### Scanline Texture
-Every screen retains the 2px scanline overlay at 3% opacity — it grounds the glassmorphism in hardware reality:
-```css
-body::after {
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px
-  );
-}
-```
+### Lines
+
+| Token | Value | Use |
+|---|---|---|
+| `--hair` | `rgba(255,255,255,0.07)` | Default 1px border |
+| `--hair-2` | `rgba(255,255,255,0.13)` | Hover / emphasis border, dividers |
+
+### Accent — one, and only one
+
+| Token | Value | Use |
+|---|---|---|
+| `--ember` | `#ff6a2b` | CTAs, active nav, brand mark, focus ring, the hero series line |
+| `--ember-2` | `#ffa877` | Hover state of the above, link hover |
+| `--ember-ghost` | `rgba(255,106,43,0.13)` | Accent chip fill |
+
+### Data semantics — never the accent
+
+Keeping "up" out of the brand colour means a rising stock never reads as
+"selected", and the accent never reads as "good news".
+
+| Token | Value | Use |
+|---|---|---|
+| `--pos` | `#38c98e` | Gains, advancing, live indicator |
+| `--neg` | `#f05a52` | Losses, declining, errors |
+| `--warn` | `#f0b429` | Warnings |
+| `--cool` | `#6fa8ff` | Reserved secondary data hue |
+
+**Colour is never the only signal.** Every `Delta` pairs its hue with a ▲/▼
+glyph and a signed number; the market heatmap prints the percentage inside each
+tile.
 
 ---
 
 ## 3. Typography
 
-| Role | Font | Weight | Style |
-|---|---|---|---|
-| Display / Headers | `Space Grotesk` | 700 | Uppercase, wide tracking |
-| Navigation labels | `Space Grotesk` | 500 | Uppercase, `tracking-widest` |
-| Body / Descriptions | `Space Grotesk` | 400 | Sentence case |
-| Metadata / Timestamps | `IBM Plex Mono` | 400 | Uppercase, tabular nums |
-| Terminal prompts | `IBM Plex Mono` | 400 | `>>>` prefix, accent color |
+Loaded and self-hosted by `next/font/google` in `src/app/layout.tsx` — no
+third-party request, no layout shift.
 
-**Rule:** `Space Grotesk` replaces Manrope entirely. Use `IBM Plex Mono` only for machine-generated data (timestamps, EP numbers, latency readings, terminal prompts).
+| Role | Family | Token |
+|---|---|---|
+| Display | **Instrument Serif** 400 | `--font-display` |
+| UI / body | **Instrument Sans** 400–700 | `--font-sans` |
+| Data | **JetBrains Mono** 400/500/700 | `--font-mono` |
+
+- `.display` — the serif. Headlines and pull quotes only. `line-height: 0.98`,
+  `letter-spacing: -0.025em`.
+- `.eyebrow` — 10px mono, `0.18em` tracking, uppercase. Section labels.
+- `.num` — mono with `tabular-nums`. **Every number on the site**: prices,
+  percentages, timestamps, counts, durations. Digits must not shift width as
+  they tick.
+- Body copy is sans at 15px / 1.6.
+
+Headline sizes use `clamp()` rather than breakpoints, so type scales
+continuously instead of stepping.
 
 ---
 
-## 4. Border Radius
+## 4. Radius, elevation, motion
 
-| Context | Value |
+| Token | Value | Use |
+|---|---|---|
+| `--r-1` | `2px` | Chips, segmented controls |
+| `--r-2` | `6px` | Buttons, inputs, small cards |
+| `--r-3` | `12px` | Panels |
+| `--r-4` | `20px` | Reserved |
+
+Elevation is a 1px inset highlight plus a long, soft shadow (`--shadow-lift`,
+`--shadow-panel`) — light from above, the way a physical panel sits in a case.
+No glow-as-elevation.
+
+Motion uses `--ease-out` (`cubic-bezier(.22,1,.36,1)`) for entrances and
+`--ease-spring` for press feedback. Durations: 180ms for state, 300ms for
+hover reveals, 700ms for scroll entrances.
+
+---
+
+## 5. Component recipes
+
+Defined once in `globals.css` under `@layer components`:
+
+| Class | What it is |
 |---|---|
-| Main terminal window / large panels | `8px` (`rounded-lg`) |
-| Cards, chips, buttons, inputs | `4px` (`rounded-sm`) |
-| Traffic light circles | `50%` (fully round) |
-| Status badges, small chips | `4px` |
-| Nav active indicator | `0px` (left-border, no radius) |
-
-> **Shift from Analog Frontier:** Kernel Glass uses subtle rounding. The 0px constraint is retired — glassmorphism requires slight curves to read as "window glass."
-
----
-
-## 5. Layout Architecture
-
-### Main Shell
-```
-┌─────────────────────────────────────────────────────┐
-│  TOP BAR: AARON_J_WALTERS ●  [TERMINAL] [EP] [ADM]  │  h-12, glass surface
-├──────────┬──────────────────────────────────────────┤
-│          │                                          │
-│ SIDEBAR  │   MAIN CONTENT AREA                     │
-│ 200px    │   (scrollable)                           │
-│ fixed    │                                          │
-│          │                                          │
-├──────────┴──────────────────────────────────────────┤
-│  STATUS BAR: STATUS:ONLINE  LATENCY:14MS  MEM:42%   │  h-8, glass surface
-└─────────────────────────────────────────────────────┘
-```
-
-### Sidebar Specifications
-- Width: `240px` fixed, `64px` collapsed on mobile
-- Background: glass surface recipe
-- Active item: `border-left: 2px solid #00FF41` + text in `#00FF41` + subtle green glow
-- Inactive item: text in `#b9ccb2`, no border
-- Bottom section: Settings + Logs links, separated by `rgba(255,255,255,0.06)` line
-- CTA button: `INITIATE_SESSION` — solid `#00FF41` bg, `#131313` text, `rounded-sm`, full glow
-
-### Top Bar
-- Height: `48px`
-- Left: username with two colored dots (`#ff5f57` and `#fdbb2c`) as status indicators
-- Center: nav links — active in `#00FF41`, inactive in `#b9ccb2`
-- Right: icon row (settings gear, notification bell)
-
-### Status Bar Footer
-- Height: `32px`
-- Content: `STATUS: ONLINE` · `LATENCY: 14MS` · `MEMORY: 42%` (left) — `LINKEDIN · GITHUB · TWITTER` (right)
-- Background: same glass surface, `border-top: 1px solid rgba(255,255,255,0.06)`
-- Font: `IBM Plex Mono`, `10px`, `#b9ccb2`
-
-### Main Terminal Window (hero content area)
-- macOS window chrome: traffic light row (`#ff5f57` · `#fdbb2c` · `#28c840`) + `KERNEL_GLASS // ROOT@AARONJWALTERS` title bar text
-- Outer: glass surface recipe, `rounded-lg`
-- Inner content: grid split — text left (60%), image right (40%)
+| `.shell` | Page container — max 1320px, fluid gutters |
+| `.panel` / `.panel-flat` | The one raised-surface recipe |
+| `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-sm`, `.btn-icon` | Buttons |
+| `.field` | Text input, select, textarea |
+| `.chip` / `.chip-accent` | Metadata tags |
+| `.eyebrow`, `.display`, `.num` | Typographic roles |
+| `.rule` | Section divider that fades at both ends |
+| `.spotlight` | Cursor-tracked highlight (see below) |
+| `.link-draw` | Underline that draws in from the left |
+| `.pulse` | Live indicator with an expanding ring |
+| `.marquee` | Market tape; pauses on hover and focus |
 
 ---
 
-## 6. Component Specifications
+## 6. Interaction
 
-### Buttons
-- **Primary:** `bg-[#00FF41]` · `text-[#131313]` · `rounded-sm` · `font-bold uppercase tracking-widest` · full glow on hover · padding `px-4 py-2`
-- **Secondary:** transparent · `border: 1px solid rgba(0,255,65,0.4)` · `text-[#00FF41]` · `rounded-sm` · hover: border opacity 100%
-- **Tertiary (terminal link):** text only, `text-[#00FF41]` with `→` or `_` suffix
-
-### Navigation Items
-- Icon + label layout
-- Active: `text-[#00FF41]` + `border-left: 2px solid #00FF41` + `background: rgba(0,255,65,0.06)`
-- Inactive: `text-[#b9ccb2]` + no border + transparent bg
-- Hover: `text-[#ffffff]` + `background: rgba(255,255,255,0.04)`
-
-### Episode / Log Cards
-- Background: glass surface at slightly higher opacity: `rgba(22,22,22,0.90)`
-- Border: `1px solid rgba(255,255,255,0.07)`
-- `rounded-sm` (4px)
-- Episode number label: `EP_042` in `IBM Plex Mono`, `#b9ccb2`
-- Icon: geometric, 1px stroke, `#00FF41`
-- Title: `Space Grotesk` bold uppercase
-- Duration: `IBM Plex Mono` small, `#b9ccb2` with green dot prefix `●`
-
-### Featured Log Card
-- Wider glass panel, `rounded-lg`
-- Section label: `01 // FEATURED_LOG` in `IBM Plex Mono` `#00FF41`
-- Large title: `Space Grotesk` display, uppercase, white
-- Tag chips: `rounded-sm`, `background: rgba(0,255,65,0.12)`, `border: 1px solid rgba(0,255,65,0.3)`, `text-[#00FF41]` `text-xs`
-- `READ_TIME: 12M →` link in `#00FF41`
-
-### Traffic Light Controls
-- Three circles, `w-3 h-3`, `rounded-full`
-- Left to right: `#ff5f57` (close) · `#fdbb2c` (minimise) · `#28c840` (maximise)
-- Spacing: `gap-2`
-- Accompanied by title bar text in `IBM Plex Mono` `#b9ccb2`: `KERNEL_GLASS // ROOT@[USERNAME]`
-
-### Terminal Prompt / Input
-- Prefix: `>>>` in `#00FF41`
-- Input: underline only (`border-bottom: 1px solid rgba(255,255,255,0.2)`), no box
-- Focus: underline shifts to `#00FF41` with 4px glow beneath
-- Placeholder: `#b9ccb2` or `rgba(255,255,255,0.35)`
-- `IBM Plex Mono` font
-
-### Status Chips
-- `{SYSTEM_STATUS: ACTIVE}` style: `rounded-sm` · `border: 1px solid rgba(0,255,65,0.4)` · `text-[#00FF41]` · `text-xs uppercase` · `IBM Plex Mono`
+- **Spotlight** (`Spotlight.tsx`) writes `--mx`/`--my` straight to the DOM node
+  on pointer move — a cursor move never triggers a React render.
+- **Reveal** (`Reveal.tsx`) renders content *visible* and only hides it after
+  mount, and only when it sits below the fold. A failed hydration, a missing
+  `IntersectionObserver`, or a dropped callback therefore leaves content
+  showing rather than stranding a blank gap. A 2s failsafe backs that up.
+- **Command palette** — `⌘K` / `Ctrl-K`, or `/` outside a text field. Full
+  combobox semantics, roving `aria-activedescendant`, focus returned on close.
+- **Player shortcuts** — space or `k` toggle, `j`/`←` back 15s, `l`/`→`
+  forward 30s, `m` mute. Suppressed while typing.
 
 ---
 
-## 7. Imagery Treatment
-- **Style:** High-contrast, noir — near black-and-white with crushed blacks
-- **Framing:** Images presented as "telemetry data" or "log attachments" — framed inside glass containers with a subtle vignette
-- **Overlay:** Thin `rgba(0,255,65,0.05)` tint over images to unify with green palette
+## 7. Accessibility contract
+
+Non-negotiable, and checked every review round:
+
+1. Every interactive element takes a visible `:focus-visible` ring in `--ember`.
+2. Colour never carries meaning alone (see §2).
+3. `prefers-reduced-motion: reduce` stops the marquee, the canvas animation, the
+   scroll reveals, and smooth scrolling — in one place, in `globals.css`.
+4. `prefers-contrast: more` raises hairline and secondary-text contrast.
+5. A skip link precedes the header; `<main>` is focusable.
+6. Filter and sort results are announced with `aria-live="polite"`.
+7. Decorative canvas and SVG are `aria-hidden`; data tables carry a `<caption>`
+   and `aria-sort`.
 
 ---
 
-## 8. Do's and Don'ts
+## 8. Don'ts
 
-### Do:
-- **Do** use `rounded-sm` (4px) on all interactive elements and cards.
-- **Do** use `#00FF41` exclusively for the active/selected/CTA state — never for body text.
-- **Do** apply the glass surface recipe to every major container (sidebar, panels, cards, terminal window).
-- **Do** use `IBM Plex Mono` for all machine-generated data: timestamps, EP numbers, latency, memory readouts, terminal prompts.
-- **Do** keep backgrounds deep black (`#131313`) so the glass blur has contrast to work against.
-- **Do** retain the scanline overlay — it keeps glassmorphism grounded in hardware.
-
-### Don't:
-- **Don't** use `#00FF41` at full opacity for large text blocks — it causes eye strain. Use `#b9ccb2` for body copy.
-- **Don't** stack glass panels on glass panels without a solid `#131313` layer between them — the blur needs contrast.
-- **Don't** use rounded corners larger than `8px` — this is a terminal, not a consumer app.
-- **Don't** remove the traffic light controls from the main terminal window — they are a core visual anchor.
-- **Don't** use the old `#FF3B3B` red or `#67d7e1` cyan as accents — those belong to "Analog Frontier." Use `#ff5f57` and `#00FF41` instead.
-
----
-
-## 9. Legacy System Reference
-
-The previous system "The Analog Frontier" used:
-- `#FF3B3B` red + `#67d7e1` cyan accents
-- `0px` border radius across everything
-- No glassmorphism
-- `Manrope` body font
-
-These tokens are **retired** in Kernel Glass. Do not mix systems.
+- **Don't** reintroduce `#00FF41`, `#FF3B3B`, `#67d7e1`, or the pine/sage
+  palette. They belong to retired systems.
+- **Don't** override one palette with another via attribute selectors on
+  serialised inline styles. That is what the last redesign did, and it is the
+  reason this rewrite exists.
+- **Don't** use `--ember` for a data value, or `--pos`/`--neg` for branding.
+- **Don't** ship a number in a proportional font.
+- **Don't** add a chart library. Sparklines are server-rendered SVG; the hero
+  is a hand-written canvas. Both stay that way.
