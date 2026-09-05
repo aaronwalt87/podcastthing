@@ -3,6 +3,11 @@ import { getEpisode, updateEpisode, deleteEpisode } from '@/lib/episodes'
 
 export const dynamic = 'force-dynamic'
 
+/** A missing Redis is a configuration problem (503), not a server fault (500). */
+function isUnconfigured(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Storage is not configured'
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
@@ -43,6 +48,9 @@ export async function PUT(
 
     return NextResponse.json(updated)
   } catch (error) {
+    if (isUnconfigured(error)) {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error(`PUT /api/episodes/${params.id} error:`, error)
     return NextResponse.json({ error: 'Failed to update episode' }, { status: 500 })
   }
@@ -56,6 +64,9 @@ export async function DELETE(
     await deleteEpisode(params.id)
     return NextResponse.json({ success: true })
   } catch (error) {
+    if (isUnconfigured(error)) {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error(`DELETE /api/episodes/${params.id} error:`, error)
     return NextResponse.json({ error: 'Failed to delete episode' }, { status: 500 })
   }

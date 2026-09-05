@@ -8,6 +8,9 @@ export async function GET() {
     const episodes = await getAllEpisodes()
     return NextResponse.json(episodes)
   } catch (error) {
+    if (error instanceof Error && error.message === 'Storage is not configured') {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error('GET /api/episodes error:', error)
     return NextResponse.json({ error: 'Failed to fetch episodes' }, { status: 500 })
   }
@@ -44,6 +47,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(episode, { status: 201 })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Storage is not configured') {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error('POST /api/episodes error:', error)
     return NextResponse.json({ error: 'Failed to create episode' }, { status: 500 })
   }
