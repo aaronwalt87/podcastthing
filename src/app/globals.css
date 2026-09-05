@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,130 +8,487 @@
 html { scroll-behavior: smooth; }
 
 :root {
-  --text-primary: #ffffff;
-  --text-accent: #00FF41;
-  --text-muted: rgba(185,204,178,0.5);
+  --pine-950: #101914;
+  --pine-900: #17231c;
+  --pine-800: #24352a;
+  --pine-700: #36513f;
+  --sage: #aebba7;
+  --cream: #f2ecdf;
+  --sand: #d9c8ad;
+  --sun: #e9a96e;
+  --rock: #b96f51;
+  --sky: #9ec7dc;
+  --text-primary: #f7f2e8;
+  --text-accent: #e9a96e;
+  --text-muted: rgba(242, 236, 223, .62);
 }
 
 body {
-  font-family: 'Space Grotesk', sans-serif;
-  background-color: #080c08;
-  color: #ffffff;
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  background: var(--pine-950);
+  color: var(--cream);
+  overflow-x: hidden;
 }
 
-/* CRT scanline overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
-  );
-  pointer-events: none;
-  z-index: 9998;
+a { color: inherit; }
+button, input { font: inherit; }
+
+::selection {
+  background: rgba(233, 169, 110, .35);
+  color: #fff;
 }
 
-/* ─── Kernel Glass surface ─────────────────────────────────────────────────── */
-.glass {
-  background: rgba(20, 20, 20, 0.82);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #101914; }
+::-webkit-scrollbar-thumb { background: #4f604f; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #778678; }
 
+.glass,
 .glass-dark {
-  background: rgba(14, 14, 14, 0.90);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(19, 29, 23, .82);
+  border: 1px solid rgba(255,255,255,.09);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
 }
 
-.glow-green {
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.35), 0 0 28px rgba(0, 255, 65, 0.15);
+.font-mono { font-family: 'DM Mono', monospace; }
+
+/* Navigation */
+.summit-nav {
+  position: fixed;
+  z-index: 70;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 76px;
+  padding: 14px clamp(18px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  color: white;
+  transition: background .3s ease, border-color .3s ease, min-height .3s ease;
+  border-bottom: 1px solid transparent;
+}
+.summit-nav--scrolled {
+  min-height: 64px;
+  background: rgba(16, 25, 20, .84);
+  border-bottom-color: rgba(255,255,255,.08);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+.summit-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  width: max-content;
+}
+.summit-brand strong {
+  display: block;
+  font-size: 13px;
+  letter-spacing: .02em;
+}
+.summit-brand small {
+  display: block;
+  margin-top: 2px;
+  font: 400 9px/1 'DM Mono', monospace;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+.summit-mark {
+  width: 34px;
+  height: 26px;
+  position: relative;
+  display: block;
+}
+.summit-mark i {
+  position: absolute;
+  bottom: 2px;
+  width: 2px;
+  transform-origin: bottom;
+  background: var(--cream);
+}
+.summit-mark i:nth-child(1) { left: 4px; height: 13px; transform: rotate(42deg); }
+.summit-mark i:nth-child(2) { left: 15px; height: 24px; transform: rotate(27deg); }
+.summit-mark i:nth-child(3) { left: 26px; height: 15px; transform: rotate(-35deg); }
+.summit-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.summit-links a {
+  text-decoration: none;
+  font: 500 10px/1 'DM Mono', monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+  transition: color .2s ease;
+}
+.summit-links a:hover { color: white; }
+.summit-status {
+  justify-self: end;
+  text-decoration: none;
+  font: 500 10px/1 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.72);
+}
+.summit-status span,
+.mountain-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c7dd9a;
+  box-shadow: 0 0 0 4px rgba(199,221,154,.14);
 }
 
-/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #131313; }
-::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #00FF41; }
-
-/* ─── Placeholder ──────────────────────────────────────────────────────────── */
-::placeholder { color: rgba(185, 204, 178, 0.45); font-family: 'IBM Plex Mono', monospace; }
-
-/* ─── Range input — Matrix Green ───────────────────────────────────────────── */
-input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; }
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 12px; height: 12px; border-radius: 0;
-  background: #00FF41; cursor: pointer; margin-top: -4px;
-  box-shadow: 0 0 6px rgba(0, 255, 65, 0.8);
+/* Hero — sticky scene with scroll-driven layers */
+.mountain-hero {
+  --hero-progress: 0;
+  position: relative;
+  height: 220vh;
+  background: #203226;
 }
-input[type="range"]::-moz-range-thumb {
-  width: 12px; height: 12px; border-radius: 0;
-  background: #00FF41; border: none; cursor: pointer;
+.mountain-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 680px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.mountain-photo,
+.mountain-vignette,
+.mountain-cloud {
+  position: absolute;
+  inset: -7%;
+  pointer-events: none;
+}
+.mountain-photo {
+  background-size: cover;
+  background-position: center;
+  will-change: transform, opacity, filter;
+}
+.mountain-photo--sunset {
+  background-image: url('/colorado/colorado-sunset-wide.webp');
+  transform: scale(calc(1.07 + var(--hero-progress) * .06)) translateY(calc(var(--hero-progress) * -2.5%));
+  filter: saturate(.9) contrast(1.02);
+}
+.mountain-photo--ridge {
+  background-image: url('/colorado/colorado-sunset-ridge.webp');
+  background-position: 50% 56%;
+  opacity: calc(var(--hero-progress) * .9);
+  transform: scale(calc(1.1 + var(--hero-progress) * .08)) translateY(calc(var(--hero-progress) * -4%));
+  mix-blend-mode: soft-light;
+  filter: contrast(1.08) saturate(.9);
+}
+.mountain-photo--day {
+  background-image: url('/colorado/colorado-day-ridge.webp');
+  background-position: 50% 46%;
+  opacity: calc(max(0, (var(--hero-progress) - .62) * 1.6));
+  transform: scale(1.14) translateY(calc((1 - var(--hero-progress)) * 3%));
+  filter: saturate(.75) brightness(.72);
+  mix-blend-mode: screen;
+}
+.mountain-cloud {
+  z-index: 3;
+  inset: auto;
+  width: 46vw;
+  height: 20vh;
+  min-width: 480px;
+  min-height: 130px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 35% 55%, rgba(255,255,255,.42) 0 24%, transparent 55%),
+    radial-gradient(ellipse at 60% 45%, rgba(255,255,255,.32) 0 28%, transparent 60%);
+  filter: blur(18px);
+  opacity: .34;
+  mix-blend-mode: screen;
+}
+.mountain-cloud--one {
+  top: 12vh;
+  left: -8vw;
+  transform: translateX(calc(var(--hero-progress) * 34vw));
+}
+.mountain-cloud--two {
+  top: 25vh;
+  right: -14vw;
+  opacity: .22;
+  transform: translateX(calc(var(--hero-progress) * -26vw)) scale(.8);
+}
+.mountain-vignette {
+  z-index: 4;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(8,13,10,.62) 0%, rgba(8,13,10,.16) 50%, rgba(8,13,10,.24) 100%),
+    linear-gradient(0deg, rgba(10,17,13,.82) 0%, transparent 42%, rgba(8,12,10,.18) 100%);
+}
+.mountain-copy {
+  position: absolute;
+  z-index: 8;
+  left: clamp(24px, 7vw, 112px);
+  bottom: clamp(110px, 17vh, 180px);
+  max-width: 760px;
+  transform: translateY(calc(var(--hero-progress) * -34px));
+  opacity: calc(1 - var(--hero-progress) * .35);
+}
+.mountain-kicker,
+.section-eyebrow {
+  font: 500 10px/1.3 'DM Mono', monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.mountain-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 22px;
+  color: rgba(255,255,255,.74);
+}
+.mountain-copy h1 {
+  max-width: 820px;
+  margin: 0;
+  font-size: clamp(48px, 7vw, 108px);
+  line-height: .91;
+  letter-spacing: -.055em;
+  font-weight: 500;
+  text-wrap: balance;
+}
+.mountain-copy h1 span {
+  display: block;
+  color: rgba(255,255,255,.7);
+}
+.mountain-deck {
+  max-width: 610px;
+  margin: 28px 0 0;
+  font-size: clamp(15px, 1.4vw, 19px);
+  line-height: 1.65;
+  color: rgba(255,255,255,.7);
+}
+.mountain-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+.mountain-button {
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.34);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  font: 600 10px/1 'DM Mono', monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+.mountain-button:hover { transform: translateY(-2px); }
+.mountain-button--primary {
+  color: #1b261d;
+  border-color: var(--cream);
+  background: var(--cream);
+}
+.mountain-button--ghost {
+  color: white;
+  background: rgba(20,29,23,.2);
+  backdrop-filter: blur(8px);
+}
+.mountain-scroll-cue {
+  position: absolute;
+  z-index: 8;
+  right: clamp(24px, 5vw, 72px);
+  bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255,255,255,.58);
+  font: 500 9px/1 'DM Mono', monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.mountain-scroll-cue i {
+  width: 52px;
+  height: 1px;
+  background: rgba(255,255,255,.36);
+  position: relative;
+  overflow: hidden;
+}
+.mountain-scroll-cue i::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 1px;
+  background: white;
+  animation: trailScan 2s ease-in-out infinite;
+}
+@keyframes trailScan {
+  from { transform: translateX(-20px); }
+  to { transform: translateX(54px); }
 }
 
-/* ─── Monospace utility ─────────────────────────────────────────────────────── */
-.font-mono { font-family: 'IBM Plex Mono', monospace; }
+.summit-nav + main:not(.colorado-site) { padding-top: 84px; }
 
-/* ─── Animations ────────────────────────────────────────────────────────────── */
-@keyframes newsFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Dashboard */
+.colorado-site {
+  background:
+    radial-gradient(circle at 10% 30%, rgba(185,111,81,.08), transparent 30%),
+    linear-gradient(#142019, #101914);
 }
-.news-item-enter { animation: newsFadeIn 0.3s ease-out forwards; }
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+.dashboard-section {
+  position: relative;
+  z-index: 10;
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 120px clamp(20px, 4vw, 56px);
 }
-.blink { animation: blink 1.2s step-end infinite; }
-
-/* ─── Light mode — teal accent, white bg ────────────────────────────────────── */
-body.light-mode {
-  background-color: #ffffff;
-  color: #1a1a1a;
-  --text-primary: #1a1a1a;
-  --text-accent:  #0E7490;
-  --text-muted:   rgba(0,0,0,0.38);
+.dashboard-section--first { padding-top: 140px; }
+.dashboard-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
+  gap: 48px;
+  align-items: end;
+  margin-bottom: 42px;
+}
+.section-eyebrow { color: var(--sun); }
+.dashboard-heading h2 {
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: .96;
+  letter-spacing: -.045em;
+  font-weight: 500;
+  margin: 12px 0 0;
+}
+.dashboard-heading p {
+  margin: 0;
+  color: rgba(242,236,223,.56);
+  line-height: 1.7;
+  font-size: 14px;
+  max-width: 440px;
+}
+.mountain-panel {
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(26,38,30,.72);
+  box-shadow: 0 26px 80px rgba(0,0,0,.24);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.mountain-panel--news { padding: 4px; }
+.mountain-panel--ticker { margin-top: 14px; border-radius: 16px; }
+.mountain-panel--archive { padding: 8px; }
+.archive-toolbar {
+  min-height: 58px;
+  padding: 12px 14px 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.archive-toolbar > span {
+  flex: 0 0 auto;
+  color: rgba(242,236,223,.48);
+  font: 500 10px/1 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+.dashboard-section--archive { padding-top: 40px; }
+.trail-break {
+  min-height: 72vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 70px clamp(24px, 7vw, 110px);
+  background:
+    linear-gradient(0deg, rgba(15,23,18,.86), rgba(15,23,18,.05) 62%),
+    url('/colorado/colorado-day-ridge.webp') center 45% / cover no-repeat;
+}
+.trail-break > div { max-width: 680px; }
+.trail-break p {
+  margin: 14px 0 0;
+  max-width: 620px;
+  font-size: clamp(40px, 5vw, 76px);
+  line-height: .98;
+  letter-spacing: -.045em;
+  text-wrap: balance;
 }
 
-body.light-mode .glass      { background: rgba(255,255,255,0.93); border-color: rgba(0,0,0,0.09); }
-body.light-mode .glass-dark { background: rgba(246,246,246,0.95); border-color: rgba(0,0,0,0.06); }
-body.light-mode::after { display: none; }
-body.light-mode ::-webkit-scrollbar-track { background: #f0f0f0; }
-body.light-mode ::-webkit-scrollbar-thumb { background: #aaa; }
+/* Re-skin legacy dashboard components without touching their data or behavior. */
+.colorado-site [style*="color: rgb(0, 255, 65)"],
+.colorado-site [style*="color: #00FF41"],
+.colorado-site [style*="color: rgba(0,255,65"],
+.colorado-site [style*="color: rgba(0, 255, 65"] {
+  color: var(--sun) !important;
+}
+.colorado-site [style*="background: rgb(0, 255, 65)"],
+.colorado-site [style*="background: #00FF41"] {
+  background: var(--sun) !important;
+  color: #17231c !important;
+}
+.colorado-site [style*="border-left: 2px solid rgba(0, 255, 65"] {
+  border-left-color: var(--sun) !important;
+}
+.colorado-site [style*="box-shadow: 0px 0px"],
+.colorado-site [style*="text-shadow"] {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
 
-/* White text → near black (browser normalizes hex → rgb() in style attr) */
-body.light-mode [style*="color: rgb(255, 255, 255)"] { color: #1a1a1a !important; }
+/* Keep admin readable while the public shell changes. */
+body:has(main.admin-shell),
+body:has(form[action*="admin"]) {
+  background: #0b0f0c;
+}
 
-/* Muted off-white → muted gray */
-body.light-mode [style*="color: rgba(185, 204, 178"] { color: rgba(0,0,0,0.38) !important; }
+/* Audio controls stay functional but inherit the landscape palette. */
+input[type="range"] { accent-color: var(--sun); }
+input[type="range"]::-webkit-slider-thumb { background: var(--sun); }
 
-/* Neon green → teal */
-body.light-mode [style*="color: rgb(0, 255, 65)"]  { color: #0E7490 !important; }
-body.light-mode [style*="color: rgba(0, 255, 65"]  { color: rgba(14,116,144,0.80) !important; }
+@media (max-width: 900px) {
+  .summit-nav {
+    grid-template-columns: 1fr auto;
+    min-height: 66px;
+  }
+  .summit-links { display: none; }
+  .summit-status { display: none; }
+  .dashboard-heading { grid-template-columns: 1fr; gap: 18px; }
+  .mountain-copy { bottom: 105px; max-width: calc(100% - 48px); }
+  .mountain-copy h1 { font-size: clamp(46px, 13vw, 80px); }
+  .mountain-cloud { min-width: 360px; }
+}
+@media (max-width: 620px) {
+  .mountain-hero { height: 190vh; }
+  .mountain-stage { min-height: 620px; }
+  .mountain-photo { inset: -3%; }
+  .mountain-photo--sunset { background-position: 58% center; }
+  .mountain-copy {
+    left: 20px;
+    right: 20px;
+    bottom: 92px;
+  }
+  .mountain-copy h1 { letter-spacing: -.06em; }
+  .mountain-deck { font-size: 14px; line-height: 1.55; }
+  .mountain-scroll-cue { display: none; }
+  .dashboard-section { padding: 90px 18px; }
+  .dashboard-section--archive { padding-top: 10px; }
+  .dashboard-heading h2 { font-size: 42px; }
+  .archive-toolbar { align-items: flex-start; flex-direction: column; }
+  .trail-break { min-height: 62vh; padding: 44px 20px; }
+}
 
-/* Green backgrounds → teal-tinted */
-body.light-mode [style*="background: rgb(0, 255, 65)"]  { background: #0E7490 !important; color: #fff !important; }
-body.light-mode [style*="background: rgba(0, 255, 65"]  { background: rgba(14,116,144,0.08) !important; }
-
-/* Dark card backgrounds → white */
-body.light-mode [style*="background: rgba(20, 20, 20"]  { background: rgba(255,255,255,0.92) !important; }
-body.light-mode [style*="background: rgba(14, 14, 14"]  { background: rgba(246,246,246,0.95) !important; }
-body.light-mode [style*="background: rgba(30, 30, 30"]  { background: rgba(240,240,240,0.96) !important; }
-
-/* Remove neon glows (React serializes boxShadow as box-shadow with px units) */
-body.light-mode [style*="box-shadow: 0px 0px"] { box-shadow: none !important; }
-body.light-mode [style*="text-shadow"]          { text-shadow: none !important; }
-
-/* Green borders → teal (React serializes borderLeft as border-left) */
-body.light-mode [style*="border-left: 2px solid rgba(0, 255, 65"] { border-left-color: #0E7490 !important; }
-body.light-mode [style*="border-left: 2px solid rgb(0, 255, 65"]  { border-left-color: #0E7490 !important; }
-
-body.light-mode .blink { color: #0E7490 !important; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .mountain-photo,
+  .mountain-cloud,
+  .mountain-copy { transform: none !important; }
+  .mountain-scroll-cue i::after { animation: none; }
+}
