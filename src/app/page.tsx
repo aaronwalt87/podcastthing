@@ -3,7 +3,7 @@ import { getCachedNews } from '@/lib/news'
 import EpisodeGrid from '@/components/EpisodeGrid'
 import CategoryTabs from '@/components/CategoryTabs'
 import NewsReadout from '@/components/NewsReadout'
-import TerminalHero from '@/components/TerminalHero'
+import MountainHero from '@/components/MountainHero'
 import StockTicker from '@/components/StockTicker'
 
 export const dynamic = 'force-dynamic'
@@ -27,43 +27,52 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const latestEpisode = allEpisodes[0] ?? null
 
   return (
-    <main className="max-w-screen-xl mx-auto px-4 pt-4 pb-16 flex flex-col gap-6">
-      {/* Hero */}
-      <TerminalHero latestEpisode={latestEpisode} />
+    <main className="colorado-site">
+      <MountainHero latestEpisode={latestEpisode} />
 
-      {/* News strip — full width, compact */}
-      <NewsReadout compact initialItems={newsItems} />
-
-      {/* Market feed */}
-      <StockTicker />
-
-      {/* Episodes — full width */}
-      <div
-        id="archive"
-        className="glass rounded-lg overflow-hidden"
-        style={{ borderLeft: '2px solid rgba(0,255,65,0.5)' }}
-      >
-        <div
-          className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <span
-            className="text-xs uppercase tracking-widest"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#00FF41' }}
-          >
-            EPISODE_ARCHIVE_
-          </span>
-          <span className="blink text-xs" style={{ color: '#00FF41' }}>▮</span>
-          {categories.length > 0 && (
-            <div className="ml-auto">
-              <CategoryTabs categories={categories} selected={selectedCategory} />
-            </div>
-          )}
+      <section id="news" className="dashboard-section dashboard-section--first">
+        <div className="dashboard-heading">
+          <div>
+            <span className="section-eyebrow">01 · Live intelligence</span>
+            <h2>Technology signal</h2>
+          </div>
+          <p>Fresh headlines and market context, collected into one calm view.</p>
         </div>
-        <div className="p-4">
+
+        <div className="mountain-panel mountain-panel--news">
+          <NewsReadout compact initialItems={newsItems} />
+        </div>
+        <div className="mountain-panel mountain-panel--ticker">
+          <StockTicker />
+        </div>
+      </section>
+
+      <section id="archive" className="dashboard-section dashboard-section--archive">
+        <div className="dashboard-heading dashboard-heading--archive">
+          <div>
+            <span className="section-eyebrow">02 · Listening archive</span>
+            <h2>Podcasts worth keeping</h2>
+          </div>
+          <p>A curated archive of episodes on technology, AI, systems, leadership, and the ideas around them.</p>
+        </div>
+
+        <div className="mountain-panel mountain-panel--archive">
+          <div className="archive-toolbar">
+            <span>{episodes.length} episodes</span>
+            {categories.length > 0 && (
+              <CategoryTabs categories={categories} selected={selectedCategory} />
+            )}
+          </div>
           <EpisodeGrid episodes={episodes} selectedCategory={selectedCategory} />
         </div>
-      </div>
+      </section>
+
+      <section className="trail-break" aria-label="Colorado landscape">
+        <div>
+          <span className="section-eyebrow">Field note · Colorado</span>
+          <p>Good systems create room to look up.</p>
+        </div>
+      </section>
     </main>
   )
 }
