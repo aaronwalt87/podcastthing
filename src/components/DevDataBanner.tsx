@@ -15,9 +15,9 @@ export default function DevDataBanner() {
       className="fixed inset-x-0 z-[130] border-b px-4 py-1.5 text-center text-[11px] leading-tight"
       style={{
         top: 'var(--header-h)',
-        background: 'rgba(240, 180, 41, 0.14)',
-        borderColor: 'rgba(240, 180, 41, 0.34)',
-        color: '#f5cf7a',
+        background: 'var(--warn-ghost)',
+        borderColor: 'var(--warn-edge)',
+        color: 'var(--warn-text)',
       }}
     >
       <strong>Local development — sample data.</strong> Headlines, quotes and episodes on this page

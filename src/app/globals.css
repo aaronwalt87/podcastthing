@@ -47,6 +47,18 @@
   --warn: #f0b429;
   --cool: #6fa8ff;
 
+  /* Readable text on the tinted alert surfaces below — --neg itself is only
+     4.5:1 against them, and --warn is worse. */
+  --neg-text: #ff9d97;
+  --neg-ghost: rgba(240, 90, 82, 0.1);
+  --neg-edge: rgba(240, 90, 82, 0.32);
+  --warn-text: #f5cf7a;
+  --warn-ghost: rgba(240, 180, 41, 0.14);
+  --warn-edge: rgba(240, 180, 41, 0.34);
+
+  /* Foreground for anything sitting on the accent. */
+  --on-ember: #180a03;
+
   /* Type */
   --font-display: var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif;
   --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -292,7 +304,7 @@ p {
   .btn-primary {
     background: var(--ember);
     border-color: var(--ember);
-    color: #180a03;
+    color: var(--on-ember);
     font-weight: 600;
   }
   .btn-primary:hover {
@@ -344,6 +356,17 @@ p {
   .field:focus {
     border-color: var(--ember);
     background: var(--ink-850);
+  }
+
+  /* Inline alert. One recipe rather than the same tinted box written out at
+     each call site. */
+  .alert {
+    border-radius: var(--r-2);
+    padding: 10px 12px;
+    font-size: 14px;
+    background: var(--neg-ghost);
+    border: 1px solid var(--neg-edge);
+    color: var(--neg-text);
   }
 
   /* Hairline rule that fades at both ends — used between sections */
@@ -517,7 +540,7 @@ p {
   z-index: 200;
   padding: 10px 14px;
   background: var(--ember);
-  color: #180a03;
+  color: var(--on-ember);
   border-radius: var(--r-2);
   font-size: 13px;
   font-weight: 600;

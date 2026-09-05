@@ -116,12 +116,7 @@ export default function AdminPage() {
         ) : error ? (
           <p
             role="alert"
-            className="rounded-sm px-4 py-3 text-sm"
-            style={{
-              background: 'rgba(240,90,82,0.1)',
-              border: '1px solid rgba(240,90,82,0.3)',
-              color: '#ff9d97',
-            }}
+            className="alert"
           >
             {error}{' '}
             <button type="button" onClick={fetchEpisodes} className="link-draw ml-1">

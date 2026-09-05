@@ -56,7 +56,7 @@ function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonP
         width: box,
         height: box,
         background: 'var(--ember)',
-        color: '#180a03',
+        color: 'var(--on-ember)',
         boxShadow: playingThis ? '0 0 0 4px rgba(255,106,43,0.2)' : undefined,
       }}
     >

@@ -68,7 +68,7 @@ export default function AboutPage() {
                     key={term}
                     className="grid gap-1 border-t border-hair py-4 sm:grid-cols-[132px_minmax(0,1fr)] sm:gap-6"
                   >
-                    <dt className="num text-xs uppercase tracking-wider text-ember">{term}</dt>
+                    <dt className="num text-xs uppercase tracking-wider text-paper-2">{term}</dt>
                     <dd className="m-0 max-w-[58ch] text-[15px] leading-relaxed text-paper-2">
                       {detail}
                     </dd>

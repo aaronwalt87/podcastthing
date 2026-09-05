@@ -115,8 +115,12 @@ export default function PlayerBar() {
       {error && (
         <p
           role="alert"
-          className="border-b border-hair px-4 py-2 text-center text-xs"
-          style={{ color: 'var(--neg)', background: 'rgba(240,90,82,0.08)' }}
+          className="border-b px-4 py-2 text-center text-xs"
+          style={{
+            color: 'var(--neg-text)',
+            background: 'var(--neg-ghost)',
+            borderColor: 'var(--neg-edge)',
+          }}
         >
           {error}
         </p>

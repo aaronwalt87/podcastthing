@@ -57,12 +57,7 @@ export default function LoginForm() {
         <p
           id="login-error"
           role="alert"
-          className="rounded-sm px-3 py-2.5 text-sm"
-          style={{
-            background: 'rgba(240,90,82,0.1)',
-            border: '1px solid rgba(240,90,82,0.3)',
-            color: '#ff9d97',
-          }}
+          className="alert"
         >
           {error}
         </p>
