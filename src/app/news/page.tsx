@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { getCachedNews } from '@/lib/news'
 import NewsFeed from '@/components/news/NewsFeed'
 import Reveal from '@/components/ui/Reveal'
@@ -8,7 +9,8 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'News',
-  description: 'AI, hardware, infrastructure and tech-finance headlines from sixteen sources.',
+  description:
+    'AI, hardware, infrastructure and tech-finance headlines, parsed server-side and refreshed on a schedule.',
 }
 
 export default async function NewsPage() {
@@ -23,10 +25,10 @@ export default async function NewsPage() {
       <header className="max-w-3xl">
         <p className="eyebrow eyebrow-accent">Live intelligence</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">News</h1>
-        <p className="mt-5 text-[16px] leading-relaxed text-paper-2">
-          RSS, Atom and the Hacker News index, parsed server-side, deduplicated by content hash, and
-          sorted newest first. Headlines are classified by keyword, so a story lands in the section
-          it belongs to rather than the one its publisher sits in.
+        <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
+          RSS, Atom and the Hacker News index, parsed server-side, deduplicated by normalised link,
+          and sorted newest first. Headlines are classified by keyword, so a story lands in the
+          section it belongs to rather than the one its publisher sits in.
         </p>
 
         {items.length > 0 && (
@@ -51,10 +53,18 @@ export default async function NewsPage() {
         {items.length === 0 ? (
           <div className="panel-flat px-6 py-20 text-center">
             <p className="display text-2xl text-paper">The feed is idle.</p>
-            <p className="mx-auto mt-3 max-w-md text-sm text-paper-2">
-              Headlines are refreshed by a scheduled job and cached in Redis. Nothing is cached right
-              now — check back after the next run.
+            <p className="mx-auto mt-3 max-w-[52ch] text-sm text-paper-2">
+              Headlines are fetched on a schedule and cached; the cache is empty between runs or
+              just after a deploy. Nothing is broken — it refills on the next pass.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/markets" className="btn btn-sm">
+                See the market board <span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/podcasts" className="btn btn-sm">
+                Browse the archive <span aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
         ) : (
           <Reveal>

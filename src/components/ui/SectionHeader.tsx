@@ -25,7 +25,9 @@ export default function SectionHeader({
           {eyebrow}
         </p>
         <h2 className="display mt-3 text-[clamp(30px,4.4vw,52px)]">{title}</h2>
-        {description && <p className="mt-3 text-[15px] text-paper-2">{description}</p>}
+        {description && (
+          <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-paper-2">{description}</p>
+        )}
       </div>
 
       {action && (

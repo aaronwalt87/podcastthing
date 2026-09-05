@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { profile } from '@/lib/profile'
 
 const LINKS = [
-  { label: 'Podcasts', href: '/podcasts' },
   { label: 'News', href: '/news' },
   { label: 'Markets', href: '/markets' },
+  { label: 'Podcasts', href: '/podcasts' },
+  { label: 'About', href: '/about' },
 ]
 
 function isActive(pathname: string, href: string): boolean {
@@ -34,6 +36,7 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMac, setIsMac] = useState(false)
+  const menuToggleRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -48,6 +51,18 @@ export default function SiteHeader() {
 
   // A route change should never leave the mobile sheet hanging open.
   useEffect(() => setMenuOpen(false), [pathname])
+
+  // Escape is the only way out for a keyboard user once the sheet has focus.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      menuToggleRef.current?.focus()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
 
   if (pathname.startsWith('/admin')) return null
 
@@ -65,13 +80,13 @@ export default function SiteHeader() {
       }}
     >
       <div className="shell flex h-full items-center gap-6">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="Aaron Walters — home">
+        <Link href="/" className="flex items-center gap-2.5" aria-label={`${profile.name} — home`}>
           <BrandMark />
-          <span className="hidden sm:block">
+          <span className="block">
             <span className="block text-[13px] font-medium leading-tight text-paper">
-              Aaron Walters
+              {profile.name}
             </span>
-            <span className="eyebrow block leading-tight">Signal</span>
+            <span className="eyebrow hidden leading-tight sm:block">{profile.location}</span>
           </span>
         </Link>
 
@@ -103,17 +118,18 @@ export default function SiteHeader() {
         <button
           type="button"
           onClick={openPalette}
-          className="ml-auto flex h-9 items-center gap-2.5 rounded-sm border border-hair bg-ink-900/60 px-3 text-xs text-paper-3 transition-colors hover:border-hair-2 hover:text-paper-2 md:ml-0"
+          className="ml-auto flex h-9 items-center gap-2.5 rounded-sm border border-hair-2 bg-ink-900/60 px-3 text-xs text-paper-2 transition-colors hover:border-white/40 hover:text-paper md:ml-0"
           aria-label="Open search"
         >
           <span aria-hidden="true">⌕</span>
           <span className="hidden lg:inline">Search</span>
-          <kbd className="num hidden text-[10px] opacity-70 lg:inline">
+          <kbd className="num hidden text-[11px] text-paper-2 lg:inline">
             {isMac ? '⌘' : 'Ctrl '}K
           </kbd>
         </button>
 
         <button
+          ref={menuToggleRef}
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
           aria-expanded={menuOpen}
@@ -133,28 +149,27 @@ export default function SiteHeader() {
         </button>
       </div>
 
-      {menuOpen && (
-        <nav
-          id="mobile-nav"
-          aria-label="Primary"
-          className="border-b border-hair bg-ink-950/95 backdrop-blur md:hidden"
-        >
-          <div className="shell flex flex-col py-2">
-            {LINKS.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                aria-current={isActive(pathname, href) ? 'page' : undefined}
-                className={`border-b border-hair py-3.5 text-[15px] last:border-0 ${
-                  isActive(pathname, href) ? 'text-ember' : 'text-paper'
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </nav>
-      )}
+      <nav
+        id="mobile-nav"
+        hidden={!menuOpen}
+        aria-label="Primary"
+        className="border-b border-hair bg-ink-950/95 backdrop-blur md:hidden"
+      >
+        <div className="shell flex flex-col py-2">
+          {LINKS.map(({ label, href }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(pathname, href) ? 'page' : undefined}
+              className={`border-b border-hair py-3.5 text-[15px] last:border-0 ${
+                isActive(pathname, href) ? 'text-ember' : 'text-paper'
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </nav>
     </header>
   )
 }

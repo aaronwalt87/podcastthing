@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { usePlayer } from '@/context/PlayerContext'
 import type { Episode } from '@/types/episode'
 
@@ -17,9 +18,12 @@ const SIZES = {
   lg: { box: 56, icon: 19 },
 }
 
-export default function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonProps) {
+function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonProps) {
   const { currentEpisode, isPlaying, isLoading, play, pause } = usePlayer()
 
+  // An episode with no source must not offer a control that silently does
+  // nothing — development fixtures and half-entered records both hit this.
+  const playable = episode.audioUrl.trim().length > 0
   const isCurrent = currentEpisode?.id === episode.id
   const playingThis = isCurrent && isPlaying
   const loadingThis = isCurrent && isLoading
@@ -28,6 +32,18 @@ export default function PlayButton({ episode, queue, size = 'md', className = ''
   const onClick = () => {
     if (playingThis) pause()
     else play(episode, queue)
+  }
+
+  if (!playable) {
+    return (
+      <span
+        className={`chip shrink-0 ${className}`}
+        style={{ height: SIZES[size].box, paddingInline: 10 }}
+        title="This episode has no audio source"
+      >
+        No audio
+      </span>
+    )
   }
 
   return (
@@ -45,7 +61,7 @@ export default function PlayButton({ episode, queue, size = 'md', className = ''
       }}
     >
       {loadingThis ? (
-        <svg width={icon} height={icon} viewBox="0 0 24 24" aria-hidden="true">
+        <svg width={icon} height={icon} viewBox="0 0 24 24" className="spin" aria-hidden="true">
           <circle
             cx="12"
             cy="12"
@@ -55,16 +71,7 @@ export default function PlayButton({ episode, queue, size = 'md', className = ''
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray="14 42"
-          >
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="0 12 12"
-              to="360 12 12"
-              dur="0.9s"
-              repeatCount="indefinite"
-            />
-          </circle>
+          />
         </svg>
       ) : playingThis ? (
         <svg width={icon} height={icon} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -86,3 +93,5 @@ export default function PlayButton({ episode, queue, size = 'md', className = ''
     </button>
   )
 }
+
+export default memo(PlayButton)

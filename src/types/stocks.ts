@@ -27,3 +27,13 @@ export interface MarketSnapshot {
   marketState: MarketState
   updatedAt: number
 }
+
+/** Display labels for a session state. Kept in the types leaf so client
+ *  components can import it without pulling the Redis-backed lib into their
+ *  bundle graph. */
+export const MARKET_STATE_LABEL: Record<MarketState, string> = {
+  REGULAR: 'Open',
+  PRE: 'Pre-market',
+  POST: 'After hours',
+  CLOSED: 'Closed',
+}

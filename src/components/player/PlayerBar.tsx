@@ -39,7 +39,7 @@ function Scrubber() {
 
   return (
     <div className="flex flex-1 items-center gap-3">
-      <span className="num w-11 shrink-0 text-right text-[11px] text-paper-3">
+      <span className="num w-11 shrink-0 text-right text-[11px] text-paper-2">
         {formatDuration(value)}
       </span>
 
@@ -64,7 +64,7 @@ function Scrubber() {
         style={{ ['--range-progress' as string]: `${percent}%` }}
       />
 
-      <span className="num w-11 shrink-0 text-[11px] text-paper-3">{formatDuration(max)}</span>
+      <span className="num w-11 shrink-0 text-[11px] text-paper-2">{formatDuration(max)}</span>
     </div>
   )
 }
@@ -85,6 +85,8 @@ export default function PlayerBar() {
     skip,
     setRate,
     toggleMute,
+    shortcutsEnabled,
+    setShortcutsEnabled,
   } = usePlayer()
 
   const cycleRate = useCallback(() => {
@@ -128,7 +130,7 @@ export default function PlayerBar() {
           </div>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-paper">{currentEpisode.title}</p>
-            <p className="truncate text-[11px] text-paper-3">{currentEpisode.showName}</p>
+            <p className="truncate text-[11px] text-paper-2">{currentEpisode.showName}</p>
           </div>
         </div>
 
@@ -139,7 +141,7 @@ export default function PlayerBar() {
               <button
                 type="button"
                 onClick={previous}
-                className="btn btn-ghost btn-icon"
+                className="btn btn-ghost btn-icon hidden sm:inline-flex"
                 aria-label="Previous episode"
               >
                 <Icon path={ICONS.prev} />
@@ -163,7 +165,7 @@ export default function PlayerBar() {
               style={{ background: 'var(--paper)', color: 'var(--ink-950)' }}
             >
               {isLoading ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" className="spin" aria-hidden="true">
                   <circle
                     cx="12"
                     cy="12"
@@ -173,16 +175,7 @@ export default function PlayerBar() {
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeDasharray="14 42"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      from="0 12 12"
-                      to="360 12 12"
-                      dur="0.9s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
+                  />
                 </svg>
               ) : (
                 <Icon path={isPlaying ? ICONS.pause : ICONS.play} size={16} />
@@ -202,12 +195,24 @@ export default function PlayerBar() {
               <button
                 type="button"
                 onClick={next}
-                className="btn btn-ghost btn-icon"
+                className="btn btn-ghost btn-icon hidden sm:inline-flex"
                 aria-label="Next episode"
               >
                 <Icon path={ICONS.next} />
               </button>
             )}
+
+            {/* Mute stays reachable at every width — hiding it below lg left the
+                bare `m` shortcut as the only route, which is itself opt-in. */}
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="btn btn-ghost btn-icon lg:hidden"
+              aria-label={muted ? 'Unmute' : 'Mute'}
+              aria-pressed={muted}
+            >
+              <Icon path={muted ? ICONS.muted : ICONS.volume} />
+            </button>
           </div>
 
           <div className="hidden sm:flex">
@@ -216,12 +221,12 @@ export default function PlayerBar() {
         </div>
 
         {/* Options */}
-        <div className="hidden items-center gap-1 lg:flex lg:w-40 lg:justify-end">
+        <div className="hidden items-center gap-1 lg:flex lg:w-52 lg:justify-end">
           <button
             type="button"
             onClick={cycleRate}
             className="btn btn-ghost btn-sm num"
-            aria-label={`Playback speed ${rate}×. Click to change.`}
+            aria-label={`Playback speed ${rate} times. Activate to change.`}
           >
             {rate}×
           </button>
@@ -233,6 +238,17 @@ export default function PlayerBar() {
             aria-pressed={muted}
           >
             <Icon path={muted ? ICONS.muted : ICONS.volume} />
+          </button>
+          {/* Single-key shortcuts collide with screen-reader quick-nav keys, so
+              they are off until asked for (WCAG 2.1.4). */}
+          <button
+            type="button"
+            onClick={() => setShortcutsEnabled(!shortcutsEnabled)}
+            className="btn btn-ghost btn-sm num"
+            aria-pressed={shortcutsEnabled}
+            title="Keyboard shortcuts: space or K to play, J and L to skip, M to mute"
+          >
+            {shortcutsEnabled ? 'K✓' : 'K'}
           </button>
         </div>
       </div>

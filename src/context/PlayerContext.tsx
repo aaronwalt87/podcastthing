@@ -14,6 +14,7 @@ import type { Episode } from '@/types/episode'
 const PROGRESS_KEY = 'signal:progress:v1'
 const RATE_KEY = 'signal:rate:v1'
 const VOLUME_KEY = 'signal:volume:v1'
+const SHORTCUTS_KEY = 'signal:shortcuts:v1'
 /** Don't restore a position within this many seconds of the end. */
 const RESUME_TAIL_GUARD = 20
 /** Don't bother restoring trivial progress. */
@@ -48,6 +49,9 @@ function writeJson(key: string, value: unknown): void {
 
 interface TransportValue {
   currentEpisode: Episode | null
+  /** Single-key shortcuts are opt-in (WCAG 2.1.4) and persist per browser. */
+  shortcutsEnabled: boolean
+  setShortcutsEnabled: (enabled: boolean) => void
   isPlaying: boolean
   /** True between selecting an episode and the first frame of audio. */
   isLoading: boolean
@@ -97,14 +101,27 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [muted, setMuted] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [progress, setProgress] = useState<ProgressMap>({})
+  const [shortcutsEnabled, setShortcutsEnabledState] = useState(false)
+
+  /**
+   * Saved positions live in a ref, not state. They change every few seconds of
+   * playback; holding them in state would invalidate `play`, `progressFor` and
+   * everything memoised from them, re-rendering every consumer of the transport
+   * context (and re-registering the MediaSession handlers) on that cadence.
+   */
+  const progressRef = useRef<ProgressMap>({})
 
   /** Position to seek to once metadata for the pending episode has loaded. */
   const pendingSeek = useRef<number | null>(null)
+  /** Bumped to force a reload of the same source — used to retry after an error. */
+  const [loadNonce, setLoadNonce] = useState(0)
+  /** Identifies the current load; stale async callbacks compare against it. */
+  const loadGeneration = useRef(0)
 
   /* ---------------------------------------------------- restore settings -- */
   useEffect(() => {
-    setProgress(readJson<ProgressMap>(PROGRESS_KEY, {}))
+    progressRef.current = readJson<ProgressMap>(PROGRESS_KEY, {})
+    setShortcutsEnabledState(readJson<boolean>(SHORTCUTS_KEY, false))
     const storedRate = readJson<number>(RATE_KEY, 1)
     const storedVolume = readJson<number>(VOLUME_KEY, 1)
     if (PLAYBACK_RATES.includes(storedRate as (typeof PLAYBACK_RATES)[number])) {
@@ -117,15 +134,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const play = useCallback(
     (episode: Episode, nextQueue?: Episode[]) => {
-      setError(null)
       if (nextQueue) setQueue(nextQueue)
 
-      if (currentEpisode?.id === episode.id) {
-        void audioRef.current?.play().catch(() => {})
+      const audio = audioRef.current
+      const isSame = currentEpisode?.id === episode.id
+
+      // Re-selecting a source that already failed must reload it. The element
+      // latches its error, so calling play() again would reject silently and
+      // leave the user with a cleared banner and no audio.
+      if (isSame && !audio?.error) {
+        setError(null)
+        void audio?.play().catch(() => {})
         return
       }
 
-      const saved = progress[episode.id] ?? 0
+      setError(null)
+      const saved = progressRef.current[episode.id] ?? 0
       pendingSeek.current = saved > RESUME_MIN ? saved : null
 
       setCurrentEpisode(episode)
@@ -133,8 +157,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       setDuration(0)
       setIsLoading(true)
       setIsPlaying(true)
+      if (isSame) setLoadNonce((n) => n + 1)
     },
-    [currentEpisode?.id, progress]
+    [currentEpisode?.id]
   )
 
   const pause = useCallback(() => {
@@ -224,7 +249,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const progressFor = useCallback((episodeId: string) => progress[episodeId] ?? 0, [progress])
+  const progressFor = useCallback((episodeId: string) => progressRef.current[episodeId] ?? 0, [])
+
+  const setShortcutsEnabled = useCallback((enabled: boolean) => {
+    setShortcutsEnabledState(enabled)
+    writeJson(SHORTCUTS_KEY, enabled)
+  }, [])
 
   /* ------------------------------------------------- audio element wiring -- */
 
@@ -233,20 +263,27 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const audio = audioRef.current
     if (!audio || !currentEpisode) return
 
+    const generation = ++loadGeneration.current
+
     audio.src = currentEpisode.audioUrl
     audio.playbackRate = rate
     audio.volume = volume
     audio.muted = muted
     audio.load()
 
-    void audio.play().catch(() => {
+    void audio.play().catch((err: unknown) => {
+      // Switching episodes aborts the previous load; that rejection belongs to
+      // the old episode and must not overwrite the new one's state.
+      if (generation !== loadGeneration.current) return
+      if (err instanceof DOMException && err.name === 'AbortError') return
       // Autoplay policies can reject; surface it as "paused", not as an error.
       setIsPlaying(false)
       setIsLoading(false)
     })
-    // `rate`/`volume`/`muted` are applied here but must not re-trigger a load.
+    // `rate`/`volume`/`muted` are applied on load but must not re-trigger one.
+    // `loadNonce` is the explicit retry signal for the same source.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentEpisode?.id])
+  }, [currentEpisode?.id, loadNonce])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -304,12 +341,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const onEnded = () => {
       setIsPlaying(false)
       if (currentEpisode) {
-        setProgress((prev) => {
-          const copy = { ...prev }
-          delete copy[currentEpisode.id]
-          writeJson(PROGRESS_KEY, copy)
-          return copy
-        })
+        // A finished episode should start from the top next time.
+        delete progressRef.current[currentEpisode.id]
+        writeJson(PROGRESS_KEY, progressRef.current)
       }
       next()
     }
@@ -325,11 +359,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (Math.abs(currentTime - lastPersisted.current) < 5) return
     lastPersisted.current = currentTime
 
-    setProgress((prev) => {
-      const nextMap = { ...prev, [currentEpisode.id]: currentTime }
-      writeJson(PROGRESS_KEY, nextMap)
-      return nextMap
-    })
+    progressRef.current[currentEpisode.id] = currentTime
+    writeJson(PROGRESS_KEY, progressRef.current)
   }, [currentEpisode, currentTime, isPlaying])
 
   /* --------------------------------------------------------- OS integration */
@@ -383,14 +414,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   /* ---------------------------------------------------- keyboard shortcuts */
 
   useEffect(() => {
+    // Bare single-character shortcuts collide with screen-reader quick-nav keys
+    // (k, l, m are all browse-mode commands), so they are opt-in per WCAG 2.1.4.
+    if (!shortcutsEnabled) return
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (!currentEpisode) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
 
       const target = event.target as HTMLElement | null
-      const typing =
+
+      if (
         target?.isContentEditable ||
         ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')
-      if (typing || event.metaKey || event.ctrlKey || event.altKey) return
+      ) {
+        return
+      }
+
+      // Space, Enter and the arrow keys belong to whatever control has focus.
+      // Swallowing them here would break keyboard activation of every button
+      // and link on the page.
+      if (target?.closest('button, a, summary, [role="button"], [role="slider"], [tabindex]')) {
+        return
+      }
 
       switch (event.key) {
         case ' ':
@@ -419,13 +465,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [currentEpisode, skip, toggle, toggleMute])
+  }, [currentEpisode, shortcutsEnabled, skip, toggle, toggleMute])
 
   /* ----------------------------------------------------------------- value */
 
   const transport = useMemo<TransportValue>(
     () => ({
       currentEpisode,
+      shortcutsEnabled,
+      setShortcutsEnabled,
       isPlaying,
       isLoading,
       error,
@@ -449,6 +497,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       currentEpisode,
+      shortcutsEnabled,
+      setShortcutsEnabled,
       isPlaying,
       isLoading,
       error,

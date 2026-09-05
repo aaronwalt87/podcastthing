@@ -1,3 +1,5 @@
+import 'server-only'
+import { cache } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { getRedis } from './redis'
 import { sampleEpisodes, sampleDataEnabled } from './sample-data'
@@ -22,7 +24,12 @@ function toEpisode(raw: Record<string, string> | null | undefined): Episode | nu
   }
 }
 
-export async function getAllEpisodes(): Promise<Episode[]> {
+/**
+ * Deduplicated per request. /podcasts alone calls this three times (episodes,
+ * categories, shows); without `cache()` that is three full zrange + pipeline
+ * round-trips against a per-command-priced store.
+ */
+export const getAllEpisodes = cache(async function getAllEpisodes(): Promise<Episode[]> {
   const redis = getRedis()
   // Local dev with no credentials renders fixtures; production renders empty.
   if (!redis) return sampleDataEnabled() ? sampleEpisodes() : []
@@ -44,7 +51,7 @@ export async function getAllEpisodes(): Promise<Episode[]> {
     console.error('[episodes] getAllEpisodes failed', err)
     return []
   }
-}
+})
 
 export async function getEpisode(id: string): Promise<Episode | null> {
   const redis = getRedis()

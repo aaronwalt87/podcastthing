@@ -2,18 +2,9 @@ import { NextResponse } from 'next/server'
 import { getAllEpisodes } from '@/lib/episodes'
 import { getCachedNews } from '@/lib/news'
 import { getMarketSnapshot } from '@/lib/stocks'
+import type { SearchRecord } from '@/types/search'
 
 export const dynamic = 'force-dynamic'
-
-export interface SearchRecord {
-  id: string
-  kind: 'episode' | 'news' | 'symbol'
-  title: string
-  subtitle: string
-  href: string
-  /** External links open in a new tab; internal ones navigate in place. */
-  external: boolean
-}
 
 /**
  * Flat index behind the command palette. Slim on purpose — titles and links

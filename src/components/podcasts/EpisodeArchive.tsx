@@ -58,9 +58,10 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
   if (episodes.length === 0) {
     return (
       <div className="panel-flat px-6 py-20 text-center">
-        <p className="display text-2xl text-paper">The archive is empty.</p>
-        <p className="mx-auto mt-3 max-w-md text-sm text-paper-2">
-          Episodes added through the admin panel appear here, newest first.
+        <p className="display text-2xl text-paper">Nothing in the archive yet.</p>
+        <p className="mx-auto mt-3 max-w-[48ch] text-sm text-paper-2">
+          This is a hand-picked list of episodes on infrastructure, AI, and how technology work
+          actually gets done — not a firehose. New ones land as they turn out to be worth the time.
         </p>
       </div>
     )
@@ -144,9 +145,7 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
                 type="button"
                 onClick={() => setSort(key)}
                 aria-pressed={sort === key}
-                className={`rounded-xs px-2.5 py-1.5 text-xs transition-colors ${
-                  sort === key ? 'bg-white/[0.07] text-paper' : 'text-paper-3 hover:text-paper'
-                }`}
+                className="seg"
               >
                 {label}
               </button>
@@ -174,8 +173,20 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
             Clear filters
           </button>
         </div>
+      ) : filtered.length <= 2 ? (
+        // One or two results get the wide treatment rather than a lonely
+        // third-width card with an empty row beside it.
+        <div className="flex flex-col gap-5">
+          {filtered.map((ep) => (
+            <EpisodeCard key={ep.id} episode={ep} queue={filtered} featured />
+          ))}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          className={`grid grid-cols-1 gap-5 sm:grid-cols-2 ${
+            filtered.length === 4 ? '' : 'lg:grid-cols-3'
+          }`}
+        >
           {filtered.map((ep) => (
             <EpisodeCard key={ep.id} episode={ep} queue={filtered} />
           ))}

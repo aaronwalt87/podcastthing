@@ -6,6 +6,8 @@ import SiteHeader from '@/components/nav/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
 import CommandPalette from '@/components/nav/CommandPalette'
 import PlayerBar from '@/components/player/PlayerBar'
+import DevDataBanner from '@/components/DevDataBanner'
+import { profile } from '@/lib/profile'
 
 /* Self-hosted at build time: no third-party request, no layout shift. */
 const sans = Instrument_Sans({
@@ -28,22 +30,35 @@ const mono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
 })
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aaronwalters.dev'
+
+const DESCRIPTION =
+  `${profile.name} — a career in hosting, IT and support, now writing the software too. ` +
+  `A live technology news, markets and podcast dashboard, built and maintained in ${profile.location}.`
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aaronwalters.dev'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Aaron Walters — Signal',
-    template: '%s · Aaron Walters',
+    default: `${profile.name} — ${profile.tagline}`,
+    template: `%s · ${profile.name}`,
   },
-  description:
-    'Technology news, market signal, and a curated podcast archive — collected in one dashboard and refreshed on a schedule.',
+  description: DESCRIPTION,
+  authors: [{ name: profile.name, url: `${SITE_URL}/about` }],
+  creator: profile.name,
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
-    siteName: 'Aaron Walters — Signal',
-    title: 'Aaron Walters — Signal',
-    description:
-      'Technology news, market signal, and a curated podcast archive, in one place.',
+    url: SITE_URL,
+    locale: 'en_US',
+    siteName: profile.name,
+    title: `${profile.name} — ${profile.tagline}`,
+    description: DESCRIPTION,
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${profile.name} — ${profile.tagline}`,
+    description: 'A live news, markets and podcast dashboard, built in public.',
+  },
   robots: { index: true, follow: true },
 }
 
@@ -62,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
 
           <SiteHeader />
+          <DevDataBanner />
           <CommandPalette />
 
           <main id="main" tabIndex={-1}>

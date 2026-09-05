@@ -35,14 +35,19 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
 
-    const reduceMotion =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const motionQuery =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-reduced-motion: reduce)')
+        : null
+    let reduceMotion = motionQuery?.matches ?? false
 
     let width = 0
     let height = 0
     let frame = 0
     let running = true
+    let onScreen = true
+    /** Rebuilt on resize — allocating five gradients per frame is 300/s of GC. */
+    let fills: CanvasGradient[] = []
 
     // Normalise the series to 0..1 once; redrawing shouldn't recompute it.
     const normalised: number[] = (() => {
@@ -61,6 +66,19 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       canvas.width = Math.round(width * dpr)
       canvas.height = Math.round(height * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      // Gradients depend only on height, so they are built here, not per frame.
+      fills = Array.from({ length: LAYERS }, (_, index) => {
+        const depth = index / LAYERS
+        const baseline = height * (0.52 + depth * 0.13)
+        const amplitude = height * (0.16 - depth * 0.022)
+        const alpha = 0.5 - depth * 0.4
+
+        const fill = ctx.createLinearGradient(0, baseline - amplitude, 0, height)
+        fill.addColorStop(0, `rgba(255, 106, 43, ${(alpha * 0.14).toFixed(3)})`)
+        fill.addColorStop(1, 'rgba(255, 106, 43, 0)')
+        return fill
+      })
     }
 
     const drawGeneratedLayer = (index: number, time: number) => {
@@ -83,13 +101,10 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       ctx.lineTo(width, height)
       ctx.closePath()
 
-      const fill = ctx.createLinearGradient(0, baseline - amplitude, 0, height)
-      fill.addColorStop(0, `rgba(255, 106, 43, ${(alpha * 0.14).toFixed(3)})`)
-      fill.addColorStop(1, 'rgba(255, 106, 43, 0)')
-      ctx.fillStyle = fill
+      ctx.fillStyle = fills[index] ?? 'rgba(255, 106, 43, 0)'
       ctx.fill()
 
-      ctx.strokeStyle = `rgba(180, 196, 214, ${(alpha * 0.3).toFixed(3)})`
+      ctx.strokeStyle = `rgba(180, 196, 214, ${(alpha * 0.5).toFixed(3)})`
       ctx.lineWidth = 1
       ctx.stroke()
     }
@@ -102,34 +117,41 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       // A slow vertical breath keeps the real line alive without distorting it.
       const breath = reduceMotion ? 0 : Math.sin(time * 0.4) * 2
 
+      // Inset so the terminus dot reads as an endpoint rather than a clipped edge.
+      const right = width - 6
+
       ctx.beginPath()
       normalised.forEach((value, i) => {
-        const x = (i / (normalised.length - 1)) * width
+        const x = (i / (normalised.length - 1)) * right
         const y = baseline - value * amplitude + breath
         if (i === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
       })
 
-      ctx.strokeStyle = 'rgba(255, 106, 43, 0.85)'
-      ctx.lineWidth = 1.5
       ctx.lineJoin = 'round'
       ctx.lineCap = 'round'
-      ctx.shadowColor = 'rgba(255, 106, 43, 0.55)'
-      ctx.shadowBlur = 12
+
+      // Two strokes instead of shadowBlur: visually equivalent glow, an order of
+      // magnitude cheaper per frame.
+      ctx.strokeStyle = 'rgba(255, 106, 43, 0.16)'
+      ctx.lineWidth = 5
       ctx.stroke()
-      ctx.shadowBlur = 0
+
+      ctx.strokeStyle = 'rgba(255, 106, 43, 0.9)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
 
       // Mark the latest close.
       const lastValue = normalised[normalised.length - 1]
       const lastY = baseline - lastValue * amplitude + breath
       ctx.beginPath()
-      ctx.arc(width, lastY, 3, 0, Math.PI * 2)
+      ctx.arc(right, lastY, 3, 0, Math.PI * 2)
       ctx.fillStyle = 'rgba(255, 168, 119, 1)'
       ctx.fill()
     }
 
     const render = (timestampMs: number) => {
-      if (!running) return
+      if (!running || !onScreen) return
       const time = timestampMs / 1000
 
       ctx.clearRect(0, 0, width, height)
@@ -157,17 +179,36 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       }
     }
 
+    // …or while the canvas is scrolled off screen, which is most of the visit.
+    const visibility =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(([entry]) => {
+            onScreen = entry.isIntersecting
+            if (onScreen) start()
+            else cancelAnimationFrame(frame)
+          })
+        : null
+    visibility?.observe(canvas)
+
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      reduceMotion = event.matches
+      start()
+    }
+    motionQuery?.addEventListener('change', onMotionChange)
+
     start()
 
-    const observer =
+    const resizeObserver =
       typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => start()) : null
-    observer?.observe(canvas)
+    resizeObserver?.observe(canvas)
     document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       running = false
       cancelAnimationFrame(frame)
-      observer?.disconnect()
+      resizeObserver?.disconnect()
+      visibility?.disconnect()
+      motionQuery?.removeEventListener('change', onMotionChange)
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [series])

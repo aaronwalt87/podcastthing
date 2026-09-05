@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { getMarketSnapshot, MARKET_STATE_LABEL } from '@/lib/stocks'
+import { getMarketSnapshot } from '@/lib/stocks'
+import { MARKET_STATE_LABEL } from '@/types/stocks'
 import QuoteCard from '@/components/markets/QuoteCard'
 import MarketTable from '@/components/markets/MarketTable'
 import SectorHeatmap from '@/components/markets/SectorHeatmap'
@@ -7,6 +8,7 @@ import Delta from '@/components/markets/Delta'
 import Reveal from '@/components/ui/Reveal'
 import SectionHeader from '@/components/ui/SectionHeader'
 import { timeAgo } from '@/lib/format'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,19 +47,29 @@ export default async function MarketsPage() {
           )}
         </p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Markets</h1>
-        <p className="mt-5 text-[16px] leading-relaxed text-paper-2">
-          The names that set the tone for the rest of the feed. Quotes come from a live API where a
-          key is configured, and fall back to end-of-day closes otherwise — every row says which,
-          because a number without a provenance is just decoration.
+        <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
+          Index proxies, semiconductors, platforms and the infrastructure vendors underneath them.
+          Quotes come from a live API when a key is configured and from end-of-day closes when it
+          is not; the source column says which, per row.
         </p>
       </header>
 
       {snapshot.quotes.length === 0 ? (
         <div className="panel-flat my-14 px-6 py-20 text-center">
           <p className="display text-2xl text-paper">The board is dark.</p>
-          <p className="mx-auto mt-3 max-w-md text-sm text-paper-2">
-            Quotes refresh on a scheduled job and are cached in Redis. Nothing is cached right now.
+          <p className="mx-auto mt-3 max-w-[52ch] text-sm text-paper-2">
+            Quotes are fetched on a schedule and cached. Either the window between runs is open or
+            the upstream is unavailable — the end-of-day fallback covers the second case, so this
+            usually means the first.
           </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link href="/news" className="btn btn-sm">
+              Read the headlines <span aria-hidden="true">→</span>
+            </Link>
+            <Link href="/about" className="btn btn-sm">
+              How this is built <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
       ) : (
         <>
@@ -66,7 +78,7 @@ export default async function MarketsPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {indices.map((quote) => (
                 <Reveal key={quote.symbol} className="h-full">
-                  <QuoteCard quote={quote} emphasis />
+                  <QuoteCard quote={quote} emphasis now={now} showSource />
                 </Reveal>
               ))}
 

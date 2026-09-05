@@ -1,9 +1,11 @@
+import 'server-only'
 import { getRedis } from './redis'
 import { sampleMarket, sampleDataEnabled } from './sample-data'
 import type { MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
 
 const STOCK_KEY = 'stocks:cache:v2'
-const STOCK_TTL = 3600
+/** See the note on NEWS_TTL_SECONDS — the TTL has to outlive the cron gap. */
+const STOCK_TTL = 172_800
 const HISTORY_POINTS = 60
 
 interface Tracked {
@@ -74,9 +76,23 @@ export function marketStateAt(date = new Date()): MarketState {
  * Daily closes from Stooq's CSV endpoint. No API key, so history (and a usable
  * fallback quote) works even when FINNHUB_TOKEN is absent.
  */
+function stooqDate(offsetDays: number): string {
+  const d = new Date(Date.now() - offsetDays * 86_400_000)
+  return [
+    d.getUTCFullYear(),
+    String(d.getUTCMonth() + 1).padStart(2, '0'),
+    String(d.getUTCDate()).padStart(2, '0'),
+  ].join('')
+}
+
 async function fetchHistory(symbol: string): Promise<number[]> {
   try {
-    const url = `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&i=d`
+    // Unbounded, Stooq returns the entire daily history — decades of CSV per
+    // symbol, of which we keep 60 rows. Bounding the range keeps each response
+    // in the low kilobytes so 16 symbols fit inside the timeout budget.
+    const url =
+      `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&i=d` +
+      `&d1=${stooqDate(130)}&d2=${stooqDate(0)}`
     const res = await fetchWithTimeout(url)
     if (!res.ok) return []
 
@@ -166,19 +182,40 @@ function buildQuote(
   }
 }
 
+/** Run tasks with a ceiling on how many are in flight at once. */
+async function pooled<T, R>(items: T[], limit: number, task: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length)
+  let cursor = 0
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor++
+      results[index] = await task(items[index])
+    }
+  })
+
+  await Promise.all(workers)
+  return results
+}
+
 export async function refreshStocks(): Promise<MarketSnapshot> {
   const token = process.env.FINNHUB_TOKEN
   const state = marketStateAt()
 
-  const results = await Promise.all(
-    TRACKED.map(async (tracked) => {
-      const [history, live] = await Promise.all([
-        fetchHistory(tracked.symbol),
-        token ? fetchFinnhubQuote(tracked.symbol, token) : Promise.resolve(null),
-      ])
-      return buildQuote(tracked, history, live, state)
-    })
-  )
+  // Six at a time: sixteen concurrent cold fetches on a serverless container
+  // push the slowest symbols past their timeout and drop them from the board.
+  const results = await pooled(TRACKED, 6, async (tracked) => {
+    const [history, live] = await Promise.all([
+      fetchHistory(tracked.symbol),
+      token ? fetchFinnhubQuote(tracked.symbol, token) : Promise.resolve(null),
+    ])
+    const quote = buildQuote(tracked, history, live, state)
+    if (!quote) {
+      // Silently vanishing from the board is worse than a noisy log line.
+      console.warn(`[stocks] no usable data for ${tracked.symbol}`)
+    }
+    return quote
+  })
 
   const quotes = results.filter((q): q is StockQuote => q !== null)
   const snapshot = summarize(quotes, state)
@@ -239,9 +276,3 @@ export async function getMarketSnapshot(): Promise<MarketSnapshot> {
   }
 }
 
-export const MARKET_STATE_LABEL: Record<MarketState, string> = {
-  REGULAR: 'Open',
-  PRE: 'Pre-market',
-  POST: 'After hours',
-  CLOSED: 'Closed',
-}

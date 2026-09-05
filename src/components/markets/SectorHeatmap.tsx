@@ -7,7 +7,9 @@ import type { StockQuote } from '@/types/stocks'
  */
 function tint(changePercent: number): string {
   const magnitude = Math.min(Math.abs(changePercent) / 4, 1)
-  const alpha = 0.1 + magnitude * 0.55
+  // The green tint lightens the tile faster than the red one, so its ceiling is
+  // lower: past ~0.60 alpha, --paper on the result drops below 4.5:1.
+  const alpha = 0.1 + magnitude * (changePercent >= 0 ? 0.45 : 0.55)
   return changePercent >= 0
     ? `rgba(56, 201, 142, ${alpha.toFixed(3)})`
     : `rgba(240, 90, 82, ${alpha.toFixed(3)})`
@@ -29,27 +31,35 @@ export default function SectorHeatmap({ quotes }: { quotes: StockQuote[] }) {
 
         return (
           <section key={sector} aria-label={`${sector} sector`}>
-            <div className="mb-2.5 flex items-baseline justify-between gap-3">
-              <h3 className="eyebrow">{sector}</h3>
-              <span
-                className="num text-xs"
-                style={{ color: avg >= 0 ? 'var(--pos)' : 'var(--neg)' }}
-              >
-                {pct(avg)} avg
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
-              {members.map((q) => (
-                <div
-                  key={q.symbol}
-                  className="flex flex-col justify-between gap-2 rounded-sm border border-hair p-3"
-                  style={{ background: tint(q.changePercent) }}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-4">
+              <div className="flex shrink-0 items-baseline justify-between gap-3 sm:w-36 sm:flex-col sm:justify-center sm:gap-1">
+                <h3 className="eyebrow">{sector}</h3>
+                <span
+                  className="num text-xs"
+                  style={{ color: avg >= 0 ? 'var(--pos)' : 'var(--neg)' }}
                 >
-                  <p className="num text-xs font-medium text-paper">{q.symbol}</p>
-                  <p className="num text-sm text-paper">{pct(q.changePercent)}</p>
-                </div>
-              ))}
+                  {pct(avg)} avg
+                </span>
+              </div>
+
+              {/* A band rather than a fixed grid: every sector spans the full
+                  width, and tile width carries magnitude as a second encoding
+                  instead of leaving three-quarters of a row empty. */}
+              <div className="flex flex-1 flex-wrap gap-1.5">
+                {members.map((q) => (
+                  <div
+                    key={q.symbol}
+                    className="flex min-w-[92px] flex-col justify-between gap-2 rounded-sm border border-hair p-3"
+                    style={{
+                      background: tint(q.changePercent),
+                      flex: `${(1 + Math.min(Math.abs(q.changePercent), 4)).toFixed(2)} 1 0%`,
+                    }}
+                  >
+                    <p className="num text-xs font-medium text-paper">{q.symbol}</p>
+                    <p className="num text-sm text-paper">{pct(q.changePercent)}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )

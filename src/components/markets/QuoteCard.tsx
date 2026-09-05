@@ -1,16 +1,30 @@
 import Sparkline from './Sparkline'
 import Delta from './Delta'
 import Spotlight from '@/components/ui/Spotlight'
-import { num } from '@/lib/format'
+import { num, timeAgo } from '@/lib/format'
 import type { StockQuote } from '@/types/stocks'
 
 interface QuoteCardProps {
   quote: StockQuote
   /** Larger treatment for index-level tiles. */
   emphasis?: boolean
+  /** Stable reference time so the age doesn't shift between SSR and hydration. */
+  now?: number
+  /** Show where the number came from. Off in dense grids. */
+  showSource?: boolean
 }
 
-export default function QuoteCard({ quote, emphasis = false }: QuoteCardProps) {
+const SOURCE_LABEL: Record<StockQuote['source'], string> = {
+  finnhub: 'Live quote',
+  stooq: 'End-of-day close',
+}
+
+export default function QuoteCard({
+  quote,
+  emphasis = false,
+  now,
+  showSource = false,
+}: QuoteCardProps) {
   const up = quote.changePercent >= 0
 
   return (
@@ -47,6 +61,13 @@ export default function QuoteCard({ quote, emphasis = false }: QuoteCardProps) {
             className="shrink-0"
           />
         </div>
+
+        {showSource && (
+          <p className="eyebrow border-t border-hair pt-3">
+            {SOURCE_LABEL[quote.source]}
+            {now !== undefined && quote.updatedAt > 0 && ` · ${timeAgo(quote.updatedAt, now)} ago`}
+          </p>
+        )}
       </div>
     </Spotlight>
   )

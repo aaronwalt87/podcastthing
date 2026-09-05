@@ -6,6 +6,8 @@ interface DeltaProps {
   size?: 'sm' | 'md'
   /** Show the absolute move alongside the percentage. */
   showAbsolute?: boolean
+  /** Hide the absolute move below `sm` — narrow tables cannot afford it. */
+  absoluteFrom?: 'always' | 'sm'
 }
 
 /**
@@ -17,6 +19,7 @@ export default function Delta({
   change,
   size = 'sm',
   showAbsolute = false,
+  absoluteFrom = 'always',
 }: DeltaProps) {
   const up = changePercent >= 0
   const color = up ? 'var(--pos)' : 'var(--neg)'
@@ -29,7 +32,11 @@ export default function Delta({
       <span aria-hidden="true">{up ? '▲' : '▼'}</span>
       <span>{pct(changePercent)}</span>
       {showAbsolute && change !== undefined && (
-        <span className="opacity-55">{signed(change)}</span>
+        // A token, not opacity: --neg at 55% computes to 2.4:1, which is below
+        // AA for what is still a price figure.
+        <span className={`text-paper-3 ${absoluteFrom === 'sm' ? 'hidden sm:inline' : ''}`}>
+          {signed(change)}
+        </span>
       )}
     </span>
   )

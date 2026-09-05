@@ -39,26 +39,36 @@ export default function Reveal({ children, delay = 0, className, as = 'div' }: R
 
     node.setAttribute('data-reveal', '')
 
+    let delivered = false
+
     const show = () => {
       node.setAttribute('data-shown', 'true')
       observer.disconnect()
-      clearTimeout(failsafe)
+      window.clearTimeout(failsafe)
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        delivered = true
         if (entry.isIntersecting) show()
       },
       { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
     )
     observer.observe(node)
 
-    // Never let a missed callback strand content off-screen.
-    const failsafe = window.setTimeout(show, 2000)
+    /**
+     * Guards only against the observer never reporting at all. An unconditional
+     * timer would reveal everything two seconds after load, so nothing below the
+     * first screen would ever animate — IntersectionObserver always delivers an
+     * initial entry, so a missing `delivered` flag is the real failure.
+     */
+    const failsafe = window.setTimeout(() => {
+      if (!delivered) show()
+    }, 2000)
 
     return () => {
       observer.disconnect()
-      clearTimeout(failsafe)
+      window.clearTimeout(failsafe)
     }
   }, [])
 

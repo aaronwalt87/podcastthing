@@ -16,6 +16,11 @@ const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; hideBelow
   { key: 'changePercent', label: 'Change', align: 'right' },
 ]
 
+const SOURCE_LABEL: Record<StockQuote['source'], string> = {
+  finnhub: 'Live',
+  stooq: 'EOD close',
+}
+
 export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
   const [sortKey, setSortKey] = useState<SortKey>('changePercent')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -46,10 +51,18 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
 
   if (quotes.length === 0) return null
 
+  const activeLabel = COLUMNS.find((c) => c.key === sortKey)?.label ?? sortKey
+
   return (
-    <div className="panel overflow-hidden">
+    <div className="panel relative overflow-hidden">
+      {/* aria-sort is only read when a header is revisited; this announces the
+          change at the moment it happens. */}
+      <p aria-live="polite" className="sr-only">
+        Sorted by {activeLabel}, {sortDir === 'asc' ? 'ascending' : 'descending'}
+      </p>
+
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-sm">
+        <table className="w-full min-w-[340px] border-collapse text-sm md:min-w-[620px]">
           <caption className="sr-only">
             Tracked technology equities, sorted by {sortKey} {sortDir === 'asc' ? 'ascending' : 'descending'}
           </caption>
@@ -81,6 +94,9 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                   </th>
                 )
               })}
+              <th scope="col" className="hidden px-4 py-3 text-left md:table-cell">
+                <span className="eyebrow">Source</span>
+              </th>
               <th scope="col" className="hidden px-4 py-3 text-right sm:table-cell">
                 <span className="eyebrow">60d</span>
               </th>
@@ -95,16 +111,31 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
               >
                 <th scope="row" className="px-4 py-3 text-left font-normal">
                   <span className="num text-[13px] font-medium text-paper">{q.symbol}</span>
-                  <span className="ml-2 hidden text-xs text-paper-3 lg:inline">{q.name}</span>
+                  <span className="ml-2 hidden text-xs text-paper-2 lg:inline">{q.name}</span>
                 </th>
-                <td className="hidden px-4 py-3 text-xs text-paper-3 md:table-cell">{q.sector}</td>
+                <td className="hidden px-4 py-3 text-xs text-paper-2 md:table-cell">{q.sector}</td>
                 <td className="num px-4 py-3 text-right text-paper">{num(q.price)}</td>
                 <td className="px-4 py-3 text-right">
-                  <Delta changePercent={q.changePercent} change={q.change} showAbsolute />
+                  <Delta
+                    changePercent={q.changePercent}
+                    change={q.change}
+                    showAbsolute
+                    absoluteFrom="sm"
+                  />
+                </td>
+                <td className="hidden px-4 py-3 md:table-cell">
+                  <span className="chip">{SOURCE_LABEL[q.source]}</span>
                 </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <div className="flex justify-end">
-                    <Sparkline id={`tbl-${q.symbol}`} points={q.history} width={96} height={26} />
+                    <Sparkline
+                      id={`tbl-${q.symbol}`}
+                      points={q.history}
+                      width={96}
+                      height={26}
+                      color="var(--paper-3)"
+                      fill={false}
+                    />
                   </div>
                 </td>
               </tr>

@@ -3,10 +3,12 @@ import { getAllEpisodes } from '@/lib/episodes'
 import { getCachedNews } from '@/lib/news'
 import { getMarketSnapshot } from '@/lib/stocks'
 import Hero from '@/components/home/Hero'
+import SignalField from '@/components/home/SignalField'
 import MarketStrip from '@/components/markets/MarketStrip'
 import QuoteCard from '@/components/markets/QuoteCard'
 import NewsDigest from '@/components/news/NewsDigest'
 import EpisodeCard from '@/components/podcasts/EpisodeCard'
+import EpisodeIndex from '@/components/podcasts/EpisodeIndex'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Reveal from '@/components/ui/Reveal'
 
@@ -21,9 +23,10 @@ export default async function HomePage() {
 
   // One timestamp for the whole render so relative ages don't drift on hydration.
   const now = Date.now()
+  const sourceCount = new Set(news.map((item) => item.source)).size
 
   const [featured, ...rest] = episodes
-  const secondary = rest.slice(0, 2)
+  const indexed = rest.slice(0, 4)
 
   const indices = snapshot.quotes.filter((q) => q.sector === 'Index')
   const movers = snapshot.quotes
@@ -32,13 +35,14 @@ export default async function HomePage() {
     .slice(0, 4 - Math.min(indices.length, 2))
 
   const spotlight = [...indices.slice(0, 2), ...movers]
+  const ridge = snapshot.quotes.find((q) => q.symbol === 'QQQ') ?? snapshot.quotes[0] ?? null
 
   return (
     <>
       <Hero
         latestEpisode={featured ?? null}
-        episodeCount={episodes.length}
         headlineCount={news.length}
+        sourceCount={sourceCount}
         snapshot={snapshot}
       />
 
@@ -51,28 +55,28 @@ export default async function HomePage() {
             index="01"
             eyebrow="Live intelligence"
             title="What's moving right now"
-            description="Headlines pulled from sixteen sources and the tech tape underneath them, cached server-side and refreshed on a cron."
+            description="Headlines from every tech and infrastructure feed worth reading, plus the Hacker News index — parsed server-side and cached, with the tape underneath them."
             action={{ label: 'All headlines', href: '/news' }}
           />
         </Reveal>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-          <Reveal>
+        <div className="mt-10 grid items-stretch gap-5 lg:grid-cols-[1.35fr_1fr]">
+          <Reveal className="h-full">
             <NewsDigest items={news} now={now} limit={8} />
           </Reveal>
 
-          <Reveal delay={90}>
-            <div className="flex flex-col gap-4">
+          <Reveal delay={90} className="h-full">
+            <div className="flex h-full flex-col gap-5">
               {spotlight.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2 sm:grid-rows-2">
                     {spotlight.map((quote, i) => (
                       <QuoteCard key={quote.symbol} quote={quote} emphasis={i < 2} />
                     ))}
                   </div>
                   <Link
                     href="/markets"
-                    className="panel-flat flex items-center justify-between px-4 py-3.5 text-sm text-paper-2 transition-colors hover:bg-white/[0.03] hover:text-paper"
+                    className="panel-flat flex shrink-0 items-center justify-between px-4 py-3.5 text-sm text-paper-2 transition-colors hover:bg-white/[0.03] hover:text-paper"
                   >
                     <span>
                       <span className="num" style={{ color: 'var(--pos)' }}>
@@ -90,10 +94,11 @@ export default async function HomePage() {
                   </Link>
                 </>
               ) : (
-                <div className="panel-flat px-6 py-12 text-center">
+                <div className="panel-flat flex flex-1 flex-col justify-center px-6 py-12 text-center">
                   <p className="eyebrow">Market feed idle</p>
-                  <p className="mt-2 text-sm text-paper-2">
-                    Quotes refresh on a schedule. Nothing is cached right now.
+                  <p className="mx-auto mt-2 max-w-[42ch] text-sm text-paper-2">
+                    Quotes are fetched on a schedule and cached. Nothing is cached right now — the
+                    board refills on the next run.
                   </p>
                 </div>
               )}
@@ -102,45 +107,62 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="shell">
-        <hr className="rule" />
+      {/* The ridge returns as a full-bleed band so the page has a second event
+          and the hero canvas reads as an identity rather than decoration. */}
+      <div className="relative h-[132px] overflow-hidden border-y border-hair">
+        <div className="absolute inset-0 -z-10 opacity-70">
+          <SignalField series={ridge?.history ?? []} />
+        </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(90deg, var(--ink-950) 0%, rgba(7,8,10,0.35) 30%, rgba(7,8,10,0.35) 70%, var(--ink-950) 100%)',
+          }}
+        />
       </div>
 
       {/* --------------------------------------------------------- archive -- */}
-      <section id="archive" className="shell py-20 md:py-28">
+      <section id="archive" className="shell py-20 md:pb-28 md:pt-32">
         <Reveal>
           <SectionHeader
             index="02"
             eyebrow="Listening archive"
             title="Episodes worth finishing"
-            description="Conversations on infrastructure, AI, and how technology work actually gets done. Playback picks up where you left it."
+            description="Hand-picked, not a feed — the ones I'd send a colleague, on infrastructure, AI, and how technology work actually gets done. Playback picks up where you left it."
             action={{ label: 'Full archive', href: '/podcasts' }}
           />
         </Reveal>
 
         {episodes.length === 0 ? (
           <div className="panel-flat mt-10 px-6 py-20 text-center">
-            <p className="display text-2xl text-paper">The archive is empty.</p>
-            <p className="mx-auto mt-3 max-w-md text-sm text-paper-2">
-              Episodes added through the admin panel appear here.
+            <p className="display text-2xl text-paper">Nothing in the archive yet.</p>
+            <p className="mx-auto mt-3 max-w-[46ch] text-sm text-paper-2">
+              This is a curated list rather than a firehose — episodes land here as they turn out to
+              be worth the time.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/news" className="btn btn-sm">
+                Read the headlines <span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/markets" className="btn btn-sm">
+                See the board <span aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
         ) : (
-          <div className="mt-10 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+          <div className="mt-10 flex flex-col gap-2">
             {featured && (
-              <Reveal className="h-full">
+              <Reveal>
                 <EpisodeCard episode={featured} queue={episodes} featured />
               </Reveal>
             )}
 
-            {secondary.length > 0 && (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
-                {secondary.map((ep, i) => (
-                  <Reveal key={ep.id} delay={70 * (i + 1)} className="h-full">
-                    <EpisodeCard episode={ep} queue={episodes} />
-                  </Reveal>
-                ))}
-              </div>
+            {indexed.length > 0 && (
+              <Reveal delay={80}>
+                <EpisodeIndex episodes={indexed} queue={episodes} startAt={2} />
+              </Reveal>
             )}
           </div>
         )}
@@ -149,19 +171,26 @@ export default async function HomePage() {
       {/* ----------------------------------------------------------- about -- */}
       <section className="shell pb-24">
         <Reveal>
-          <div className="panel grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-center md:p-12">
+          <div className="panel grid gap-10 p-8 md:grid-cols-[1fr_auto] md:items-center md:p-12">
             <div className="max-w-2xl">
-              <p className="eyebrow eyebrow-accent">Colophon</p>
-              <p className="display mt-4 text-[clamp(24px,3.2vw,38px)]">
-                Everything here is real data on a schedule — no mock numbers, no placeholder
-                telemetry.
+              <p className="eyebrow eyebrow-accent">About this build</p>
+              <p className="display mt-4 max-w-[22ch] text-[clamp(26px,3.4vw,42px)]">
+                I&rsquo;ve run infrastructure for years. This is what happened when I started
+                writing the code myself.
               </p>
-              <p className="mt-5 text-[15px] leading-relaxed text-paper-2">
-                Headlines are parsed from RSS and Atom feeds plus the Hacker News index, deduplicated
-                by content hash, and cached in Redis. Quotes come from a live API with a keyless
-                daily-close fallback, so the board still renders when the upstream is down. The
-                player keeps your position per episode and talks to the OS media controls.
+              <p className="mt-5 max-w-[62ch] text-[15px] leading-relaxed text-paper-2">
+                Everything here is fetched, cached and refreshed on a schedule — feeds parsed
+                server-side and deduplicated into Redis, quotes from a live API with a keyless
+                daily-close fallback so the board still renders when the upstream is down, and a
+                player that keeps your position per episode and talks to the OS media controls. The
+                decisions are the interesting part, and I&rsquo;ll happily defend any of them.
               </p>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link href="/about" className="btn btn-primary btn-sm">
+                  Read the full story <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
 
             <ul className="flex flex-col gap-3 text-sm text-paper-2 md:w-56">
@@ -169,7 +198,7 @@ export default async function HomePage() {
                 'Next.js App Router',
                 'Server components by default',
                 'Upstash Redis cache',
-                'Vercel cron refresh',
+                'Scheduled refresh jobs',
                 'No client-side chart library',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2.5">

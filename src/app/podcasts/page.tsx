@@ -31,11 +31,12 @@ export default async function PodcastsPage({ searchParams }: PodcastsPageProps) 
       <header className="max-w-3xl">
         <p className="eyebrow eyebrow-accent">Listening archive</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Podcasts</h1>
-        <p className="mt-5 text-[16px] leading-relaxed text-paper-2">
+        <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
           {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
-          {totalShows > 0 && ` across ${totalShows} ${totalShows === 1 ? 'show' : 'shows'}`}. Search
-          the archive, filter it, and pick up any episode where you left off — positions are stored
-          in your browser, not on a server.
+          {totalShows > 0 && ` across ${totalShows} ${totalShows === 1 ? 'show' : 'shows'}`}, picked
+          one at a time — the ones I&rsquo;d send a colleague, not everything I subscribe to. Search
+          it, filter it, and pick up any episode where you left off; positions live in your browser,
+          not on a server.
         </p>
       </header>
 

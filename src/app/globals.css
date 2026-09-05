@@ -22,14 +22,19 @@
   --ink-700: #1b2027;
   --ink-600: #262c35;
 
-  /* Hairlines */
+  /* Hairlines. --hair and --hair-2 are decorative; --edge is the boundary of
+     an interactive control and must stay at or above 3:1 (WCAG 1.4.11). */
   --hair: rgba(255, 255, 255, 0.07);
   --hair-2: rgba(255, 255, 255, 0.13);
+  --edge: rgba(255, 255, 255, 0.35);
 
   /* Ink on canvas — warm whites keep the dark UI from going clinical */
   --paper: #f2f0ec;
   --paper-2: #9aa4ae;
-  --paper-3: #646d79;
+  /* 5.6:1 on --ink-950 and 4.6:1 on --ink-700, the darkest and lightest
+     surfaces it sits on. The previous #646d79 was 3.5:1 — below AA on every
+     surface — while carrying most of the site's labels and metadata. */
+  --paper-3: #7f8895;
 
   /* Signal — the one accent. Instrument backlight / Colorado ember. */
   --ember: #ff6a2b;
@@ -58,7 +63,7 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Elevation */
-  --shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.075) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.7);
   --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 32px 80px -32px rgba(0, 0, 0, 0.85);
 
   /* Layout */
@@ -75,8 +80,10 @@
 
 html {
   scroll-behavior: smooth;
-  /* keep anchored sections clear of the fixed header */
+  /* Keep anchored sections and focused elements clear of the fixed header
+     and the fixed player bar. */
   scroll-padding-top: calc(var(--header-h) + 24px);
+  scroll-padding-bottom: calc(var(--player-h) + 24px);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -165,9 +172,12 @@ p {
   }
 
   /* Raised surface. One recipe, used everywhere a panel is needed. */
+  /* The brighter top edge is what makes a panel sit on the ground rather than
+     read as an outlined region — a black shadow is invisible on #07080a. */
   .panel {
     background: linear-gradient(180deg, var(--ink-850), var(--ink-900));
     border: 1px solid var(--hair);
+    border-top-color: rgba(255, 255, 255, 0.12);
     border-radius: var(--r-3);
     box-shadow: var(--shadow-lift);
   }
@@ -179,11 +189,13 @@ p {
   }
 
   /* Eyebrow / section label — mono, tracked, quiet */
+  /* Carries section labels, form labels and live-region counts, so it is held
+     at 11px rather than the 10px that reads as decoration. */
   .eyebrow {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--paper-3);
   }
@@ -225,9 +237,30 @@ p {
   }
 
   .chip-accent {
-    border-color: rgba(255, 106, 43, 0.35);
+    border-color: var(--ember);
     background: var(--ember-ghost);
     color: var(--ember-2);
+  }
+
+  /* Pressed/active state for segmented controls. The inset bar is the cue that
+     survives when the 1.1:1 background tint does not. */
+  .seg {
+    border-radius: var(--r-1);
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--paper-3);
+    background: transparent;
+    box-shadow: inset 0 -2px 0 transparent;
+    transition: color 0.18s var(--ease-out), background 0.18s var(--ease-out),
+      box-shadow 0.18s var(--ease-out);
+  }
+  .seg:hover {
+    color: var(--paper);
+  }
+  .seg[aria-pressed='true'] {
+    color: var(--paper);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 -2px 0 var(--ember);
   }
 
   /* Buttons */
@@ -296,7 +329,7 @@ p {
     height: 40px;
     padding-inline: 12px;
     background: var(--ink-900);
-    border: 1px solid var(--hair);
+    border: 1px solid var(--edge);
     border-radius: var(--r-2);
     color: var(--paper);
     font-size: 14px;
@@ -306,10 +339,10 @@ p {
     color: var(--paper-3);
   }
   .field:hover {
-    border-color: var(--hair-2);
+    border-color: rgba(255, 255, 255, 0.5);
   }
   .field:focus {
-    border-color: rgba(255, 106, 43, 0.5);
+    border-color: var(--ember);
     background: var(--ink-850);
   }
 
@@ -365,6 +398,13 @@ p {
   opacity: 1;
   transform: none;
 }
+/* Tabbing into a section that has not revealed yet must not focus something
+   invisible — show it immediately rather than waiting out the transition. */
+[data-reveal]:focus-within {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
 
 /* Marquee ticker */
 .marquee {
@@ -373,7 +413,8 @@ p {
   animation: marquee var(--marquee-duration, 70s) linear infinite;
 }
 .marquee-viewport:hover .marquee,
-.marquee-viewport:focus-within .marquee {
+.marquee-viewport:focus-within .marquee,
+.marquee-viewport[data-paused='true'] .marquee {
   animation-play-state: paused;
 }
 @keyframes marquee {
@@ -382,6 +423,18 @@ p {
   }
   to {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Loading spinner. CSS rather than SVG SMIL so the reduced-motion block below
+   actually stops it — `animation-duration: 0.01ms` does nothing to SMIL. */
+.spin {
+  transform-origin: 50% 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -556,7 +609,8 @@ input[type='range']::-moz-range-thumb {
   :root {
     --hair: rgba(255, 255, 255, 0.2);
     --hair-2: rgba(255, 255, 255, 0.34);
-    --paper-2: #c2c9d0;
-    --paper-3: #97a0aa;
+    --edge: rgba(255, 255, 255, 0.55);
+    --paper-2: #c9d0d7;
+    --paper-3: #aab3bd;
   }
 }

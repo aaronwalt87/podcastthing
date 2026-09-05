@@ -56,7 +56,7 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
                 className={`chip transition-colors ${active ? 'chip-accent' : 'hover:text-paper'}`}
               >
                 {cat}
-                <span className="opacity-50">{count}</span>
+                <span className="text-paper-3">{count}</span>
               </button>
             )
           })}
@@ -127,15 +127,25 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
           </button>
         </div>
       ) : (
-        <div className="panel divide-y divide-hair overflow-hidden md:grid md:grid-cols-2 md:divide-y-0">
-          {filtered.map((item, i) => (
-            <div
-              key={item.id}
-              className={`border-hair md:border-b ${i % 2 === 0 ? 'md:border-r' : ''}`}
-            >
-              <NewsRow item={item} now={now} showSummary />
-            </div>
-          ))}
+        <div className="panel overflow-hidden md:grid md:grid-cols-2">
+          {(() => {
+            // Split into two columns explicitly so each reads top-to-bottom.
+            // A CSS grid fills row-major, which makes scanning one column skip
+            // every other story.
+            const half = Math.ceil(filtered.length / 2)
+            return [filtered.slice(0, half), filtered.slice(half)].map((column, columnIndex) => (
+              <div
+                key={columnIndex}
+                className={`divide-y divide-hair ${
+                  columnIndex === 0 ? 'md:border-r md:border-hair' : ''
+                } ${columnIndex === 1 && column.length > 0 ? 'border-t border-hair md:border-t-0' : ''}`}
+              >
+                {column.map((item) => (
+                  <NewsRow key={item.id} item={item} now={now} showSummary />
+                ))}
+              </div>
+            ))
+          })()}
         </div>
       )}
     </div>

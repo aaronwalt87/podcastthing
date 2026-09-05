@@ -1,9 +1,16 @@
+import 'server-only'
 import { getRedis } from './redis'
 import { sampleNews, sampleDataEnabled } from './sample-data'
 import type { NewsItem, NewsCategory } from '@/types/news'
 
 const NEWS_KEY = 'news:cache'
-const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 7200)
+/**
+ * The TTL must comfortably outlive the refresh interval, or the cache expires
+ * long before the next cron run and the site renders empty in between. Vercel's
+ * Hobby plan only allows daily crons, so 48h leaves a full run of slack: a
+ * stale headline beats a blank page.
+ */
+const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 172_800)
 const MAX_ITEMS = 60
 
 const RSS_SOURCES: { url: string; name: string; type: 'rss'; category: NewsCategory }[] = [
@@ -93,8 +100,28 @@ function classifyTitle(title: string, fallback: NewsCategory): NewsCategory {
   return fallback
 }
 
-function makeId(source: string, link: string): string {
-  const str = source + '|' + link
+/**
+ * Normalise before hashing: the same story arriving from the HN RSS feed and
+ * from the Algolia index used to hash under two different source names and
+ * survive the dedupe as two rows.
+ */
+function normaliseLink(link: string): string {
+  try {
+    const url = new URL(link)
+    url.hash = ''
+    const drop: string[] = []
+    url.searchParams.forEach((_value, key) => {
+      if (key.startsWith('utm_') || key === 'ref' || key === 'source') drop.push(key)
+    })
+    for (const key of drop) url.searchParams.delete(key)
+    return `${url.host.replace(/^www\./, '')}${url.pathname.replace(/\/$/, '')}${url.search}`
+  } catch {
+    return link
+  }
+}
+
+function makeId(_source: string, link: string): string {
+  const str = normaliseLink(link)
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57
   for (let i = 0; i < str.length; i++) {
     const c = str.charCodeAt(i)

@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { SearchRecord } from '@/app/api/search/route'
+import type { SearchRecord } from '@/types/search'
 
 const NAV_RECORDS: SearchRecord[] = [
   { id: 'nav-home', kind: 'symbol', title: 'Home', subtitle: 'Overview', href: '/', external: false },
   { id: 'nav-podcasts', kind: 'symbol', title: 'Podcasts', subtitle: 'Episode archive', href: '/podcasts', external: false },
   { id: 'nav-news', kind: 'symbol', title: 'News', subtitle: 'Technology feed', href: '/news', external: false },
   { id: 'nav-markets', kind: 'symbol', title: 'Markets', subtitle: 'Tech equities', href: '/markets', external: false },
+  { id: 'nav-about', kind: 'symbol', title: 'About', subtitle: 'Who is building this', href: '/about', external: false },
 ]
 
 const KIND_LABEL: Record<SearchRecord['kind'], string> = {
@@ -25,23 +26,29 @@ export default function CommandPalette() {
   const [query, setQuery] = useState('')
   const [records, setRecords] = useState<SearchRecord[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
   const [active, setActive] = useState(0)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   /** Element focused before opening, so focus can be handed back on close. */
   const restoreFocus = useRef<HTMLElement | null>(null)
+  /** Mirrors `open` so the ⌘K handler can branch outside a state updater. */
+  const openRef = useRef(false)
 
   /* ------------------------------------------------------------- open/close */
 
   const openPalette = useCallback(() => {
     restoreFocus.current = document.activeElement as HTMLElement | null
+    openRef.current = true
     setOpen(true)
     setQuery('')
     setActive(0)
   }, [])
 
   const closePalette = useCallback(() => {
+    openRef.current = false
     setOpen(false)
     restoreFocus.current?.focus?.()
   }, [])
@@ -51,13 +58,11 @@ export default function CommandPalette() {
       const isToggle = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k'
       if (isToggle) {
         event.preventDefault()
-        setOpen((wasOpen) => {
-          if (wasOpen) return false
-          restoreFocus.current = document.activeElement as HTMLElement | null
-          setQuery('')
-          setActive(0)
-          return true
-        })
+        // State updaters must be pure — React may replay them — so the open/close
+        // decision and its side effects happen here, not inside setOpen.
+        if (openRef.current) closePalette()
+        else openPalette()
+        return
       }
       // "/" is a search shortcut everywhere except inside a text field.
       const target = event.target as HTMLElement | null
@@ -71,7 +76,7 @@ export default function CommandPalette() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [openPalette])
+  }, [closePalette, openPalette])
 
   // Listen for the header button (avoids threading a ref through the tree).
   useEffect(() => {
@@ -85,16 +90,22 @@ export default function CommandPalette() {
   useEffect(() => {
     if (!open || loaded) return
     let cancelled = false
+    setFailed(false)
 
     fetch('/api/search')
-      .then((res) => (res.ok ? res.json() : { records: [] }))
+      .then((res) => {
+        if (!res.ok) throw new Error(`search index ${res.status}`)
+        return res.json()
+      })
       .then((data: { records?: SearchRecord[] }) => {
         if (cancelled) return
         setRecords(data.records ?? [])
         setLoaded(true)
       })
       .catch(() => {
-        if (!cancelled) setLoaded(true)
+        // `loaded` stays false so the next open retries — a flaky network or a
+        // mid-rollout deploy must not disable search for the whole session.
+        if (!cancelled) setFailed(true)
       })
 
     return () => {
@@ -103,7 +114,14 @@ export default function CommandPalette() {
   }, [open, loaded])
 
   useEffect(() => {
-    if (open) inputRef.current?.focus()
+    if (!open) return
+    inputRef.current?.focus()
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
   }, [open])
 
   /* --------------------------------------------------------------- results */
@@ -151,7 +169,7 @@ export default function CommandPalette() {
     [closePalette, router]
   )
 
-  const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const onDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault()
@@ -169,6 +187,24 @@ export default function CommandPalette() {
         event.preventDefault()
         closePalette()
         break
+      case 'Tab': {
+        // Everything behind the dialog is covered by the backdrop, so focus must
+        // not be able to land there.
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'input, button, [href], [tabindex]:not([tabindex="-1"])'
+        )
+        if (!focusable || focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
+        break
+      }
       default:
         break
     }
@@ -185,9 +221,11 @@ export default function CommandPalette() {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Search the site"
+        onKeyDown={onDialogKeyDown}
         className="panel w-full max-w-xl overflow-hidden"
         style={{ boxShadow: 'var(--shadow-panel)' }}
       >
@@ -199,13 +237,12 @@ export default function CommandPalette() {
             ref={inputRef}
             type="text"
             role="combobox"
-            aria-expanded="true"
+            aria-expanded={results.length > 0}
             aria-controls="palette-results"
             aria-activedescendant={results[active] ? `palette-option-${active}` : undefined}
             aria-autocomplete="list"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onInputKeyDown}
             placeholder="Search episodes, headlines, tickers…"
             className="h-14 flex-1 bg-transparent text-[15px] outline-none placeholder:text-paper-3"
           />
@@ -221,34 +258,44 @@ export default function CommandPalette() {
         >
           {results.length === 0 ? (
             <li className="px-3 py-8 text-center text-sm text-paper-3">
-              {loaded ? 'No matches.' : 'Loading index…'}
+              {failed
+                ? 'The search index is unavailable. Close and reopen to retry.'
+                : loaded
+                  ? 'No matches.'
+                  : 'Loading index…'}
             </li>
           ) : (
             results.map((record, i) => (
-              <li key={record.id}>
-                <button
-                  type="button"
-                  id={`palette-option-${i}`}
-                  data-index={i}
-                  role="option"
-                  aria-selected={i === active}
-                  onMouseEnter={() => setActive(i)}
-                  onClick={() => choose(record)}
-                  className={`flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-left transition-colors ${
-                    i === active ? 'bg-white/[0.06]' : ''
-                  }`}
-                >
-                  <span className="chip shrink-0">{KIND_LABEL[record.kind]}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-paper">{record.title}</span>
-                    <span className="block truncate text-xs text-paper-3">{record.subtitle}</span>
+              // The option is the list item itself: a tabbable button inside a
+              // listbox gives the widget two competing notions of "current".
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+              <li
+                key={record.id}
+                id={`palette-option-${i}`}
+                data-index={i}
+                role="option"
+                aria-selected={i === active}
+                onMouseEnter={() => setActive(i)}
+                onClick={() => choose(record)}
+                className={`flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5 transition-colors ${
+                  i === active ? 'bg-white/[0.07]' : ''
+                }`}
+                style={
+                  i === active
+                    ? { boxShadow: 'inset 2px 0 0 var(--ember)' }
+                    : undefined
+                }
+              >
+                <span className="chip shrink-0">{KIND_LABEL[record.kind]}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm text-paper">{record.title}</span>
+                  <span className="block truncate text-xs text-paper-2">{record.subtitle}</span>
+                </span>
+                {record.external && (
+                  <span aria-hidden="true" className="shrink-0 text-xs text-paper-3">
+                    ↗
                   </span>
-                  {record.external && (
-                    <span aria-hidden="true" className="shrink-0 text-xs text-paper-3">
-                      ↗
-                    </span>
-                  )}
-                </button>
+                )}
               </li>
             ))
           )}

@@ -86,6 +86,11 @@ export function sampleMarket(): MarketSnapshot {
   }
 }
 
+/**
+ * Publisher names are recycled from the real source list so the layout matches
+ * production density. The headlines themselves are fictional — see the summary
+ * text and the development banner, which say so on screen.
+ */
 const HEADLINES: [string, string, NewsItem['category'], number][] = [
   ['Anthropic ships a longer-context Claude aimed at codebase-scale reasoning', 'The Verge', 'AI', 0.4],
   ['OpenAI details its inference cost curve for the first time', 'TechCrunch', 'AI', 1.2],
@@ -114,7 +119,7 @@ export function sampleNews(): NewsItem[] {
     sourceType: source === 'Hacker News' ? ('social' as const) : ('rss' as const),
     publishedAt: Date.now() - hoursAgo * 3_600_000,
     summary:
-      'Sample summary used only in local development, so layout and density can be evaluated without live credentials.',
+      'PLACEHOLDER — local development only. This headline is invented and did not come from this publication.',
     category,
   })).sort((a, b) => b.publishedAt - a.publishedAt)
 }
@@ -164,7 +169,8 @@ export function sampleEpisodes(): Episode[] {
     title,
     showName,
     description,
-    // Silent placeholder — playback controls render, nothing streams.
+    // No audio: the card renders a "sample, no audio" chip instead of a play
+    // control, so nothing on screen invites a click that does nothing.
     audioUrl: '',
     audioType: 'url' as const,
     category,
