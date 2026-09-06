@@ -46,11 +46,11 @@ function Row({
       <span className="min-w-0">
         <span className="block truncate text-[15px] font-medium text-paper">{episode.title}</span>
         {/* The description fills what was a wide empty middle, and stops the
-            index conveying less per item than the cards it replaced. */}
+            index conveying less per item than the cards it replaced. It reads
+            at every width — a phone row with only a title is thinner than the
+            card it replaced. */}
         {episode.description && (
-          <span className="clamp-1 mt-0.5 hidden text-[13px] text-paper-3 md:block">
-            {episode.description}
-          </span>
+          <span className="clamp-1 mt-0.5 text-[13px] text-paper-3">{episode.description}</span>
         )}
         <span className="mt-0.5 flex items-center gap-2.5 md:hidden">
           {isCurrent && (

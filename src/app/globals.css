@@ -534,17 +534,29 @@ p {
   transform: scaleX(1);
 }
 
-/* Line-clamp helpers (no plugin dependency) */
-.clamp-1,
-.clamp-2,
-.clamp-3 {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Line-clamp helpers (no plugin dependency).
+   Declared in the components layer, not here at the top level: these set
+   `display`, and at top level they outrank Tailwind's `hidden`/`block`
+   utilities on cascade order — so `clamp-1 hidden md:block` stayed visible at
+   every width. The layer puts utilities back on top, where they belong. */
+@layer components {
+  .clamp-1,
+  .clamp-2,
+  .clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .clamp-1 {
+    -webkit-line-clamp: 1;
+  }
+  .clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+  .clamp-3 {
+    -webkit-line-clamp: 3;
+  }
 }
-.clamp-1 { -webkit-line-clamp: 1; }
-.clamp-2 { -webkit-line-clamp: 2; }
-.clamp-3 { -webkit-line-clamp: 3; }
 
 /* Screen-reader-only, but focusable (skip link) */
 .sr-only-focusable {

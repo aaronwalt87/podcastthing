@@ -208,15 +208,25 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
             // this block while focus is inside it drops focus to <body>, which
             // dumps a keyboard user above the header.
             <div className="mt-6 flex flex-col items-center gap-2">
+              {/* aria-disabled, not the native attribute: disabling the element
+                  that currently has focus makes it unfocusable, and the browser
+                  reverts focus to <body> — dumping the user above the header on
+                  the click that matters most. */}
               <button
                 type="button"
-                onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                disabled={visible >= filtered.length}
-                className="btn disabled:cursor-default disabled:opacity-50"
+                onClick={() => {
+                  if (visible >= filtered.length) return
+                  setVisible((v) => v + PAGE_SIZE)
+                }}
+                aria-disabled={visible >= filtered.length}
+                className={`btn ${visible >= filtered.length ? 'cursor-default opacity-50' : ''}`}
               >
                 {visible >= filtered.length ? 'All episodes shown' : 'Show more episodes'}
               </button>
-              <p aria-live="polite" className="eyebrow">
+              <p
+                aria-live={visible > PAGE_SIZE ? 'polite' : 'off'}
+                className="eyebrow"
+              >
                 Showing {Math.min(visible, filtered.length)} of {filtered.length}
               </p>
             </div>

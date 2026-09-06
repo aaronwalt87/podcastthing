@@ -92,14 +92,27 @@ export default function PlayerBar() {
 
   const [optionsOpen, setOptionsOpen] = useState(false)
   const optionsRef = useRef<HTMLDivElement>(null)
+  const optionsToggleRef = useRef<HTMLButtonElement>(null)
 
-  // Escape and an outside click both close the disclosure.
+  // Escape and an outside click both close the disclosure — and hand focus
+  // back to the toggle if it was inside, or hiding the panel would drop focus
+  // to <body>. Same pattern as the mobile menu in SiteHeader.
   useEffect(() => {
     if (!optionsOpen) return
-    const onKeyDown = (e: KeyboardEvent) => e.key === 'Escape' && setOptionsOpen(false)
-    const onPointerDown = (e: PointerEvent) => {
-      if (!optionsRef.current?.contains(e.target as Node)) setOptionsOpen(false)
+
+    const close = () => {
+      const hadFocus = optionsRef.current?.contains(document.activeElement)
+      setOptionsOpen(false)
+      if (hadFocus) optionsToggleRef.current?.focus()
     }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+    const onPointerDown = (e: PointerEvent) => {
+      if (!optionsRef.current?.contains(e.target as Node)) close()
+    }
+
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('pointerdown', onPointerDown)
     return () => {
@@ -153,12 +166,17 @@ export default function PlayerBar() {
           </div>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-paper">{currentEpisode.title}</p>
-            <p className="truncate text-[11px] text-paper-2">
-              {currentEpisode.showName}
+            {/* The show name truncates, not the row: `truncate` on the parent
+                would clip the transcript link out of view while leaving it in
+                the tab order. */}
+            <p className="flex items-baseline gap-1.5 text-[11px] text-paper-2">
+              <span className="truncate">{currentEpisode.showName}</span>
               {currentEpisode.transcriptUrl && (
                 <>
-                  {' · '}
-                  <TranscriptLink episode={currentEpisode} />
+                  <span aria-hidden="true" className="shrink-0">
+                    ·
+                  </span>
+                  <TranscriptLink episode={currentEpisode} className="shrink-0" />
                 </>
               )}
             </p>
@@ -256,6 +274,7 @@ export default function PlayerBar() {
           </button>
 
           <button
+            ref={optionsToggleRef}
             type="button"
             onClick={() => setOptionsOpen((o) => !o)}
             aria-expanded={optionsOpen}

@@ -12,6 +12,10 @@ import { timeAgo } from '@/lib/format'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+// A cold cache triggers a background refresh through waitUntil, which keeps the
+// invocation alive but is still bounded by maxDuration — 10s by default, which
+// a slow upstream can exceed.
+export const maxDuration = 60
 
 export const metadata: Metadata = {
   title: 'Markets',

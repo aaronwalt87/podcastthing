@@ -95,8 +95,8 @@ unconfigured — every caller must treat `null` as an empty store, not an error.
 ```
 episodes_index          sorted set; score = addedAt (ms), member = episode id
 episodes:{id}           hash; Episode fields as strings
-news:cache              JSON string; TTL = NEWS_TTL_SECONDS (default 7200)
-stocks:cache:v2         JSON MarketSnapshot; TTL 3600
+news:cache              JSON string; TTL = NEWS_TTL_SECONDS (default 172800 = 48h)
+stocks:cache:v2         JSON MarketSnapshot; TTL 172800 = 48h
 ```
 
 ### Market data
@@ -106,6 +106,10 @@ stocks:cache:v2         JSON MarketSnapshot; TTL 3600
 the last two closes derive the change. Each `StockQuote` records its `source`.
 **Bump the cache key** (`stocks:cache:v2`) whenever `MarketSnapshot` changes
 shape — stale JSON of the old shape would otherwise deserialise into holes.
+
+**Both TTLs must outlive the cron interval.** Vercel Hobby allows daily crons
+only, so 48h leaves a full run of slack; a TTL shorter than the gap leaves the
+site empty between runs, which is the failure this value exists to prevent.
 
 ### Formatting
 

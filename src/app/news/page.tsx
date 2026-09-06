@@ -6,6 +6,10 @@ import Reveal from '@/components/ui/Reveal'
 import { timeAgo } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
+// A cold cache triggers a background refresh through waitUntil, which keeps the
+// invocation alive but is still bounded by maxDuration — 10s by default, which
+// a slow upstream can exceed.
+export const maxDuration = 60
 
 export const metadata: Metadata = {
   title: 'News',

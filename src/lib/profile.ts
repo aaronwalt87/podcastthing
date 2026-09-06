@@ -131,13 +131,13 @@ export const profile = {
       title: 'No charting library',
       choice:
         'The trend lines are server-rendered SVG and the ridge is a hand-written canvas, rather than pulling in a charting package.',
-      cost: 'The sparklines cannot be hovered for a value, and any new chart type is work rather than a config option. In exchange nothing about the drawing ships to the browser.',
+      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the hero ridge is a canvas, and its drawing code does run in the browser.",
     },
     {
       title: 'Cache stale data rather than show none',
       choice:
         'Feed and quote caches outlive their refresh interval by a full extra run, so a missed job leaves yesterday on screen instead of an empty page.',
-      cost: 'A headline can be up to two days old if the scheduled job fails repeatedly, and nothing on the page shouts about it. A blank dashboard is a worse lie than an old one.',
+      cost: "A headline can be up to two days old if the scheduled job fails repeatedly. The timestamp is on the page, but it's small, and someone skimming will miss it.",
     },
     {
       title: 'The market board works with no API key',
@@ -161,7 +161,7 @@ export const profile = {
       title: 'Two contexts for one audio player',
       choice:
         'Transport state and the playback clock are separate React contexts, so the four-times-a-second tick reaches only the scrubber.',
-      cost: 'More moving parts than one context, and a subtle rule to remember. One context re-rendered every episode card on every tick.',
+      cost: "More moving parts than one context, and a rule a future reader has to know before touching it: subscribe to the clock and you re-render on every tick. Nothing in the code stops someone getting that wrong.",
     },
   ] as Decision[],
 

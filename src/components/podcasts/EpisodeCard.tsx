@@ -116,7 +116,13 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
           }`}
         >
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <span className="num w-full text-[11px] uppercase tracking-wider text-paper-2 sm:w-auto">
+            {featured && indexLabel !== undefined && (
+              <span className="num text-[11px] text-paper-3">
+                {String(indexLabel).padStart(2, '0')}
+                <span aria-hidden="true" className="ml-2.5 text-paper-3">·</span>
+              </span>
+            )}
+            <span className="num text-[11px] uppercase tracking-wider text-paper-2">
               {episode.showName}
             </span>
             <span aria-hidden="true" className="hidden h-2.5 w-px bg-hair-2 sm:block" />
@@ -153,19 +159,18 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
           )}
 
           {/* 1.2.1 is a per-item criterion: one disclosed episode does not
-              carry the rest. Rendered on every card, featured or not. */}
-          <div
-            className={`flex flex-wrap items-center gap-3 ${
-              featured ? 'mt-auto max-w-[46ch] justify-between pt-5' : 'pt-1'
-            }`}
-          >
-            {featured && (
-              <span className="num text-[11px] text-paper-3">
-                {String(indexLabel ?? 1).padStart(2, '0')}
-              </span>
-            )}
-            <TranscriptLink episode={episode} />
-          </div>
+              carry the rest. Rendered on every card, featured or not — and the
+              row collapses entirely when there is nothing to put in it. */}
+          {(episode.transcriptUrl || episode.sourceUrl || (featured && episode.category)) && (
+            <div
+              className={`flex flex-wrap items-center gap-3 ${
+                featured ? 'mt-auto max-w-[46ch] justify-between pt-5' : 'pt-1'
+              }`}
+            >
+              <TranscriptLink episode={episode} />
+              {featured && episode.category && <span className="chip">{episode.category}</span>}
+            </div>
+          )}
         </div>
       </article>
     </Spotlight>

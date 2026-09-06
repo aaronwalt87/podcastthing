@@ -12,7 +12,8 @@ export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
  * human-chosen secret — one HMAC per guess, billions per second on commodity
  * hardware — so a single leaked cookie would recover the password itself.
  * `SESSION_SECRET` is used when set; otherwise the password is stretched
- * through PBKDF2 so each guess costs ~100k iterations instead of one.
+ * through PBKDF2 (see PBKDF2_ITERATIONS) so each guess costs that many hashes
+ * instead of one.
  *
  * Web Crypto throughout, so the same code runs in Edge middleware and Node
  * routes.

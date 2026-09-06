@@ -13,6 +13,10 @@ import SectionHeader from '@/components/ui/SectionHeader'
 import Reveal from '@/components/ui/Reveal'
 
 export const dynamic = 'force-dynamic'
+// A cold cache triggers a background refresh through waitUntil, which keeps the
+// invocation alive but is still bounded by maxDuration — 10s by default, which
+// a slow upstream can exceed.
+export const maxDuration = 60
 
 export default async function HomePage() {
   const [episodes, news, snapshot] = await Promise.all([

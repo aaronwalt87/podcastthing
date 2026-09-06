@@ -273,6 +273,11 @@ export async function getMarketSnapshot(): Promise<MarketSnapshot> {
         // the response is flushed, so a fire-and-forget refresh never finishes
         // — it just holds the lock while doing nothing. This only shows up in
         // production; a long-lived `next dev` process completes it either way.
+        //
+        // Off Vercel this is a silent no-op (the request-context symbol is
+        // absent), which is correct on any host that keeps the process alive.
+        // On another FREEZING host — Lambda via OpenNext, Netlify, Workers —
+        // the original bug would return with no error and no log line.
         waitUntil(
           refreshStocks().catch((err) =>
             console.error('[stocks] warm refresh failed', err)

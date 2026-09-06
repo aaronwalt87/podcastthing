@@ -44,10 +44,13 @@ function clientKey(request: Request): string {
  *  - Redis is *configured but failing* — fail CLOSED. Unlimited guessing
  *    against one shared human-chosen password is worse than an admin waiting
  *    for the store to come back.
- *  - Redis is *not configured at all* — allow. There is nothing to rate-limit
- *    with, the admin panel cannot write anything without a store anyway, and
- *    failing closed here would permanently lock the owner out of a deployment
- *    that was never given credentials.
+ *  - Redis is *not configured at all* — fall back to a per-instance counter
+ *    rather than failing closed, which would permanently lock the owner out of
+ *    a deployment that was never given credentials. This is not risk-free:
+ *    /api/upload mints billable Blob tokens and needs no Redis, so a store-less
+ *    deploy that still holds BLOB_READ_WRITE_TOKEN is worth guessing at. The
+ *    in-memory counter bounds that within a warm container, which is the best
+ *    available without a store.
  */
 async function overLimit(key: string): Promise<boolean> {
   if (!isRedisConfigured()) {
@@ -58,6 +61,15 @@ async function overLimit(key: string): Promise<boolean> {
     // guessing at. The in-memory counter below limits that within a warm
     // container, which is the best available without a store.
     const now = Date.now()
+
+    // A cache with no eviction is a leak. Sweep expired entries once the map
+    // grows past a size a real client population would not reach.
+    if (memoryAttempts.size > 1000) {
+      memoryAttempts.forEach((v, k) => {
+        if (now - v.since >= WINDOW_SECONDS * 1000) memoryAttempts.delete(k)
+      })
+    }
+
     const seen = memoryAttempts.get(key)
     if (seen && now - seen.since < WINDOW_SECONDS * 1000) {
       seen.count += 1
