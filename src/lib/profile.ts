@@ -178,7 +178,7 @@ export const profile = {
    * Example: { label: 'GitHub', href: 'https://github.com/your-handle', external: true }
    */
   links: [
-    { label: 'Email', href: '', external: false },
+    { label: 'Email', href: 'mailto:walt.aaron@gmail.com', external: false },
     { label: 'GitHub', href: '', external: true },
     { label: 'LinkedIn', href: '', external: true },
   ] as ProfileLink[],
