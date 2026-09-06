@@ -13,6 +13,9 @@ export const dynamic = 'force-dynamic'
 const WINDOW_SECONDS = 900 // 15 minutes
 const MAX_ATTEMPTS = 10
 
+/** Per-instance fallback when no store is configured. Survives a warm container. */
+const memoryAttempts = new Map<string, { count: number; since: number }>()
+
 /** SHA-256 hex, so the comparison below is over fixed-length strings. */
 async function digest(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
@@ -22,8 +25,14 @@ async function digest(value: string): Promise<string> {
 }
 
 function clientKey(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for') ?? ''
-  const ip = forwarded.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown'
+  // The platform header first, and never the LEFTMOST x-forwarded-for entry:
+  // proxies append, so the leftmost value is whatever the client sent. Keying
+  // on it lets an attacker mint a fresh counter per request — defeating the
+  // limit entirely and inflating the Redis key count on the way.
+  const ip =
+    request.headers.get('x-real-ip') ||
+    (request.headers.get('x-forwarded-for') ?? '').split(',').pop()?.trim() ||
+    'unknown'
   return `auth:attempts:${ip}`
 }
 
@@ -42,7 +51,19 @@ function clientKey(request: Request): string {
  */
 async function overLimit(key: string): Promise<boolean> {
   if (!isRedisConfigured()) {
-    console.warn('[auth] no store configured — login attempts are not rate limited')
+    // Nothing to count with. Failing closed here would permanently lock the
+    // owner out of a deployment that was never given credentials. Note this is
+    // not risk-free: /api/upload mints billable Blob tokens and needs no Redis,
+    // so a store-less deploy that still has BLOB_READ_WRITE_TOKEN is worth
+    // guessing at. The in-memory counter below limits that within a warm
+    // container, which is the best available without a store.
+    const now = Date.now()
+    const seen = memoryAttempts.get(key)
+    if (seen && now - seen.since < WINDOW_SECONDS * 1000) {
+      seen.count += 1
+      return seen.count > MAX_ATTEMPTS
+    }
+    memoryAttempts.set(key, { count: 1, since: now })
     return false
   }
 

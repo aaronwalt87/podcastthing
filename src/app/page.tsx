@@ -38,7 +38,9 @@ export default async function HomePage() {
     .slice(0, 4 - Math.min(indices.length, 2))
 
   const spotlight = [...indices.slice(0, 2), ...movers]
-  const ridge = snapshot.quotes.find((q) => q.symbol === 'QQQ') ?? snapshot.quotes[0] ?? null
+  // The same series the hero draws — two ridge moments showing different
+  // instruments would read as incidental rather than as one drawing.
+  const ridge = snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null
 
   return (
     <>
@@ -110,21 +112,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* The ridge returns as a labelled plate carrying the next section's
-          index — so it introduces something rather than floating between two
-          voids, and the drawing reads as a readout rather than decoration. */}
-      <SignalPlate quote={ridge} height={172}>
-        <p className="eyebrow flex items-center gap-2">
-          <span className="eyebrow-accent">02</span>
-          <span aria-hidden="true" className="h-px w-6 bg-hair-2" />
-          Listening archive
-        </p>
-      </SignalPlate>
+      {/* The ridge returns as a labelled instrument plate. The section eyebrow
+          stays with its own headline below — moving it onto the plate split a
+          single typographic unit across 170px of ridge. */}
+      <SignalPlate quote={ridge} height={172} />
 
       {/* --------------------------------------------------------- archive -- */}
-      <section id="archive" className="shell pb-20 pt-10 md:pb-28 md:pt-14">
+      <section id="archive" className="shell pb-20 pt-12 md:pb-28 md:pt-16">
         <Reveal>
           <SectionHeader
+            index="02"
+            eyebrow="Listening archive"
             title="Episodes worth finishing"
             description="Hand-picked, not a feed — the ones I'd send a colleague, on infrastructure, AI, and how technology work actually gets done. Playback picks up where you left it."
             action={{ label: 'Full archive', href: '/podcasts' }}
@@ -151,7 +149,7 @@ export default async function HomePage() {
           <div className="mt-10 flex flex-col gap-2">
             {featured && (
               <Reveal>
-                <EpisodeCard episode={featured} queue={homeQueue} featured />
+                <EpisodeCard episode={featured} queue={homeQueue} featured indexLabel={1} />
               </Reveal>
             )}
 

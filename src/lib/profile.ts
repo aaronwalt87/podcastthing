@@ -54,14 +54,15 @@ export const profile = {
   heroLeadMuted: 'Now I build it too.',
 
   /**
-   * The about page standfirst. Credential, then concession, then evidence —
-   * the concession sits in the middle, where it reads as confidence.
+   * The line that introduces you, used in the hero AND at the top of /about.
+   * Four beats: credential, concession, evidence, what-it-is. The concession
+   * sits in the middle, where it reads as confidence rather than apology.
    *
    * Sharper with a number: "I've spent fifteen years keeping other people's
    * software running…". Add one if you are comfortable stating it.
    */
   standfirst:
-    "I've spent my career keeping other people's software running — hosting, IT, support, and the delivery process around all three. I'm new to writing it. This site is the largest thing I've built, and it's where I learn in public.",
+    "I've spent my career keeping other people's software running — hosting, IT, support, and the delivery process around all three. I'm new to writing it. This site is the largest thing I've built: technology news, the market underneath it, and the episodes worth finishing, collected and refreshed on a schedule. It's where I learn in public.",
 
   about: [
     {

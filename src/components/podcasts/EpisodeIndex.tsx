@@ -4,6 +4,7 @@ import { memo } from 'react'
 import { usePlayer } from '@/context/PlayerContext'
 import EpisodeArtwork from './EpisodeArtwork'
 import PlayButton from './PlayButton'
+import TranscriptLink from './TranscriptLink'
 import { longDate } from '@/lib/format'
 import type { Episode } from '@/types/episode'
 
@@ -28,7 +29,7 @@ function Row({
 
   return (
     <li
-      className="group grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-4 border-t border-hair py-4 transition-colors hover:bg-white/[0.02] sm:gap-5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]"
+      className="group grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-4 border-t border-hair py-3 transition-colors hover:bg-white/[0.02] sm:gap-5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]"
       aria-current={isCurrent ? 'true' : undefined}
     >
       <span
@@ -38,12 +39,19 @@ function Row({
         {String(index).padStart(2, '0')}
       </span>
 
-      <span className="h-11 w-11 shrink-0 overflow-hidden rounded-sm bg-ink-800 sm:h-14 sm:w-14">
+      <span className="h-11 w-11 shrink-0 overflow-hidden rounded-sm bg-ink-800">
         <EpisodeArtwork episode={episode} size="sm" />
       </span>
 
       <span className="min-w-0">
         <span className="block truncate text-[15px] font-medium text-paper">{episode.title}</span>
+        {/* The description fills what was a wide empty middle, and stops the
+            index conveying less per item than the cards it replaced. */}
+        {episode.description && (
+          <span className="clamp-1 mt-0.5 hidden text-[13px] text-paper-3 md:block">
+            {episode.description}
+          </span>
+        )}
         <span className="mt-0.5 flex items-center gap-2.5 md:hidden">
           {isCurrent && (
             <span className="chip chip-accent shrink-0">{isPlaying ? 'Playing' : 'Paused'}</span>
@@ -51,6 +59,12 @@ function Row({
           <span className="num truncate text-[11px] uppercase tracking-wider text-paper-2">
             {episode.showName}
           </span>
+          {episode.audioUrl.trim().length === 0 && (
+            <>
+              <span aria-hidden="true" className="text-paper-3">·</span>
+              <span className="num shrink-0 text-[11px] text-paper-3">No audio</span>
+            </>
+          )}
         </span>
       </span>
 
@@ -77,6 +91,7 @@ function Row({
             <span className="num shrink-0 text-[11px] text-paper-3">No audio</span>
           </>
         )}
+        {episode.transcriptUrl && <TranscriptLink episode={episode} className="shrink-0" />}
       </span>
 
       <PlayButton episode={episode} queue={queue} size="sm" />

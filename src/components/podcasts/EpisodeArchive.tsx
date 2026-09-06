@@ -63,6 +63,8 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
   }
 
   const filtersActive = query !== '' || category !== 'All' || show !== 'All'
+  // Disclosed once here rather than repeated on forty rows.
+  const withTranscripts = filtered.filter((ep) => ep.transcriptUrl).length
 
   if (episodes.length === 0) {
     return (
@@ -174,6 +176,7 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
       <div className="flex items-center gap-3">
         <p aria-live="polite" className="eyebrow">
           {filtered.length} of {episodes.length} episodes
+          {withTranscripts > 0 && ` · ${withTranscripts} with transcripts`}
         </p>
         {filtersActive && (
           <button type="button" onClick={reset} className="link-draw text-xs">
@@ -195,22 +198,26 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
         // in one column, the row height stops depending on how a title wraps,
         // and a single filtered result can never be a lonely third-width card.
         <div className="flex flex-col gap-2">
-          <EpisodeCard episode={filtered[0]} queue={filtered} featured />
+          <EpisodeCard episode={filtered[0]} queue={filtered} featured indexLabel={1} />
           {filtered.length > 1 && (
             <EpisodeIndex episodes={filtered.slice(1, visible)} queue={filtered} startAt={2} />
           )}
 
-          {filtered.length > visible && (
+          {filtered.length > PAGE_SIZE && (
+            // Rendered unconditionally and disabled when exhausted: unmounting
+            // this block while focus is inside it drops focus to <body>, which
+            // dumps a keyboard user above the header.
             <div className="mt-6 flex flex-col items-center gap-2">
               <button
                 type="button"
                 onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                className="btn"
+                disabled={visible >= filtered.length}
+                className="btn disabled:cursor-default disabled:opacity-50"
               >
-                Show more episodes
+                {visible >= filtered.length ? 'All episodes shown' : 'Show more episodes'}
               </button>
-              <p className="eyebrow">
-                Showing {visible} of {filtered.length}
+              <p aria-live="polite" className="eyebrow">
+                Showing {Math.min(visible, filtered.length)} of {filtered.length}
               </p>
             </div>
           )}

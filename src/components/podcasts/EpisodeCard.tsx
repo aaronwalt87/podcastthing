@@ -14,6 +14,8 @@ interface EpisodeCardProps {
   queue?: Episode[]
   /** Wide, image-forward treatment used for the lead episode. */
   featured?: boolean
+  /** Running order, so a lead card followed by an index starting at 02 reads. */
+  indexLabel?: number
 }
 
 function Bar({ ratio, live }: { ratio: number; live: boolean }) {
@@ -50,7 +52,7 @@ function ResumeBar({ episode, isCurrent }: { episode: Episode; isCurrent: boolea
   return progressFor(episode.id) > 0 ? <Bar ratio={1} live={false} /> : null
 }
 
-function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
+function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCardProps) {
   const { currentEpisode, isPlaying } = usePlayer()
   const isCurrent = currentEpisode?.id === episode.id
 
@@ -113,11 +115,11 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
             featured ? 'p-6 md:justify-center md:p-8' : 'flex-1 p-4'
           }`}
         >
-          <div className="flex items-center gap-2.5">
-            <span className="num text-[11px] uppercase tracking-wider text-paper-2">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="num w-full text-[11px] uppercase tracking-wider text-paper-2 sm:w-auto">
               {episode.showName}
             </span>
-            <span aria-hidden="true" className="h-2.5 w-px bg-hair-2" />
+            <span aria-hidden="true" className="hidden h-2.5 w-px bg-hair-2 sm:block" />
             <time
               className="num text-[11px] text-paper-3"
               dateTime={new Date(episode.addedAt).toISOString()}
@@ -126,7 +128,7 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
             </time>
             {episode.audioUrl.trim().length === 0 && (
               <>
-                <span aria-hidden="true" className="h-2.5 w-px bg-hair-2" />
+                <span aria-hidden="true" className="text-paper-3">·</span>
                 <span className="num text-[11px] text-paper-3">No audio</span>
               </>
             )}
@@ -150,12 +152,20 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
             </p>
           )}
 
-          {featured && (
-            <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
-              <TranscriptLink episode={episode} />
-              {episode.category && <span className="chip">{episode.category}</span>}
-            </div>
-          )}
+          {/* 1.2.1 is a per-item criterion: one disclosed episode does not
+              carry the rest. Rendered on every card, featured or not. */}
+          <div
+            className={`flex flex-wrap items-center gap-3 ${
+              featured ? 'mt-auto max-w-[46ch] justify-between pt-5' : 'pt-1'
+            }`}
+          >
+            {featured && (
+              <span className="num text-[11px] text-paper-3">
+                {String(indexLabel ?? 1).padStart(2, '0')}
+              </span>
+            )}
+            <TranscriptLink episode={episode} />
+          </div>
         </div>
       </article>
     </Spotlight>

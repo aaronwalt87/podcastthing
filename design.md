@@ -161,19 +161,60 @@ Defined once in `globals.css` under `@layer components`:
 
 ## 7. Accessibility contract
 
-Non-negotiable, and checked every review round:
+Target: **WCAG 2.2 Level AA.** Checked every review round with computed ratios;
+known gaps are named below rather than left implied.
 
-1. Every interactive element takes a visible `:focus-visible` ring in `--ember`.
-2. Colour never carries meaning alone (see §2).
-3. `prefers-reduced-motion: reduce` stops the marquee, the canvas animation, the
-   scroll reveals, and smooth scrolling — in one place, in `globals.css`.
-4. `prefers-contrast: more` raises hairline and secondary-text contrast.
-5. A skip link precedes the header; `<main>` is focusable.
-6. Filter and sort results are announced with `aria-live="polite"`.
-7. Decorative canvas and SVG are `aria-hidden`; data tables carry a `<caption>`
-   and `aria-sort`.
+1. Every interactive element takes a visible `:focus-visible` ring in `--ember`
+   (7.0:1 on the page ground, 6.5:1 on a panel).
+2. **Colour never carries meaning alone.** Every `Delta` pairs hue with a ▲/▼
+   glyph and a signed number; heatmap tiles print the percentage; the playing
+   episode carries a Playing/Paused chip, not just an ember row number;
+   selected segmented controls carry a 2px inset `--ember` bar, because the
+   background tint behind them is only 1.2:1.
+3. Text contrast: `--paper` 17.6:1, `--paper-2` 7.9:1, `--paper-3` 5.1:1 on the
+   page ground and 4.8:1 on a panel. **`--paper-3` must not be used on
+   `--ink-700` or lighter** (4.2:1 there). Nothing renders text below 11px.
+4. Control boundaries meet 1.4.11: `--edge` is 3.2:1 against a field's own fill
+   and 3.3:1 against the page. `--hair` and `--hair-2` are decorative only and
+   must never be the sole boundary of a control.
+5. `prefers-reduced-motion: reduce` stops the marquee, the canvas rAF loop, the
+   scroll reveals, the loading spinners and smooth scrolling. **No SMIL** — a
+   CSS `.spin` class, so the media query actually reaches it. `SignalField` and
+   `Reveal` re-evaluate the query at runtime, not only at mount.
+6. `prefers-contrast: more` raises hairlines, control edges and both secondary
+   ink levels, and widens the gap *between* them rather than narrowing it.
+7. A skip link precedes the header; `<main>` is focusable; `scroll-padding-top`
+   and `scroll-padding-bottom` keep focused elements clear of the fixed header
+   and the fixed player bar (2.4.11).
+8. **Single-key shortcuts are off by default** and opt-in per browser, because
+   `j`/`k`/`l`/`m` collide with screen-reader quick-nav keys (2.1.4). The
+   handler yields to whatever control has focus, via `FOCUSABLE_SELECTOR`.
+9. Filter, sort and pagination results are announced with `aria-live="polite"`,
+   into regions that are already mounted when their text changes.
+10. Decorative canvas and SVG are `aria-hidden`; anything a hidden drawing
+    captions carries its own text alternative. Data tables have a `<caption>`
+    and `aria-sort`.
+11. The command palette is a full combobox/listbox: roving
+    `aria-activedescendant`, options owned directly by the listbox, Tab trapped
+    inside the dialog, background scroll locked, focus returned on close.
+12. Nothing is removed at a breakpoint to make a layout fit. The player's rate
+    and shortcut controls sit behind a disclosure available at every width, so
+    the bar reflows to 320px without losing functionality (1.4.10).
+13. `[hidden]` is forced with `!important` in `globals.css`: a Tailwind display
+    utility has the same specificity as the preflight rule and wins on cascade
+    order, which silently leaves hidden elements on screen.
 
----
+### Known limitation — audio-only content (1.2.1, Level A)
+
+Episodes are **curated third-party audio**, not produced here, so the text
+alternative is the publisher's own transcript, surfaced per episode through
+`transcriptUrl`. Where a publisher provides none, the UI links the episode page
+and says so to assistive technology rather than staying silent — a two-line
+description is not an equivalent alternative and is never presented as one.
+
+**Episodes without a publisher transcript do not conform to 1.2.1.** The archive
+states how many of the listed episodes have one, so the gap is disclosed rather
+than hidden. Adding a `transcriptUrl` in the admin form closes it per episode.
 
 ## 8. Don'ts
 

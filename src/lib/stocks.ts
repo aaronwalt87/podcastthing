@@ -1,4 +1,5 @@
 import 'server-only'
+import { waitUntil } from '@vercel/functions'
 import { acquireLock, getRedis } from './redis'
 import { sampleMarket, sampleDataEnabled } from './sample-data'
 import type { MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
@@ -220,7 +221,10 @@ export async function refreshStocks(): Promise<MarketSnapshot> {
   const quotes = results.filter((q): q is StockQuote => q !== null)
   const snapshot = summarize(quotes, state)
 
-  if (quotes.length > 0) {
+  // A run interrupted partway would otherwise cache four of sixteen symbols for
+  // two days, and a truncated board is worse than an empty one — the empty
+  // state at least explains itself.
+  if (quotes.length >= Math.ceil(TRACKED.length / 2)) {
     const redis = getRedis()
     if (redis) {
       try {
@@ -265,7 +269,15 @@ export async function getMarketSnapshot(): Promise<MarketSnapshot> {
       // See the note in getCachedNews: warm a cold cache rather than serving an
       // empty board until the next scheduled run.
       if (await acquireLock('lock:stocks:refresh', 180)) {
-        void refreshStocks().catch((err) => console.error('[stocks] warm refresh failed', err))
+        // waitUntil, not a bare promise: on Vercel the container is frozen once
+        // the response is flushed, so a fire-and-forget refresh never finishes
+        // — it just holds the lock while doing nothing. This only shows up in
+        // production; a long-lived `next dev` process completes it either way.
+        waitUntil(
+          refreshStocks().catch((err) =>
+            console.error('[stocks] warm refresh failed', err)
+          )
+        )
       }
       return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
     }

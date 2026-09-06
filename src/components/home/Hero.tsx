@@ -81,16 +81,18 @@ export default function Hero({
           </span>
         </h1>
 
-        <p className="mt-6 max-w-[54ch] text-[16px] leading-relaxed text-paper-2">
-          A career spent keeping other people&rsquo;s software running — hosting, IT, support, and
-          the delivery process around all three. This is the dashboard I got tired of not having:
-          technology news, the market underneath it, and the episodes worth finishing. Built in
-          public, in {profile.location}.
+        {/* One shared line, so the "new to writing it" concession appears on the
+            page that actually gets shared — not only on /about. */}
+        <p className="mt-6 max-w-[56ch] text-[16px] leading-relaxed text-paper-2">
+          {profile.standfirst}
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link href="/news" className="btn btn-primary">
             Open the feed
+          </Link>
+          <Link href="/about" className="btn">
+            Who I am <span aria-hidden="true">→</span>
           </Link>
 
           {latestEpisode && latestEpisode.audioUrl.trim().length > 0 && (
@@ -106,7 +108,7 @@ export default function Hero({
           )}
         </div>
 
-        <dl className="mt-12 grid grid-cols-3 gap-6 border-t border-hair pt-6 lg:mt-16">
+        <dl className="mt-9 grid grid-cols-3 gap-6 border-t border-hair pt-6 lg:mt-12">
           <Stat label="Headlines tracked" value={String(headlineCount)} />
           <Stat label="Sources" value={String(sourceCount)} />
           <Stat

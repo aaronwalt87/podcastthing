@@ -1,4 +1,5 @@
 import 'server-only'
+import { waitUntil } from '@vercel/functions'
 import { acquireLock, getRedis } from './redis'
 import { sampleNews, sampleDataEnabled } from './sample-data'
 import type { NewsItem, NewsCategory } from '@/types/news'
@@ -271,7 +272,15 @@ export async function getCachedNews(): Promise<NewsItem[]> {
       // background so the following request is served, and take a lock so a
       // spike triggers one refresh rather than sixty.
       if (await acquireLock('lock:news:refresh', 120)) {
-        void refreshNews().catch((err) => console.error('[news] warm refresh failed', err))
+        // waitUntil, not a bare promise: on Vercel the container is frozen once
+        // the response is flushed, so a fire-and-forget refresh never finishes
+        // — it just holds the lock while doing nothing. This only shows up in
+        // production; a long-lived `next dev` process completes it either way.
+        waitUntil(
+          refreshNews().catch((err) =>
+            console.error('[news] warm refresh failed', err)
+          )
+        )
       }
       return []
     }

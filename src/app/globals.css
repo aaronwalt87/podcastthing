@@ -173,6 +173,13 @@ p {
   background: #39424e;
 }
 
+/* `hidden` must beat any display utility. Tailwind's preflight rule has the
+   same specificity as `.flex` and loses on cascade order, which silently leaves
+   [hidden] elements on screen. */
+[hidden] {
+  display: none !important;
+}
+
 /* Every interactive element gets the same visible focus ring. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--ember);
@@ -248,7 +255,7 @@ p {
     border: 1px solid var(--hair-2);
     border-radius: var(--r-1);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--paper-2);
@@ -641,6 +648,8 @@ input[type='range']::-moz-range-thumb {
     --hair-2: rgba(255, 255, 255, 0.34);
     --edge: rgba(255, 255, 255, 0.55);
     --paper-2: #c9d0d7;
-    --paper-3: #aab3bd;
+    /* Held further from --paper-2 than the default palette, not closer: a user
+       who asks for more contrast should not get a flatter hierarchy. */
+    --paper-3: #8f98a3;
   }
 }

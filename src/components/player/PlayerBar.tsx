@@ -1,8 +1,9 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePlayer, usePlayerClock, PLAYBACK_RATES } from '@/context/PlayerContext'
 import EpisodeArtwork from '@/components/podcasts/EpisodeArtwork'
+import TranscriptLink from '@/components/podcasts/TranscriptLink'
 import { duration as formatDuration } from '@/lib/format'
 
 function Icon({ path, size = 16 }: { path: string; size?: number }) {
@@ -89,6 +90,24 @@ export default function PlayerBar() {
     setShortcutsEnabled,
   } = usePlayer()
 
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const optionsRef = useRef<HTMLDivElement>(null)
+
+  // Escape and an outside click both close the disclosure.
+  useEffect(() => {
+    if (!optionsOpen) return
+    const onKeyDown = (e: KeyboardEvent) => e.key === 'Escape' && setOptionsOpen(false)
+    const onPointerDown = (e: PointerEvent) => {
+      if (!optionsRef.current?.contains(e.target as Node)) setOptionsOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [optionsOpen])
+
   const cycleRate = useCallback(() => {
     const i = PLAYBACK_RATES.indexOf(rate as (typeof PLAYBACK_RATES)[number])
     setRate(PLAYBACK_RATES[(i + 1) % PLAYBACK_RATES.length])
@@ -134,7 +153,15 @@ export default function PlayerBar() {
           </div>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-paper">{currentEpisode.title}</p>
-            <p className="truncate text-[11px] text-paper-2">{currentEpisode.showName}</p>
+            <p className="truncate text-[11px] text-paper-2">
+              {currentEpisode.showName}
+              {currentEpisode.transcriptUrl && (
+                <>
+                  {' · '}
+                  <TranscriptLink episode={currentEpisode} />
+                </>
+              )}
+            </p>
           </div>
         </div>
 
@@ -214,18 +241,10 @@ export default function PlayerBar() {
           </div>
         </div>
 
-        {/* Options */}
-        <div className="flex items-center gap-1 lg:w-52 lg:justify-end">
-          <button
-            type="button"
-            onClick={cycleRate}
-            className="btn btn-ghost btn-sm num"
-            // Must contain the visible text so speech input can target it
-            // (WCAG 2.5.3 Label in Name).
-            aria-label={`Playback speed ${rate}×`}
-          >
-            {rate}×
-          </button>
+        {/* Options. Mute stays inline; rate and the shortcut toggle sit behind a
+            disclosure available at every width. Nothing is removed at a
+            breakpoint, so the row still fits a 320px viewport (1.4.10). */}
+        <div ref={optionsRef} className="relative flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={toggleMute}
@@ -235,22 +254,62 @@ export default function PlayerBar() {
           >
             <Icon path={muted ? ICONS.muted : ICONS.volume} />
           </button>
-          {/* Single-key shortcuts collide with screen-reader quick-nav keys, so
-              they are off until asked for (WCAG 2.1.4). */}
+
           <button
             type="button"
-            onClick={() => setShortcutsEnabled(!shortcutsEnabled)}
-            className="btn btn-ghost btn-sm num"
-            aria-pressed={shortcutsEnabled}
-            aria-label="K — single-key playback shortcuts"
-            aria-describedby="shortcut-help"
+            onClick={() => setOptionsOpen((o) => !o)}
+            aria-expanded={optionsOpen}
+            aria-controls="player-options"
+            aria-label="Playback options"
+            className="btn btn-ghost btn-icon"
           >
-            {shortcutsEnabled ? 'K✓' : 'K'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.8" />
+              <circle cx="12" cy="12" r="1.8" />
+              <circle cx="19" cy="12" r="1.8" />
+            </svg>
           </button>
-          <span id="shortcut-help" className="sr-only">
-            When on: space or K plays and pauses, J and the left arrow skip back fifteen seconds,
-            L and the right arrow skip forward thirty, M mutes.
-          </span>
+
+          {/* `hidden` alone is not enough here: Tailwind's `flex` utility has the
+              same specificity as the preflight's [hidden]{display:none} and comes
+              later in the cascade, so the panel would stay visible. The display
+              class is applied conditionally instead. */}
+          <div
+            id="player-options"
+            hidden={!optionsOpen}
+            className={`panel absolute bottom-[calc(100%+10px)] right-0 items-center gap-1 p-1.5 ${
+              optionsOpen ? 'flex' : ''
+            }`}
+            style={{ boxShadow: 'var(--shadow-panel)' }}
+          >
+            <button
+              type="button"
+              onClick={cycleRate}
+              className="btn btn-ghost btn-sm num"
+              // Must contain the visible text so speech input can target it
+              // (WCAG 2.5.3 Label in Name).
+              aria-label={`Playback speed ${rate}\u00d7`}
+            >
+              {rate}&times;
+            </button>
+
+            {/* Single-key shortcuts collide with screen-reader quick-nav keys,
+                so they are off until asked for (WCAG 2.1.4). */}
+            <button
+              type="button"
+              onClick={() => setShortcutsEnabled(!shortcutsEnabled)}
+              className="btn btn-ghost btn-sm num"
+              aria-pressed={shortcutsEnabled}
+              aria-label="K — single-key playback shortcuts"
+              aria-describedby="shortcut-help"
+            >
+              {shortcutsEnabled ? 'K\u2713' : 'K'}
+            </button>
+            <span id="shortcut-help" className="sr-only">
+              When on: space or K plays and pauses, J and the left arrow skip back fifteen
+              seconds, L and the right arrow skip forward thirty, M mutes.
+            </span>
+          </div>
         </div>
       </div>
 

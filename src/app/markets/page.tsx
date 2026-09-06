@@ -151,7 +151,7 @@ export default async function MarketsPage() {
                 index="02"
                 eyebrow="By sector"
                 title="Where the move is concentrated"
-                description="Hue is direction, opacity is magnitude, capped at ±4% so one outlier can't wash out the board."
+                description="Hue is direction, opacity is magnitude, capped at ±2% so one outlier can't wash out the board."
               />
             </Reveal>
             <Reveal delay={60}>

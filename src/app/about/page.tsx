@@ -150,14 +150,16 @@ export default function AboutPage() {
           Want to argue with a decision on this page?
         </p>
         <p className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-paper-2">
-          That is the conversation I want to have.{' '}
+          That&rsquo;s the conversation I want to have.{' '}
           {links.length > 0
             ? 'Any of the links above reaches me.'
-            : 'The source is the argument — read it and tell me where I am wrong.'}
+            : // With no contact link configured, an invitation to reply would be
+              // a closed loop. Point at something the reader can verify instead.
+              'Every choice here is on the record — the board says where each number came from, and the feed says which source parsed it.'}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/markets" className="btn btn-sm">
-            See it working <span aria-hidden="true">→</span>
+            See how the numbers are sourced <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>

@@ -36,7 +36,10 @@ export default function SignalPlate({
 }: SignalPlateProps) {
   const caption =
     label ??
-    (quote ? `${quote.symbol} · 60D · ${SOURCE_LABEL[quote.source].toUpperCase()}` : null)
+    // The cache holds JSON with a 48h TTL, so a snapshot written by older code
+    // can outlive a deploy. Everything else in the data layer degrades to an
+    // empty state rather than throwing; this keeps that invariant.
+    (quote ? `${quote.symbol} · 60D · ${(SOURCE_LABEL[quote.source] ?? 'unknown').toUpperCase()}` : null)
 
   return (
     <div
@@ -65,10 +68,24 @@ export default function SignalPlate({
       />
 
       <div className="shell flex h-full items-center justify-between gap-6">
+        {/* Both labels get a literal plate: the ridge's visual mass is centred
+            too, so anything vertically centred would have the line running
+            through the type at some viewport width. */}
         <div className="min-w-0">{children}</div>
         {caption && (
-          <p className="eyebrow shrink-0 whitespace-nowrap" style={{ color: 'var(--paper-3)' }}>
-            {caption}
+          // The drawing itself is aria-hidden, so the terse visual caption has
+          // nothing for a screen reader to attach to. The sr-only sentence
+          // carries the same provenance in a form that stands alone.
+          <p
+            className="eyebrow shrink-0 whitespace-nowrap rounded-xs bg-ink-950/75 px-2.5 py-1 backdrop-blur-[2px]"
+            style={{ color: 'var(--paper-3)' }}
+          >
+            <span aria-hidden="true">{caption}</span>
+            <span className="sr-only">
+              {quote
+                ? `Chart: ${quote.symbol}, 60-day trend, ${SOURCE_LABEL[quote.source] ?? 'unknown'} data.`
+                : caption}
+            </span>
           </p>
         )}
       </div>

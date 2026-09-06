@@ -250,6 +250,16 @@ export default function CommandPalette() {
           <kbd className="chip">Esc</kbd>
         </div>
 
+        <p role="status" aria-live="polite" className="sr-only">
+          {results.length === 0
+            ? failed
+              ? 'Search index unavailable'
+              : loaded
+                ? 'No matches'
+                : 'Loading index'
+            : `${results.length} results`}
+        </p>
+
         <ul
           ref={listRef}
           id="palette-results"
@@ -259,13 +269,14 @@ export default function CommandPalette() {
         >
           {results.length === 0 ? (
             <li role="presentation" className="px-3 py-8 text-center text-sm text-paper-3">
-              <p role="status">
-                {failed
-                  ? 'The search index is unavailable. Close and reopen to retry.'
-                  : loaded
-                    ? 'No matches.'
-                    : 'Loading index…'}
-              </p>
+              {/* The message swaps inside a region that is already mounted — a
+                  live region inserted with its text already present is
+                  unreliably announced. */}
+              {failed
+                ? 'The search index is unavailable. Close and reopen to retry.'
+                : loaded
+                  ? 'No matches.'
+                  : 'Loading index…'}
             </li>
           ) : (
             results.map((record, i) => (

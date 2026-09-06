@@ -18,7 +18,10 @@ export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7 // 7 days
  * routes.
  */
 
-const PBKDF2_ITERATIONS = 100_000
+/** Lower than a password-storage figure on purpose: this runs per cold Edge
+ *  isolate, and it is a fallback for when SESSION_SECRET is unset. Still four
+ *  orders of magnitude better than using the raw password as key material. */
+const PBKDF2_ITERATIONS = 20_000
 /** Fixed salt: the input is a single site-wide secret, not a user table. */
 const PBKDF2_SALT = new TextEncoder().encode('signal.admin.session.v1')
 
@@ -37,27 +40,40 @@ export function safeEqual(a: string, b: string): boolean {
   return diff === 0
 }
 
-let cachedKey: CryptoKey | null = null
+/**
+ * The PROMISE is cached, not the resolved key: caching only the result lets N
+ * concurrent requests on a cold isolate each run a full PBKDF2 derivation
+ * before the first one finishes.
+ */
+let keyPromise: Promise<CryptoKey | null> | null = null
 
-async function getKey(): Promise<CryptoKey | null> {
-  if (cachedKey) return cachedKey
-
+async function deriveKey(): Promise<CryptoKey | null> {
   const explicit = process.env.SESSION_SECRET
+
   if (explicit && explicit.length >= 16) {
-    cachedKey = await crypto.subtle.importKey(
+    return crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(explicit),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['sign']
     )
-    return cachedKey
+  }
+
+  if (explicit) {
+    console.warn(
+      `[auth] SESSION_SECRET is ${explicit.length} characters; at least 16 are required. ` +
+        'Falling back to deriving the key from ADMIN_PASSWORD.'
+    )
   }
 
   const password = process.env.ADMIN_PASSWORD
   if (!password) return null
 
-  // No dedicated secret: stretch the password rather than using it raw.
+  // No usable dedicated secret: stretch the password rather than using it raw.
+  // This runs in Edge middleware, where CPU is tightest — which is why
+  // SESSION_SECRET is the documented production requirement and this path is a
+  // local-development convenience.
   const material = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
@@ -66,14 +82,42 @@ async function getKey(): Promise<CryptoKey | null> {
     ['deriveKey']
   )
 
-  cachedKey = await crypto.subtle.deriveKey(
+  return crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt: PBKDF2_SALT, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
     material,
     { name: 'HMAC', hash: 'SHA-256', length: 256 },
     false,
     ['sign']
   )
-  return cachedKey
+}
+
+function getKey(): Promise<CryptoKey | null> {
+  if (!keyPromise) keyPromise = deriveKey()
+  return keyPromise
+}
+
+/**
+ * Short fingerprint of the current password, bound into every signed payload.
+ *
+ * With SESSION_SECRET in use the key no longer depends on ADMIN_PASSWORD, so
+ * rotating the password would otherwise revoke nothing — the obvious incident
+ * response would silently leave every stolen cookie valid for up to seven more
+ * days. Including this makes rotation revocation again.
+ */
+let epochPromise: Promise<string> | null = null
+
+function passwordEpoch(): Promise<string> {
+  if (!epochPromise) {
+    epochPromise = crypto.subtle
+      .digest('SHA-256', new TextEncoder().encode(process.env.ADMIN_PASSWORD ?? ''))
+      .then((bytes) =>
+        Array.from(new Uint8Array(bytes))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('')
+          .slice(0, 16)
+      )
+  }
+  return epochPromise
 }
 
 async function sign(payload: string): Promise<string | null> {
@@ -88,7 +132,7 @@ async function sign(payload: string): Promise<string | null> {
 
 export async function createSessionToken(now = Date.now()): Promise<string | null> {
   const expiresAt = now + SESSION_MAX_AGE_SECONDS * 1000
-  const signature = await sign(`admin-session|${expiresAt}`)
+  const signature = await sign(`admin-session|${expiresAt}|${await passwordEpoch()}`)
   return signature ? `${expiresAt}.${signature}` : null
 }
 
@@ -103,7 +147,7 @@ export async function verifySessionToken(token: string, now = Date.now()): Promi
     const expiresAt = Number(token.slice(0, separator))
     if (!Number.isSafeInteger(expiresAt) || expiresAt <= now) return false
 
-    const expected = await sign(`admin-session|${expiresAt}`)
+    const expected = await sign(`admin-session|${expiresAt}|${await passwordEpoch()}`)
     return expected !== null && safeEqual(token.slice(separator + 1), expected)
   } catch {
     return false

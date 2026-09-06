@@ -67,7 +67,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
           {/* Provenance belongs on the table, not repeated in every row — a
               column where every cell holds the same value carries no
               information and adds sixteen high-contrast boxes. */}
-          <caption className="caption-bottom px-4 py-3 text-left">
+          <caption className="caption-bottom border-t border-hair px-4 py-3 text-left">
             <span className="eyebrow">
               {sources.length === 1
                 ? `All quotes: ${SOURCE_LABEL[sources[0]]}`

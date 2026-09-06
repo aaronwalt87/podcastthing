@@ -36,12 +36,14 @@ export default function TranscriptLink({
         rel="noopener noreferrer"
         className={`text-[13px] text-paper-2 underline decoration-hair-2 underline-offset-4 transition-colors hover:text-paper ${className}`}
       >
-        No transcript — episode page <span aria-hidden="true">↗</span>
+        Episode page <span aria-hidden="true">↗</span>
+        <span className="sr-only"> — no transcript is available for this episode</span>
       </a>
     )
   }
 
-  return (
-    <span className={`text-[13px] text-paper-3 ${className}`}>No transcript available</span>
-  )
+  // Silence is the right default for an absent optional feature: a label on
+  // every card would announce a missing capability to a reader who never
+  // thought to want it — the same failure the "No audio" badge had.
+  return null
 }
