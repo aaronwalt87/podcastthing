@@ -42,6 +42,15 @@ export interface AboutSection {
   body: string
 }
 
+export interface Decision {
+  /** Short, declarative. "Cache stale data rather than show none." */
+  title: string
+  /** What was chosen, and the alternative it was chosen over. */
+  choice: string
+  /** The honest cost. An entry with no cost is marketing, not a decision. */
+  cost: string
+}
+
 export const profile = {
   name: 'Aaron Walters',
   /** Shown in the header lockup, the hero kicker and the about page. */
@@ -90,6 +99,71 @@ export const profile = {
       body: `I wanted one page that told me what happened in technology today, what the market underneath it did, and what was worth listening to. Nothing available did all three without an account, so I built it. Every part of it is a decision I can defend: why the cache sits where it does, why there's no charting library, why headlines are classified by keyword rather than by publisher.`,
     },
   ] as AboutSection[],
+
+  /**
+   * A record of choices made in this build, and what each one cost.
+   *
+   * ───────────────────────────────────────────────────────────────────────────
+   *  THIS IS THE MOST VALUABLE PAGE ON THE SITE, AND THE LEAST FINISHED.
+   *
+   *  Everything else here presents other people's work — their headlines,
+   *  their trades, their conversations. This is the only page that shows YOUR
+   *  judgement, which is the actual hiring question.
+   *
+   *  The entries below are real: each one describes a decision visible in this
+   *  codebase, and each names what it cost. But they were drafted, not written
+   *  by you. Two things to do:
+   *
+   *    1. Read each one and make sure you agree. If you would have chosen
+   *       differently, change the code or change the entry — either is a
+   *       better answer than leaving a decision you cannot defend.
+   *    2. Add your own, and not only about this site. The strongest entries
+   *       will be from your operations career: the migration you cut over on a
+   *       Saturday, the monitoring you turned off because it was lying, the
+   *       escalation path you rewrote. "I chose X over Y, because Z, and here
+   *       is what it cost" is the whole format.
+   *
+   *  Left empty, this section does not render at all.
+   * ───────────────────────────────────────────────────────────────────────────
+   */
+  decisions: [
+    {
+      title: 'No charting library',
+      choice:
+        'The trend lines are server-rendered SVG and the ridge is a hand-written canvas, rather than pulling in a charting package.',
+      cost: 'The sparklines cannot be hovered for a value, and any new chart type is work rather than a config option. In exchange nothing about the drawing ships to the browser.',
+    },
+    {
+      title: 'Cache stale data rather than show none',
+      choice:
+        'Feed and quote caches outlive their refresh interval by a full extra run, so a missed job leaves yesterday on screen instead of an empty page.',
+      cost: 'A headline can be up to two days old if the scheduled job fails repeatedly, and nothing on the page shouts about it. A blank dashboard is a worse lie than an old one.',
+    },
+    {
+      title: 'The market board works with no API key',
+      choice:
+        'Live quotes when a key is configured; end-of-day closes from a keyless source when it is not. Every quote records which it was.',
+      cost: 'Without a key the numbers are yesterday, and someone who does not read the label could mistake them for live. That is why the label is not optional.',
+    },
+    {
+      title: 'Playback position lives in the browser, not on a server',
+      choice:
+        'Where you stopped listening is kept in local storage, with no account and no record of it anywhere else.',
+      cost: 'It does not follow you to another device, and clearing site data loses it. Nobody has to trust me with a listening history to use the player.',
+    },
+    {
+      title: 'Keyboard shortcuts are off until asked for',
+      choice:
+        'Single-key controls — space, J, K, L, M — are opt-in per browser rather than always live.',
+      cost: 'Almost nobody will find them. Those same keys are how screen-reader users navigate, and taking them by default breaks the page for people who need it most.',
+    },
+    {
+      title: 'Two contexts for one audio player',
+      choice:
+        'Transport state and the playback clock are separate React contexts, so the four-times-a-second tick reaches only the scrubber.',
+      cost: 'More moving parts than one context, and a subtle rule to remember. One context re-rendered every episode card on every tick.',
+    },
+  ] as Decision[],
 
   /**
    * The ask. Renders as its own section, and is skipped entirely while empty.

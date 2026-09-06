@@ -187,8 +187,11 @@ export default async function HomePage() {
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <Link href="/about" className="btn btn-primary btn-sm">
-                  Read the full story <span aria-hidden="true">→</span>
+                <Link href="/decisions" className="btn btn-primary btn-sm">
+                  Read the decisions <span aria-hidden="true">→</span>
+                </Link>
+                <Link href="/about" className="btn btn-sm">
+                  Who I am <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>

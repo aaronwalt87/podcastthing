@@ -8,6 +8,7 @@ const SECTIONS = [
   { label: 'News', href: '/news' },
   { label: 'Markets', href: '/markets' },
   { label: 'Podcasts', href: '/podcasts' },
+  { label: 'Decisions', href: '/decisions' },
   { label: 'About', href: '/about' },
 ]
 

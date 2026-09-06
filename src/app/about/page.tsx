@@ -127,6 +127,7 @@ export default function AboutPage() {
             <p className="eyebrow">Elsewhere on this site</p>
             <ul role="list" className="mt-3 flex flex-col gap-2.5">
               {[
+                { label: 'Decisions, and what they cost', href: '/decisions' },
                 { label: 'The news feed', href: '/news' },
                 { label: 'The market board', href: '/markets' },
                 { label: 'The listening archive', href: '/podcasts' },
@@ -155,11 +156,11 @@ export default function AboutPage() {
             ? 'Any of the links above reaches me.'
             : // With no contact link configured, an invitation to reply would be
               // a closed loop. Point at something the reader can verify instead.
-              'Every choice here is on the record — the board says where each number came from, and the feed says which source parsed it.'}
+              'Every choice here is on the record — literally: the decisions page names each one and what it cost.'}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/markets" className="btn btn-sm">
-            See how the numbers are sourced <span aria-hidden="true">→</span>
+          <Link href="/decisions" className="btn btn-sm">
+            Read the decisions <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>

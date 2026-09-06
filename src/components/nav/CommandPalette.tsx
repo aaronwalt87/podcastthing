@@ -10,6 +10,7 @@ const NAV_RECORDS: SearchRecord[] = [
   { id: 'nav-podcasts', kind: 'symbol', title: 'Podcasts', subtitle: 'Episode archive', href: '/podcasts', external: false },
   { id: 'nav-news', kind: 'symbol', title: 'News', subtitle: 'Technology feed', href: '/news', external: false },
   { id: 'nav-markets', kind: 'symbol', title: 'Markets', subtitle: 'Tech equities', href: '/markets', external: false },
+  { id: 'nav-decisions', kind: 'symbol', title: 'Decisions', subtitle: 'Choices and what they cost', href: '/decisions', external: false },
   { id: 'nav-about', kind: 'symbol', title: 'About', subtitle: 'Who is building this', href: '/about', external: false },
 ]
 
