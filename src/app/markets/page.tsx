@@ -51,7 +51,7 @@ export default async function MarketsPage() {
         <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
           Index proxies, semiconductors, platforms and the infrastructure vendors underneath them.
           Quotes come from a live API when a key is configured and from end-of-day closes when it
-          is not; the source column says which, per row.
+          is not — the board says which, underneath it.
         </p>
       </header>
 

@@ -81,13 +81,13 @@ export default function EpisodeList({
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-paper">{episode.title}</p>
-                <p className="num truncate text-[10px] uppercase tracking-wider text-ember">
+                <p className="num truncate text-[11px] uppercase tracking-wider text-paper-2">
                   {episode.showName}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <span className="chip">{episode.audioType === 'upload' ? 'Blob' : 'URL'}</span>
                   {episode.category && <span className="chip chip-accent">{episode.category}</span>}
-                  <span className="num text-[10px] text-paper-3">{longDate(episode.addedAt)}</span>
+                  <span className="num text-[11px] text-paper-3">{longDate(episode.addedAt)}</span>
                 </div>
               </div>
 
