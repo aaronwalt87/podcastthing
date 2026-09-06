@@ -167,14 +167,20 @@ export default async function HomePage() {
       {/* ----------------------------------------------------------- about -- */}
       <section className="shell pb-24">
         <Reveal>
-          <div className="panel p-8 md:p-12">
+          {/* Two columns that both carry weight: the claim on the left, the
+              evidence and the way in on the right. A single capped column left
+              half the panel empty. */}
+          <div className="panel grid gap-8 p-8 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-14 md:p-12">
             <div>
               <p className="eyebrow eyebrow-accent">About this build</p>
-              <p className="display mt-4 max-w-[22ch] text-[clamp(26px,3.4vw,42px)]">
+              <p className="display mt-4 text-[clamp(26px,3.4vw,44px)]">
                 I&rsquo;ve run infrastructure for years. This is what happened when I started
                 writing the code myself.
               </p>
-              <p className="mt-5 max-w-[62ch] text-[15px] leading-relaxed text-paper-2">
+            </div>
+
+            <div>
+              <p className="max-w-[54ch] text-[15px] leading-relaxed text-paper-2">
                 Everything here is fetched, cached and refreshed on a schedule — feeds parsed
                 server-side and deduplicated into Redis, quotes from a live API with a keyless
                 daily-close fallback so the board still renders when the upstream is down, and a
@@ -188,7 +194,6 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-
           </div>
         </Reveal>
       </section>

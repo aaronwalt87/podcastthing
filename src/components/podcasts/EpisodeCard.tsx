@@ -98,7 +98,8 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
             )}
           </div>
 
-          {episode.category && (
+          {/* Featured cards carry the category in their meta row instead. */}
+          {episode.category && !featured && (
             <span className="chip absolute right-3 top-3 bg-ink-950/70 backdrop-blur">
               {episode.category}
             </span>
