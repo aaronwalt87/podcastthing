@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: `${profile.name} — ${profile.tagline}`,
-    description: 'A live news, markets and podcast dashboard, built in public.',
+    description: DESCRIPTION,
   },
   robots: { index: true, follow: true },
 }

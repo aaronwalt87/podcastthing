@@ -206,17 +206,7 @@ export default function PlayerBar() {
               </button>
             )}
 
-            {/* Mute stays reachable at every width — hiding it below lg left the
-                bare `m` shortcut as the only route, which is itself opt-in. */}
-            <button
-              type="button"
-              onClick={toggleMute}
-              className="btn btn-ghost btn-icon lg:hidden"
-              aria-label={muted ? 'Unmute' : 'Mute'}
-              aria-pressed={muted}
-            >
-              <Icon path={muted ? ICONS.muted : ICONS.volume} />
-            </button>
+
           </div>
 
           <div className="hidden sm:flex">
@@ -225,12 +215,14 @@ export default function PlayerBar() {
         </div>
 
         {/* Options */}
-        <div className="hidden items-center gap-1 lg:flex lg:w-52 lg:justify-end">
+        <div className="flex items-center gap-1 lg:w-52 lg:justify-end">
           <button
             type="button"
             onClick={cycleRate}
             className="btn btn-ghost btn-sm num"
-            aria-label={`Playback speed ${rate} times. Activate to change.`}
+            // Must contain the visible text so speech input can target it
+            // (WCAG 2.5.3 Label in Name).
+            aria-label={`Playback speed ${rate}×`}
           >
             {rate}×
           </button>
@@ -250,10 +242,15 @@ export default function PlayerBar() {
             onClick={() => setShortcutsEnabled(!shortcutsEnabled)}
             className="btn btn-ghost btn-sm num"
             aria-pressed={shortcutsEnabled}
-            title="Keyboard shortcuts: space or K to play, J and L to skip, M to mute"
+            aria-label="K — single-key playback shortcuts"
+            aria-describedby="shortcut-help"
           >
             {shortcutsEnabled ? 'K✓' : 'K'}
           </button>
+          <span id="shortcut-help" className="sr-only">
+            When on: space or K plays and pauses, J and the left arrow skip back fifteen seconds,
+            L and the right arrow skip forward thirty, M mutes.
+          </span>
         </div>
       </div>
 

@@ -22,6 +22,14 @@ const RESUME_MIN = 15
 
 export const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2] as const
 
+/**
+ * Elements that receive keyboard activation, and therefore own the keys the
+ * player would otherwise swallow. `[tabindex]` alone would match `<main
+ * tabIndex={-1}>` and silently kill every shortcut after the skip link is used.
+ */
+export const FOCUSABLE_SELECTOR =
+  'button, a[href], summary, input, select, textarea, [role="button"], [role="slider"], [tabindex]:not([tabindex="-1"])'
+
 /* --------------------------------------------------------------- storage -- */
 
 type ProgressMap = Record<string, number>
@@ -110,6 +118,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
    * context (and re-registering the MediaSession handlers) on that cadence.
    */
   const progressRef = useRef<ProgressMap>({})
+  /**
+   * Bumped only when the map changes in a way the UI must reflect — restoring
+   * from storage, and clearing a finished episode. The 5-second persist path
+   * writes the ref without bumping, so the churn this ref exists to avoid does
+   * not come back. Without this, a returning visitor's resume markers never
+   * paint: a ref write schedules no render.
+   */
+  const [progressVersion, setProgressVersion] = useState(0)
 
   /** Position to seek to once metadata for the pending episode has loaded. */
   const pendingSeek = useRef<number | null>(null)
@@ -121,6 +137,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   /* ---------------------------------------------------- restore settings -- */
   useEffect(() => {
     progressRef.current = readJson<ProgressMap>(PROGRESS_KEY, {})
+    setProgressVersion((v) => v + 1)
     setShortcutsEnabledState(readJson<boolean>(SHORTCUTS_KEY, false))
     const storedRate = readJson<number>(RATE_KEY, 1)
     const storedVolume = readJson<number>(VOLUME_KEY, 1)
@@ -167,9 +184,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const resume = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    // The player bar's own play button routes here, directly below the error
+    // banner — so this is the likelier retry path, and it needs the same
+    // reload fallthrough play() has. The element latches its error; calling
+    // play() again would reject silently and leave the banner cleared.
+    if (audio.error && currentEpisode) {
+      play(currentEpisode)
+      return
+    }
+
     setError(null)
-    void audioRef.current?.play().catch(() => {})
-  }, [])
+    void audio.play().catch(() => {})
+    // `play` is declared above and is stable apart from currentEpisode.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEpisode, play])
 
   const toggle = useCallback(
     (episode?: Episode) => {
@@ -249,7 +280,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const progressFor = useCallback((episodeId: string) => progressRef.current[episodeId] ?? 0, [])
+  const progressFor = useCallback(
+    (episodeId: string) => progressRef.current[episodeId] ?? 0,
+    // The version is the dependency — the ref itself is stable by design.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [progressVersion]
+  )
 
   const setShortcutsEnabled = useCallback((enabled: boolean) => {
     setShortcutsEnabledState(enabled)
@@ -344,6 +380,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         // A finished episode should start from the top next time.
         delete progressRef.current[currentEpisode.id]
         writeJson(PROGRESS_KEY, progressRef.current)
+        setProgressVersion((v) => v + 1)
       }
       next()
     }
@@ -434,9 +471,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       // Space, Enter and the arrow keys belong to whatever control has focus.
       // Swallowing them here would break keyboard activation of every button
       // and link on the page.
-      if (target?.closest('button, a, summary, [role="button"], [role="slider"], [tabindex]')) {
-        return
-      }
+      if (target?.closest(FOCUSABLE_SELECTOR)) return
 
       switch (event.key) {
         case ' ':

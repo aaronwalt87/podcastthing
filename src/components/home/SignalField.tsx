@@ -9,6 +9,12 @@ interface SignalFieldProps {
    */
   series: number[]
   className?: string
+  /**
+   * `hero` fills a tall block; `band` compresses the same drawing into a short
+   * horizontal strip, where a hero's proportions would leave the ridge hugging
+   * the floor with half the box empty.
+   */
+  variant?: 'hero' | 'band'
 }
 
 const LAYERS = 5
@@ -26,7 +32,11 @@ function ridge(x: number, seed: number, time: number): number {
  * Layered ridge field. The back layers drift; the front layer is the market
  * series itself, so the artwork is a readout rather than an ornament.
  */
-export default function SignalField({ series, className = '' }: SignalFieldProps) {
+export default function SignalField({
+  series,
+  className = '',
+  variant = 'hero',
+}: SignalFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -70,8 +80,8 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       // Gradients depend only on height, so they are built here, not per frame.
       fills = Array.from({ length: LAYERS }, (_, index) => {
         const depth = index / LAYERS
-        const baseline = height * (0.52 + depth * 0.13)
-        const amplitude = height * (0.16 - depth * 0.022)
+        const baseline = height * (variant === 'band' ? 0.72 + depth * 0.1 : 0.52 + depth * 0.13)
+        const amplitude = height * (variant === 'band' ? 0.3 - depth * 0.04 : 0.16 - depth * 0.022)
         const alpha = 0.5 - depth * 0.4
 
         const fill = ctx.createLinearGradient(0, baseline - amplitude, 0, height)
@@ -84,8 +94,8 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
     const drawGeneratedLayer = (index: number, time: number) => {
       const depth = index / LAYERS
       // Back layers sit higher, move less, and fade out.
-      const baseline = height * (0.52 + depth * 0.13)
-      const amplitude = height * (0.16 - depth * 0.022)
+      const baseline = height * (variant === 'band' ? 0.72 + depth * 0.1 : 0.52 + depth * 0.13)
+      const amplitude = height * (variant === 'band' ? 0.3 - depth * 0.04 : 0.16 - depth * 0.022)
       const alpha = 0.5 - depth * 0.4
 
       ctx.beginPath()
@@ -112,8 +122,8 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
     const drawSeriesLayer = (time: number) => {
       if (normalised.length < 2) return
 
-      const baseline = height * 0.78
-      const amplitude = height * 0.3
+      const baseline = height * (variant === 'band' ? 0.93 : 0.78)
+      const amplitude = height * (variant === 'band' ? 0.78 : 0.3)
       // A slow vertical breath keeps the real line alive without distorting it.
       const breath = reduceMotion ? 0 : Math.sin(time * 0.4) * 2
 
@@ -211,7 +221,7 @@ export default function SignalField({ series, className = '' }: SignalFieldProps
       motionQuery?.removeEventListener('change', onMotionChange)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [series])
+  }, [series, variant])
 
   return (
     <canvas

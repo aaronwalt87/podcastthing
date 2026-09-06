@@ -6,7 +6,10 @@ import type { StockQuote } from '@/types/stocks'
  * so one outlier can't wash out the rest of the board.
  */
 function tint(changePercent: number): string {
-  const magnitude = Math.min(Math.abs(changePercent) / 4, 1)
+  // Capped at ±2%, not ±4%: a typical session moves well under 2%, and the
+  // wider cap compressed every tile into the bottom fifth of the alpha range,
+  // so opacity carried almost no signal.
+  const magnitude = Math.min(Math.abs(changePercent) / 2, 1)
   // The green tint lightens the tile faster than the red one, so its ceiling is
   // lower: past ~0.60 alpha, --paper on the result drops below 4.5:1.
   const alpha = 0.1 + magnitude * (changePercent >= 0 ? 0.45 : 0.55)
@@ -50,10 +53,11 @@ export default function SectorHeatmap({ quotes }: { quotes: StockQuote[] }) {
                   <div
                     key={q.symbol}
                     className="flex min-w-[92px] flex-col justify-between gap-2 rounded-sm border border-hair p-3"
-                    style={{
-                      background: tint(q.changePercent),
-                      flex: `${(1 + Math.min(Math.abs(q.changePercent), 4)).toFixed(2)} 1 0%`,
-                    }}
+                    // Equal widths: width is the strongest channel in a tiled
+                    // layout and would read as position weight, which this is
+                    // not. Magnitude is carried by opacity alone, as the
+                    // caption says.
+                    style={{ background: tint(q.changePercent), flex: '1 1 0%' }}
                   >
                     <p className="num text-xs font-medium text-paper">{q.symbol}</p>
                     <p className="num text-sm text-paper">{pct(q.changePercent)}</p>

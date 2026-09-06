@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { FOCUSABLE_SELECTOR } from '@/context/PlayerContext'
 import type { SearchRecord } from '@/types/search'
 
 const NAV_RECORDS: SearchRecord[] = [
@@ -191,7 +192,7 @@ export default function CommandPalette() {
         // Everything behind the dialog is covered by the backdrop, so focus must
         // not be able to land there.
         const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-          'input, button, [href], [tabindex]:not([tabindex="-1"])'
+          FOCUSABLE_SELECTOR
         )
         if (!focusable || focusable.length === 0) return
         const first = focusable[0]
@@ -257,12 +258,14 @@ export default function CommandPalette() {
           className="max-h-[52vh] overflow-y-auto p-1.5"
         >
           {results.length === 0 ? (
-            <li className="px-3 py-8 text-center text-sm text-paper-3">
-              {failed
-                ? 'The search index is unavailable. Close and reopen to retry.'
-                : loaded
-                  ? 'No matches.'
-                  : 'Loading index…'}
+            <li role="presentation" className="px-3 py-8 text-center text-sm text-paper-3">
+              <p role="status">
+                {failed
+                  ? 'The search index is unavailable. Close and reopen to retry.'
+                  : loaded
+                    ? 'No matches.'
+                    : 'Loading index…'}
+              </p>
             </li>
           ) : (
             results.map((record, i) => (

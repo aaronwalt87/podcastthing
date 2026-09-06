@@ -15,7 +15,7 @@ const BUILD_NOTES: [string, string][] = [
   ],
   [
     'Caching',
-    'Feeds and quotes are fetched by scheduled jobs and cached in Redis, so a page load never waits on sixteen upstream services. A missing or failing cache degrades to an empty state, never to an error page.',
+    'Feeds and quotes are fetched by scheduled jobs and cached in Redis, so a page load never waits on a dozen-plus upstream services — and one slow publisher cannot hold up the rest. A missing or failing cache degrades to an empty state, never to an error page.',
   ],
   [
     'Charts',
@@ -40,9 +40,7 @@ export default function AboutPage() {
         <p className="eyebrow eyebrow-accent">Who is building this</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">{profile.name}</h1>
         <p className="mt-6 max-w-[58ch] text-[17px] leading-relaxed text-paper-2">
-          I have spent my career keeping other people&rsquo;s software running — hosting, IT,
-          support, and the delivery process around all three. Recently I started writing the
-          software myself. This site is where I do that in public.
+          {profile.standfirst}
         </p>
       </header>
 
@@ -51,7 +49,7 @@ export default function AboutPage() {
           {profile.about.map((section, i) => (
             <Reveal key={section.title} delay={i * 60}>
               <section>
-                <h2 className="eyebrow">{section.title}</h2>
+                <h2 className="display text-[clamp(22px,2.6vw,30px)]">{section.title}</h2>
                 <p className="mt-3 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
                   {section.body}
                 </p>
@@ -59,9 +57,22 @@ export default function AboutPage() {
             </Reveal>
           ))}
 
+          {profile.lookingFor.trim().length > 0 && (
+            <Reveal>
+              <section>
+                <h2 className="display text-[clamp(22px,2.6vw,30px)]">
+                  What I&rsquo;m looking for
+                </h2>
+                <p className="mt-3 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
+                  {profile.lookingFor}
+                </p>
+              </section>
+            </Reveal>
+          )}
+
           <Reveal>
             <section>
-              <h2 className="eyebrow">How this one is built</h2>
+              <h2 className="display text-[clamp(22px,2.6vw,30px)]">How this one is built</h2>
               <dl className="mt-5 flex flex-col">
                 {BUILD_NOTES.map(([term, detail]) => (
                   <div
@@ -87,7 +98,7 @@ export default function AboutPage() {
             {links.length > 0 ? (
               <>
                 <p className="eyebrow mt-7">Reach me</p>
-                <ul className="mt-3 flex flex-col gap-2.5">
+                <ul role="list" className="mt-3 flex flex-col gap-2.5">
                   {links.map((link) => (
                     <li key={link.label}>
                       <a
@@ -101,18 +112,20 @@ export default function AboutPage() {
                   ))}
                 </ul>
               </>
-            ) : (
+            ) : process.env.NODE_ENV !== 'production' ? (
+              // Development only — a visitor must never be shown a TODO, least
+              // of all in the slot where the contact details belong.
               <p className="mt-7 text-[13px] leading-relaxed text-paper-3">
-                Contact links are set in{' '}
-                <code className="num text-ember">src/lib/profile.ts</code> — fill one in and it
-                appears here and in the footer.
+                No contact links yet — set them in{' '}
+                <code className="num text-ember">src/lib/profile.ts</code>. This note is
+                development-only and never renders in production.
               </p>
-            )}
+            ) : null}
           </div>
 
           <div className="panel-flat p-6">
             <p className="eyebrow">Elsewhere on this site</p>
-            <ul className="mt-3 flex flex-col gap-2.5">
+            <ul role="list" className="mt-3 flex flex-col gap-2.5">
               {[
                 { label: 'The news feed', href: '/news' },
                 { label: 'The market board', href: '/markets' },
@@ -132,7 +145,22 @@ export default function AboutPage() {
         </aside>
       </div>
 
-      <div className="pb-8" />
+      <div className="mt-16 border-t border-hair py-10">
+        <p className="display max-w-[24ch] text-[clamp(22px,2.6vw,32px)]">
+          Want to argue with a decision on this page?
+        </p>
+        <p className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-paper-2">
+          That is the conversation I want to have.{' '}
+          {links.length > 0
+            ? 'Any of the links above reaches me.'
+            : 'The source is the argument — read it and tell me where I am wrong.'}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/markets" className="btn btn-sm">
+            See it working <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }

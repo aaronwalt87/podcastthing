@@ -99,7 +99,9 @@ export default function MarketStrip({ snapshot }: MarketStripProps) {
           type="button"
           onClick={() => setPaused((p) => !p)}
           aria-pressed={paused}
-          aria-label={paused ? 'Resume the market tape' : 'Pause the market tape'}
+          // Fixed label: aria-pressed already carries the state, and flipping
+          // both makes a screen reader announce it twice, contradictorily.
+          aria-label="Pause the market tape"
           className="flex shrink-0 items-center border-l border-hair px-3.5 text-paper-3 transition-colors hover:text-paper"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

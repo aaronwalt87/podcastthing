@@ -19,7 +19,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category } = body
+    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category, transcriptUrl, sourceUrl } =
+      body
 
     if (!title || !showName || !audioUrl || !audioType) {
       return NextResponse.json(
@@ -43,6 +44,8 @@ export async function POST(request: Request) {
       audioType,
       thumbnailUrl: thumbnailUrl || undefined,
       category: category || undefined,
+      transcriptUrl: transcriptUrl || undefined,
+      sourceUrl: sourceUrl || undefined,
     })
 
     return NextResponse.json(episode, { status: 201 })

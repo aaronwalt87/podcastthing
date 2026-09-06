@@ -17,8 +17,8 @@ const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; hideBelow
 ]
 
 const SOURCE_LABEL: Record<StockQuote['source'], string> = {
-  finnhub: 'Live',
-  stooq: 'EOD close',
+  finnhub: 'live quotes',
+  stooq: 'end-of-day closes',
 }
 
 export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
@@ -52,6 +52,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
   if (quotes.length === 0) return null
 
   const activeLabel = COLUMNS.find((c) => c.key === sortKey)?.label ?? sortKey
+  const sources = Array.from(new Set(quotes.map((q) => q.source)))
 
   return (
     <div className="panel relative overflow-hidden">
@@ -63,8 +64,18 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[340px] border-collapse text-sm md:min-w-[620px]">
-          <caption className="sr-only">
-            Tracked technology equities, sorted by {sortKey} {sortDir === 'asc' ? 'ascending' : 'descending'}
+          {/* Provenance belongs on the table, not repeated in every row — a
+              column where every cell holds the same value carries no
+              information and adds sixteen high-contrast boxes. */}
+          <caption className="caption-bottom px-4 py-3 text-left">
+            <span className="eyebrow">
+              {sources.length === 1
+                ? `All quotes: ${SOURCE_LABEL[sources[0]]}`
+                : sources.map((src) => SOURCE_LABEL[src]).join(' · ')}
+            </span>
+            <span className="sr-only">
+              . Sorted by {sortKey}, {sortDir === 'asc' ? 'ascending' : 'descending'}.
+            </span>
           </caption>
           <thead>
             <tr className="border-b border-hair">
@@ -94,9 +105,6 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                   </th>
                 )
               })}
-              <th scope="col" className="hidden px-4 py-3 text-left md:table-cell">
-                <span className="eyebrow">Source</span>
-              </th>
               <th scope="col" className="hidden px-4 py-3 text-right sm:table-cell">
                 <span className="eyebrow">60d</span>
               </th>
@@ -122,9 +130,6 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                     showAbsolute
                     absoluteFrom="sm"
                   />
-                </td>
-                <td className="hidden px-4 py-3 md:table-cell">
-                  <span className="chip">{SOURCE_LABEL[q.source]}</span>
                 </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <div className="flex justify-end">

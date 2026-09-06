@@ -28,11 +28,19 @@ export default function Reveal({ children, delay = 0, className, as = 'div' }: R
     const node = ref.current
     if (!node) return
 
-    const reduceMotion =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const motionQuery =
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-reduced-motion: reduce)')
+        : null
 
-    if (reduceMotion || typeof IntersectionObserver === 'undefined') return
+    // Toggling the OS setting mid-session must not leave content hidden.
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) node.setAttribute('data-shown', 'true')
+    }
+    motionQuery?.addEventListener('change', onMotionChange)
+    const detachMotion = () => motionQuery?.removeEventListener('change', onMotionChange)
+
+    if (motionQuery?.matches || typeof IntersectionObserver === 'undefined') return detachMotion
 
     // Already on screen (or nearly): leave it alone.
     if (node.getBoundingClientRect().top < window.innerHeight * HIDE_THRESHOLD) return
@@ -69,6 +77,7 @@ export default function Reveal({ children, delay = 0, className, as = 'div' }: R
     return () => {
       observer.disconnect()
       window.clearTimeout(failsafe)
+      detachMotion()
     }
   }, [])
 

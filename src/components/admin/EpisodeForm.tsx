@@ -49,6 +49,8 @@ export default function EpisodeForm({
     audioUrl: episode?.audioUrl ?? '',
     thumbnailUrl: episode?.thumbnailUrl ?? '',
     category: episode?.category ?? '',
+    transcriptUrl: episode?.transcriptUrl ?? '',
+    sourceUrl: episode?.sourceUrl ?? '',
     audioType: episode?.audioType ?? ('url' as 'upload' | 'url'),
   })
   const [file, setFile] = useState<File | null>(null)
@@ -104,6 +106,8 @@ export default function EpisodeForm({
           audioType: form.audioType,
           thumbnailUrl: form.thumbnailUrl.trim() || undefined,
           category: form.category.trim() || undefined,
+          transcriptUrl: form.transcriptUrl.trim() || undefined,
+          sourceUrl: form.sourceUrl.trim() || undefined,
         }),
       })
 
@@ -250,6 +254,36 @@ export default function EpisodeForm({
             ))}
           </datalist>
         )}
+      </Field>
+
+      <Field
+        id={`${uid}-transcript`}
+        label="Transcript URL (optional)"
+        hint="Audio-only content needs a text alternative (WCAG 1.2.1). Link the publisher's transcript where one exists — many podcast feeds carry one."
+      >
+        <input
+          id={`${uid}-transcript`}
+          type="url"
+          value={form.transcriptUrl}
+          onChange={(e) => update('transcriptUrl', e.target.value)}
+          placeholder="https://example.com/episode/transcript"
+          className="field"
+        />
+      </Field>
+
+      <Field
+        id={`${uid}-source`}
+        label="Episode page (optional)"
+        hint="Shown when there is no transcript, so a listener still has somewhere to go."
+      >
+        <input
+          id={`${uid}-source`}
+          type="url"
+          value={form.sourceUrl}
+          onChange={(e) => update('sourceUrl', e.target.value)}
+          placeholder="https://example.com/episode"
+          className="field"
+        />
       </Field>
 
       {error && (

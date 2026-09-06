@@ -1,5 +1,5 @@
 import 'server-only'
-import { getRedis } from './redis'
+import { acquireLock, getRedis } from './redis'
 import { sampleNews, sampleDataEnabled } from './sample-data'
 import type { NewsItem, NewsCategory } from '@/types/news'
 
@@ -120,7 +120,7 @@ function normaliseLink(link: string): string {
   }
 }
 
-function makeId(_source: string, link: string): string {
+function makeId(link: string): string {
   const str = normaliseLink(link)
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57
   for (let i = 0; i < str.length; i++) {
@@ -144,7 +144,7 @@ function parseRss2Feed(xml: string, sourceName: string, category: NewsCategory):
     const summary = stripHtml(description).slice(0, 200)
     const publishedAt = pubDate ? new Date(pubDate).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
+    items.push({ id: makeId(link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
@@ -159,7 +159,7 @@ function parseAtomFeed(xml: string, sourceName: string, category: NewsCategory):
     const summary = stripHtml(extractField(block, 'summary') || extractField(block, 'content')).slice(0, 200)
     const publishedAt = updated ? new Date(updated).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
+    items.push({ id: makeId(link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
@@ -212,7 +212,7 @@ async function fetchHNQuery(query: string, category: NewsCategory): Promise<News
     return (json.hits ?? [])
       .filter((h) => h.url && h.points > 5)
       .map((h) => ({
-        id: makeId('HackerNews', h.url!),
+        id: makeId(h.url!),
         title: h.title,
         link: h.url!,
         source: 'Hacker News',
@@ -265,7 +265,16 @@ export async function getCachedNews(): Promise<NewsItem[]> {
 
   try {
     const raw = await redis.get(NEWS_KEY)
-    if (!raw) return []
+    if (!raw) {
+      // A cold cache — first deploy, a flush, or a key rename — would otherwise
+      // leave the page blank until the next daily cron. Warm it in the
+      // background so the following request is served, and take a lock so a
+      // spike triggers one refresh rather than sixty.
+      if (await acquireLock('lock:news:refresh', 120)) {
+        void refreshNews().catch((err) => console.error('[news] warm refresh failed', err))
+      }
+      return []
+    }
     if (Array.isArray(raw)) return raw as NewsItem[]
     if (typeof raw === 'string') return JSON.parse(raw) as NewsItem[]
     return []

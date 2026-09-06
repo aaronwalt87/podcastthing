@@ -1,7 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
 import EpisodeCard from './EpisodeCard'
+import EpisodeIndex from './EpisodeIndex'
 import type { Episode } from '@/types/episode'
 
 type SortKey = 'newest' | 'oldest' | 'title'
@@ -11,6 +13,9 @@ interface EpisodeArchiveProps {
   categories: string[]
   shows: string[]
 }
+
+/** Rendered at once; the rest arrive on demand. Keeps a large archive usable. */
+const PAGE_SIZE = 40
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: 'newest', label: 'Newest' },
@@ -23,6 +28,7 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
   const [category, setCategory] = useState('All')
   const [show, setShow] = useState('All')
   const [sort, setSort] = useState<SortKey>('newest')
+  const [visible, setVisible] = useState(PAGE_SIZE)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -46,6 +52,9 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
     }
   }, [episodes, query, category, show, sort])
 
+  // Any change to the result set starts the window over.
+  useEffect(() => setVisible(PAGE_SIZE), [query, category, show, sort])
+
   const reset = () => {
     setQuery('')
     setCategory('All')
@@ -63,6 +72,14 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
           This is a hand-picked list of episodes on infrastructure, AI, and how technology work
           actually gets done — not a firehose. New ones land as they turn out to be worth the time.
         </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link href="/news" className="btn btn-sm">
+            Read the headlines <span aria-hidden="true">→</span>
+          </Link>
+          <Link href="/markets" className="btn btn-sm">
+            See the board <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -173,23 +190,30 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
             Clear filters
           </button>
         </div>
-      ) : filtered.length <= 2 ? (
-        // One or two results get the wide treatment rather than a lonely
-        // third-width card with an empty row beside it.
-        <div className="flex flex-col gap-5">
-          {filtered.map((ep) => (
-            <EpisodeCard key={ep.id} episode={ep} queue={filtered} featured />
-          ))}
-        </div>
       ) : (
-        <div
-          className={`grid grid-cols-1 gap-5 sm:grid-cols-2 ${
-            filtered.length === 4 ? '' : 'lg:grid-cols-3'
-          }`}
-        >
-          {filtered.map((ep) => (
-            <EpisodeCard key={ep.id} episode={ep} queue={filtered} />
-          ))}
+        // A lead card and a numbered index, not a card grid: an archive scans
+        // in one column, the row height stops depending on how a title wraps,
+        // and a single filtered result can never be a lonely third-width card.
+        <div className="flex flex-col gap-2">
+          <EpisodeCard episode={filtered[0]} queue={filtered} featured />
+          {filtered.length > 1 && (
+            <EpisodeIndex episodes={filtered.slice(1, visible)} queue={filtered} startAt={2} />
+          )}
+
+          {filtered.length > visible && (
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                className="btn"
+              >
+                Show more episodes
+              </button>
+              <p className="eyebrow">
+                Showing {visible} of {filtered.length}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

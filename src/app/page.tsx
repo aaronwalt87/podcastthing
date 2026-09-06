@@ -3,7 +3,7 @@ import { getAllEpisodes } from '@/lib/episodes'
 import { getCachedNews } from '@/lib/news'
 import { getMarketSnapshot } from '@/lib/stocks'
 import Hero from '@/components/home/Hero'
-import SignalField from '@/components/home/SignalField'
+import SignalPlate from '@/components/home/SignalPlate'
 import MarketStrip from '@/components/markets/MarketStrip'
 import QuoteCard from '@/components/markets/QuoteCard'
 import NewsDigest from '@/components/news/NewsDigest'
@@ -27,6 +27,9 @@ export default async function HomePage() {
 
   const [featured, ...rest] = episodes
   const indexed = rest.slice(0, 4)
+  // Only what is on the page: passing the full archive would serialise every
+  // episode's fields into the payload twice, growing without bound.
+  const homeQueue = featured ? [featured, ...indexed] : []
 
   const indices = snapshot.quotes.filter((q) => q.sector === 'Index')
   const movers = snapshot.quotes
@@ -107,28 +110,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* The ridge returns as a full-bleed band so the page has a second event
-          and the hero canvas reads as an identity rather than decoration. */}
-      <div className="relative h-[132px] overflow-hidden border-y border-hair">
-        <div className="absolute inset-0 -z-10 opacity-70">
-          <SignalField series={ridge?.history ?? []} />
-        </div>
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(90deg, var(--ink-950) 0%, rgba(7,8,10,0.35) 30%, rgba(7,8,10,0.35) 70%, var(--ink-950) 100%)',
-          }}
-        />
-      </div>
+      {/* The ridge returns as a labelled plate carrying the next section's
+          index — so it introduces something rather than floating between two
+          voids, and the drawing reads as a readout rather than decoration. */}
+      <SignalPlate quote={ridge} height={172}>
+        <p className="eyebrow flex items-center gap-2">
+          <span className="eyebrow-accent">02</span>
+          <span aria-hidden="true" className="h-px w-6 bg-hair-2" />
+          Listening archive
+        </p>
+      </SignalPlate>
 
       {/* --------------------------------------------------------- archive -- */}
-      <section id="archive" className="shell py-20 md:pb-28 md:pt-32">
+      <section id="archive" className="shell pb-20 pt-10 md:pb-28 md:pt-14">
         <Reveal>
           <SectionHeader
-            index="02"
-            eyebrow="Listening archive"
             title="Episodes worth finishing"
             description="Hand-picked, not a feed — the ones I'd send a colleague, on infrastructure, AI, and how technology work actually gets done. Playback picks up where you left it."
             action={{ label: 'Full archive', href: '/podcasts' }}
@@ -155,13 +151,13 @@ export default async function HomePage() {
           <div className="mt-10 flex flex-col gap-2">
             {featured && (
               <Reveal>
-                <EpisodeCard episode={featured} queue={episodes} featured />
+                <EpisodeCard episode={featured} queue={homeQueue} featured />
               </Reveal>
             )}
 
             {indexed.length > 0 && (
               <Reveal delay={80}>
-                <EpisodeIndex episodes={indexed} queue={episodes} startAt={2} />
+                <EpisodeIndex episodes={indexed} queue={homeQueue} startAt={2} />
               </Reveal>
             )}
           </div>
@@ -171,8 +167,8 @@ export default async function HomePage() {
       {/* ----------------------------------------------------------- about -- */}
       <section className="shell pb-24">
         <Reveal>
-          <div className="panel grid gap-10 p-8 md:grid-cols-[1fr_auto] md:items-center md:p-12">
-            <div className="max-w-2xl">
+          <div className="panel p-8 md:p-12">
+            <div>
               <p className="eyebrow eyebrow-accent">About this build</p>
               <p className="display mt-4 max-w-[22ch] text-[clamp(26px,3.4vw,42px)]">
                 I&rsquo;ve run infrastructure for years. This is what happened when I started
@@ -193,20 +189,6 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <ul className="flex flex-col gap-3 text-sm text-paper-2 md:w-56">
-              {[
-                'Next.js App Router',
-                'Server components by default',
-                'Upstash Redis cache',
-                'Scheduled refresh jobs',
-                'No client-side chart library',
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <span aria-hidden="true" className="mt-2 h-px w-3 shrink-0 bg-ember" />
-                  {item}
-                </li>
-              ))}
-            </ul>
           </div>
         </Reveal>
       </section>

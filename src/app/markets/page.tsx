@@ -6,6 +6,7 @@ import MarketTable from '@/components/markets/MarketTable'
 import SectorHeatmap from '@/components/markets/SectorHeatmap'
 import Delta from '@/components/markets/Delta'
 import Reveal from '@/components/ui/Reveal'
+import SignalPlate from '@/components/home/SignalPlate'
 import SectionHeader from '@/components/ui/SectionHeader'
 import { timeAgo } from '@/lib/format'
 import Link from 'next/link'
@@ -73,12 +74,18 @@ export default async function MarketsPage() {
         </div>
       ) : (
         <>
+          <SignalPlate
+            quote={snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null}
+            height={188}
+            className="mt-10"
+          />
+
           {/* Indices + breadth */}
-          <section className="mt-12" aria-label="Index proxies and breadth">
+          <section className="mt-6" aria-label="Index proxies and breadth">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {indices.map((quote) => (
                 <Reveal key={quote.symbol} className="h-full">
-                  <QuoteCard quote={quote} emphasis now={now} showSource />
+                  <QuoteCard quote={quote} emphasis now={now} />
                 </Reveal>
               ))}
 

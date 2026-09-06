@@ -53,7 +53,7 @@ export default function Hero({
           className="absolute inset-0 hidden md:block"
           style={{
             background:
-              'linear-gradient(90deg, var(--ink-950) 0%, var(--ink-950) 18%, rgba(7,8,10,0.88) 34%, rgba(7,8,10,0.12) 60%, transparent 100%)',
+              'linear-gradient(90deg, var(--ink-950) 0%, var(--ink-950) 20%, rgba(7,8,10,0.9) 34%, rgba(7,8,10,0.62) 48%, rgba(7,8,10,0.12) 68%, transparent 100%)',
           }}
         />
       </div>
@@ -92,11 +92,8 @@ export default function Hero({
           <Link href="/news" className="btn btn-primary">
             Open the feed
           </Link>
-          <Link href="/about" className="btn">
-            Who I am <span aria-hidden="true">→</span>
-          </Link>
 
-          {latestEpisode && (
+          {latestEpisode && latestEpisode.audioUrl.trim().length > 0 && (
             <div className="flex min-w-0 items-center gap-3 rounded-md border border-hair bg-ink-900/70 py-2 pl-2 pr-5 backdrop-blur">
               <PlayButton episode={latestEpisode} size="md" />
               <span className="min-w-0">
@@ -109,18 +106,19 @@ export default function Hero({
           )}
         </div>
 
-        <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-hair pt-6 sm:grid-cols-4 lg:mt-16">
+        <dl className="mt-12 grid grid-cols-3 gap-6 border-t border-hair pt-6 lg:mt-16">
           <Stat label="Headlines tracked" value={String(headlineCount)} />
           <Stat label="Sources" value={String(sourceCount)} />
           <Stat
-            label="Market · advancing"
-            value={String(snapshot.advancers)}
-            tone={snapshot.advancers > 0 ? 'var(--pos)' : undefined}
-          />
-          <Stat
-            label="Market · declining"
-            value={String(snapshot.decliners)}
-            tone={snapshot.decliners > 0 ? 'var(--neg)' : undefined}
+            label="Market breadth"
+            value={
+              snapshot.advancers + snapshot.decliners > 0
+                ? `${snapshot.advancers}/${snapshot.advancers + snapshot.decliners} up`
+                : '—'
+            }
+            tone={
+              snapshot.advancers >= snapshot.decliners ? 'var(--pos)' : 'var(--neg)'
+            }
           />
         </dl>
       </div>

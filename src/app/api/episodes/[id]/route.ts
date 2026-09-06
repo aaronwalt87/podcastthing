@@ -30,7 +30,8 @@ export async function PUT(
 ) {
   try {
     const body = await request.json()
-    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category } = body
+    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category, transcriptUrl, sourceUrl } =
+      body
 
     const updated = await updateEpisode(params.id, {
       ...(title !== undefined && { title }),
@@ -40,6 +41,8 @@ export async function PUT(
       ...(audioType !== undefined && { audioType }),
       ...(thumbnailUrl !== undefined && { thumbnailUrl }),
       ...(category !== undefined && { category }),
+      ...(transcriptUrl !== undefined && { transcriptUrl }),
+      ...(sourceUrl !== undefined && { sourceUrl }),
     })
 
     if (!updated) {

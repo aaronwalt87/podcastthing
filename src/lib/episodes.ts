@@ -20,6 +20,8 @@ function toEpisode(raw: Record<string, string> | null | undefined): Episode | nu
     audioType: (raw.audioType as Episode['audioType']) ?? 'url',
     thumbnailUrl: raw.thumbnailUrl || undefined,
     category: raw.category || undefined,
+    transcriptUrl: raw.transcriptUrl || undefined,
+    sourceUrl: raw.sourceUrl || undefined,
     addedAt: Number(raw.addedAt) || 0,
   }
 }
@@ -79,6 +81,8 @@ function toFields(episode: Episode): Record<string, string> {
   }
   if (episode.thumbnailUrl) fields.thumbnailUrl = episode.thumbnailUrl
   if (episode.category) fields.category = episode.category
+  if (episode.transcriptUrl) fields.transcriptUrl = episode.transcriptUrl
+  if (episode.sourceUrl) fields.sourceUrl = episode.sourceUrl
   return fields
 }
 
@@ -111,8 +115,9 @@ export async function updateEpisode(
 
   // Optional fields cleared in this update must be removed, not left stale.
   const toClear: string[] = []
-  if (!updated.thumbnailUrl && 'thumbnailUrl' in input) toClear.push('thumbnailUrl')
-  if (!updated.category && 'category' in input) toClear.push('category')
+  for (const field of ['thumbnailUrl', 'category', 'transcriptUrl', 'sourceUrl'] as const) {
+    if (!updated[field] && field in input) toClear.push(field)
+  }
 
   await redis.hset(episodeKey(id), fields)
   if (toClear.length > 0) {

@@ -10,18 +10,19 @@ export default function DevDataBanner() {
   if (!sampleDataEnabled() || isRedisConfigured()) return null
 
   return (
+    // Static, not fixed: a floating banner would sit over anything that
+    // scroll-padding-top brought into view, and would paint over the palette.
     <div
-      role="status"
-      className="fixed inset-x-0 z-[130] border-b px-4 py-1.5 text-center text-[11px] leading-tight"
-      style={{
-        top: 'var(--header-h)',
-        background: 'var(--warn-ghost)',
-        borderColor: 'var(--warn-edge)',
-        color: 'var(--warn-text)',
-      }}
+      className="border-b border-hair px-4 py-1.5 text-center"
+      style={{ marginTop: 'var(--header-h)', background: 'var(--ink-900)' }}
     >
-      <strong>Local development — sample data.</strong> Headlines, quotes and episodes on this page
-      are fixtures. Publisher names are placeholders and the stories are invented.
+      <span className="eyebrow" style={{ color: 'var(--warn-text)' }}>
+        Local development · sample data
+      </span>{' '}
+      <span className="text-[11px] text-paper-3">
+        News, market and episode data across this site are fixtures — publisher names are
+        placeholders and the headlines are invented.
+      </span>
     </div>
   )
 }

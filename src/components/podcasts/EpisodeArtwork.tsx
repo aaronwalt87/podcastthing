@@ -1,12 +1,16 @@
 import type { Episode } from '@/types/episode'
 
 /**
- * Hues are drawn from a curated ramp rather than the full wheel: two
- * ember-adjacent warms and three steel blues that sit beside --cool. A free
- * `hash % 360` produced olive, magenta and mid-green covers that were the
- * loudest colour on a page whose system allows exactly one accent.
+ * Hues come from a curated ramp rather than the full wheel — ember-adjacent
+ * warms and the steel band that sits beside --cool. Seven entries so a
+ * collision needs eight distinct shows.
+ *
+ * Lightness matters as much as hue here: an earlier pass dropped it far enough
+ * that every cover read as the same near-black murk against --ink-800, which
+ * looks like an image that failed to load. These values keep each cover clearly
+ * separated from the well while staying inside the one-accent system.
  */
-const RAMP = [14, 26, 202, 214, 236]
+const RAMP = [12, 24, 36, 198, 210, 222, 240]
 
 /** Deterministic index from the show name, so a show keeps one identity. */
 function hashOf(seed: string): number {
@@ -75,8 +79,13 @@ export default function EpisodeArtwork({
       className={`flex h-full w-full items-center justify-center ${className}`}
       style={{
         background: `
-          radial-gradient(120% 90% at 20% 0%, hsl(${hue} 34% 24% / 0.92), transparent 62%),
-          radial-gradient(100% 80% at 90% 100%, hsl(${(hue + 18) % 360} 40% 17% / 0.85), transparent 64%),
+          radial-gradient(120% 90% at 18% 0%, hsl(${hue} 42% 30% / 0.95), transparent 64%),
+          radial-gradient(100% 85% at 92% 100%, hsl(${(hue + 42) % 360} 38% 14% / 0.9), transparent 66%),
+          repeating-linear-gradient(
+            ${(hashOf(seed) % 4) * 45}deg,
+            rgba(255,255,255,0.04) 0 1px,
+            transparent 1px 7px
+          ),
           var(--ink-800)
         `,
       }}
@@ -84,7 +93,7 @@ export default function EpisodeArtwork({
     >
       <span
         className={`num font-medium tracking-widest ${MARK_SIZE[size]}`}
-        style={{ color: `hsl(${hue} 26% 76% / 0.55)` }}
+        style={{ color: `hsl(${hue} 30% 82% / 0.62)` }}
       >
         {initials}
       </span>

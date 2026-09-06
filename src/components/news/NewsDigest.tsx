@@ -9,8 +9,10 @@ interface NewsDigestProps {
 }
 
 /**
- * Homepage cut of the feed. Takes the two newest per category before filling
- * with whatever else is recent, so one busy source can't own the whole panel.
+ * Homepage cut of the feed: a round-robin across categories, newest first
+ * within each, so one busy source cannot own the whole panel. Rows therefore
+ * are NOT in strict time order — the header says "across sections" so the
+ * ordering reads as editorial rather than broken.
  */
 export default function NewsDigest({ items, now, limit = 8 }: NewsDigestProps) {
   // Round-robin across categories, newest first within each. Sorting the
@@ -53,7 +55,7 @@ export default function NewsDigest({ items, now, limit = 8 }: NewsDigestProps) {
     <div className="panel flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-2.5 border-b border-hair px-4 py-3">
         <span className="pulse" aria-hidden="true" />
-        <span className="eyebrow">Incoming</span>
+        <span className="eyebrow">Incoming · across sections</span>
         <span className="num ml-auto text-[11px] text-paper-3">{items.length} tracked</span>
       </div>
 

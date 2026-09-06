@@ -31,10 +31,14 @@
   /* Ink on canvas — warm whites keep the dark UI from going clinical */
   --paper: #f2f0ec;
   --paper-2: #9aa4ae;
-  /* 5.6:1 on --ink-950 and 4.6:1 on --ink-700, the darkest and lightest
-     surfaces it sits on. The previous #646d79 was 3.5:1 — below AA on every
-     surface — while carrying most of the site's labels and metadata. */
-  --paper-3: #7f8895;
+  /* 5.2:1 on --ink-950 and 4.8:1 on --ink-850, the surfaces it actually sits
+     on. The original #646d79 was 3.5:1 — below AA everywhere — while carrying
+     most of the site's labels and metadata.
+     It is also held a step below --paper-2 (1.5:1 between them) so the three
+     ink levels stay distinguishable from each other, not just from the ground.
+     Tertiary text leans on size as well as colour; do not brighten this to
+     close the gap. */
+  --paper-3: #78828f;
 
   /* Signal — the one accent. Instrument backlight / Colorado ember. */
   --ember: #ff6a2b;
@@ -91,6 +95,9 @@
 }
 
 html {
+  /* Reserve the scrollbar so locking body scroll for the palette does not
+     shift the page horizontally. */
+  scrollbar-gutter: stable;
   scroll-behavior: smooth;
   /* Keep anchored sections and focused elements clear of the fixed header
      and the fixed player bar. */

@@ -38,3 +38,21 @@ export function getRedis(): Redis | null {
 
   return client
 }
+
+/**
+ * Take a short-lived lock so a traffic spike against a cold cache triggers one
+ * refresh rather than one per request. Returns false when the lock is already
+ * held — or when there is no store, since without one there is nothing to warm.
+ */
+export async function acquireLock(key: string, seconds: number): Promise<boolean> {
+  const redis = getRedis()
+  if (!redis) return false
+
+  try {
+    const result = await redis.set(key, '1', { nx: true, ex: seconds })
+    return result === 'OK'
+  } catch (err) {
+    console.error('[redis] lock failed', err)
+    return false
+  }
+}

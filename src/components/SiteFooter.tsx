@@ -37,7 +37,7 @@ export default function SiteFooter() {
 
         <nav aria-label="Sections">
           <p className="eyebrow">Sections</p>
-          <ul className="mt-4 flex flex-col gap-2.5">
+          <ul role="list" className="mt-4 flex flex-col gap-2.5">
             {SECTIONS.map((link) => (
               <li key={link.href}>
                 <Link
@@ -55,7 +55,7 @@ export default function SiteFooter() {
           {contact.length > 0 ? (
             <>
               <p className="eyebrow">Elsewhere</p>
-              <ul className="mt-4 flex flex-col gap-2.5">
+              <ul role="list" className="mt-4 flex flex-col gap-2.5">
                 {contact.map((link) => (
                   <li key={link.label}>
                     <a
@@ -72,7 +72,7 @@ export default function SiteFooter() {
           ) : (
             <>
               <p className="eyebrow">Sources</p>
-              <ul className="mt-4 flex flex-col gap-2.5">
+              <ul role="list" className="mt-4 flex flex-col gap-2.5">
                 {SOURCES.map((link) => (
                   <li key={link.href}>
                     <a

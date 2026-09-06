@@ -5,6 +5,7 @@ import { usePlayer, usePlayerClock } from '@/context/PlayerContext'
 import Spotlight from '@/components/ui/Spotlight'
 import PlayButton from './PlayButton'
 import EpisodeArtwork from './EpisodeArtwork'
+import TranscriptLink from './TranscriptLink'
 import { longDate } from '@/lib/format'
 import type { Episode } from '@/types/episode'
 
@@ -89,7 +90,11 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
               size={featured ? 'lg' : 'md'}
             />
             {isCurrent && (
-              <span className="chip chip-accent">{isPlaying ? 'Playing' : 'Paused'}</span>
+              // Opaque backdrop: chips sit over arbitrary remote artwork, where
+              // a translucent fill can land at 3.3:1.
+              <span className="chip chip-accent bg-ink-950/80 backdrop-blur">
+                {isPlaying ? 'Playing' : 'Paused'}
+              </span>
             )}
           </div>
 
@@ -118,6 +123,12 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
             >
               {longDate(episode.addedAt)}
             </time>
+            {episode.audioUrl.trim().length === 0 && (
+              <>
+                <span aria-hidden="true" className="h-2.5 w-px bg-hair-2" />
+                <span className="num text-[11px] text-paper-3">No audio</span>
+              </>
+            )}
           </div>
 
           <h3
@@ -139,10 +150,10 @@ function EpisodeCard({ episode, queue, featured = false }: EpisodeCardProps) {
           )}
 
           {featured && (
-            <span className="eyebrow mt-2 inline-flex items-center gap-2 text-ember">
-              {isCurrent && isPlaying ? 'Now playing' : 'Play episode'}
-              <span aria-hidden="true">→</span>
-            </span>
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
+              <TranscriptLink episode={episode} />
+              {episode.category && <span className="chip">{episode.category}</span>}
+            </div>
           )}
         </div>
       </article>

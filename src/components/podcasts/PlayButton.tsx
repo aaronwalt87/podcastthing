@@ -34,17 +34,10 @@ function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonP
     else play(episode, queue)
   }
 
-  if (!playable) {
-    return (
-      <span
-        className={`chip shrink-0 ${className}`}
-        style={{ height: SIZES[size].box, paddingInline: 10 }}
-        title="This episode has no audio source"
-      >
-        No audio
-      </span>
-    )
-  }
+  // Nothing is rendered in the play slot: a full-weight badge where the primary
+  // affordance goes reads as breakage. The absence is stated in the meta line
+  // instead (see EpisodeCard / EpisodeIndex).
+  if (!playable) return null
 
   return (
     <button

@@ -1,5 +1,5 @@
 import 'server-only'
-import { getRedis } from './redis'
+import { acquireLock, getRedis } from './redis'
 import { sampleMarket, sampleDataEnabled } from './sample-data'
 import type { MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
 
@@ -261,7 +261,14 @@ export async function getMarketSnapshot(): Promise<MarketSnapshot> {
 
   try {
     const raw = await redis.get(STOCK_KEY)
-    if (!raw) return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+    if (!raw) {
+      // See the note in getCachedNews: warm a cold cache rather than serving an
+      // empty board until the next scheduled run.
+      if (await acquireLock('lock:stocks:refresh', 180)) {
+        void refreshStocks().catch((err) => console.error('[stocks] warm refresh failed', err))
+      }
+      return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+    }
 
     const parsed = (typeof raw === 'string' ? JSON.parse(raw) : raw) as MarketSnapshot
     if (!parsed || !Array.isArray(parsed.quotes)) {
