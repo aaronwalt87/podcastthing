@@ -1,494 +1,667 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+/* ============================================================================
+   SIGNAL — design system for aaronwalters.dev
+   One token set. One accent. Every surface derives from these values.
+   Components must reference tokens (or Tailwind utilities that map to them),
+   never raw hex.
+   ========================================================================= */
+
+/* Typefaces are loaded and self-hosted by next/font in app/layout.tsx, which
+   binds them to --font-display / --font-sans / --font-mono below. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
+/* ---------------------------------------------------------------- tokens -- */
 :root {
-  --pine-950: #101914;
-  --pine-900: #17231c;
-  --pine-800: #24352a;
-  --pine-700: #36513f;
-  --sage: #aebba7;
-  --cream: #f2ecdf;
-  --sand: #d9c8ad;
-  --sun: #e9a96e;
-  --rock: #b96f51;
-  --sky: #9ec7dc;
-  --text-primary: #f7f2e8;
-  --text-accent: #e9a96e;
-  --text-muted: rgba(242, 236, 223, .62);
+  /* Canvas — cool near-black, each step ~1 stop of elevation */
+  --ink-950: #07080a;
+  --ink-900: #0b0d10;
+  --ink-850: #101318;
+  --ink-800: #14181e;
+  --ink-700: #1b2027;
+  --ink-600: #262c35;
+
+  /* Hairlines. --hair and --hair-2 are decorative; --edge is the boundary of
+     an interactive control and must stay at or above 3:1 (WCAG 1.4.11). */
+  --hair: rgba(255, 255, 255, 0.07);
+  --hair-2: rgba(255, 255, 255, 0.13);
+  --edge: rgba(255, 255, 255, 0.35);
+
+  /* Ink on canvas — warm whites keep the dark UI from going clinical */
+  --paper: #f2f0ec;
+  --paper-2: #9aa4ae;
+  /* 5.2:1 on --ink-950 and 4.8:1 on --ink-850, the surfaces it actually sits
+     on. The original #646d79 was 3.5:1 — below AA everywhere — while carrying
+     most of the site's labels and metadata.
+     It is also held a step below --paper-2 (1.5:1 between them) so the three
+     ink levels stay distinguishable from each other, not just from the ground.
+     Tertiary text leans on size as well as colour; do not brighten this to
+     close the gap. */
+  --paper-3: #78828f;
+
+  /* Signal — the one accent. Instrument backlight / Colorado ember. */
+  --ember: #ff6a2b;
+  --ember-2: #ffa877;
+  --ember-ghost: rgba(255, 106, 43, 0.13);
+
+  /* Data semantics — never the accent, so "up" never reads as "brand" */
+  --pos: #38c98e;
+  --neg: #f05a52;
+  --warn: #f0b429;
+  --cool: #6fa8ff;
+
+  /* Readable text on the tinted alert surfaces below — --neg itself is only
+     4.5:1 against them, and --warn is worse. */
+  --neg-text: #ff9d97;
+  --neg-ghost: rgba(240, 90, 82, 0.1);
+  --neg-edge: rgba(240, 90, 82, 0.32);
+  --warn-text: #f5cf7a;
+  --warn-ghost: rgba(240, 180, 41, 0.14);
+  --warn-edge: rgba(240, 180, 41, 0.34);
+
+  /* Foreground for anything sitting on the accent. */
+  --on-ember: #180a03;
+
+  /* Type */
+  --font-display: var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif;
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Radius — small and deliberate; this is an instrument, not a toy */
+  --r-1: 2px;
+  --r-2: 6px;
+  --r-3: 12px;
+  --r-4: 20px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Elevation */
+  --shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.075) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.7);
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 32px 80px -32px rgba(0, 0, 0, 0.85);
+
+  /* Layout */
+  --header-h: 60px;
+  --player-h: 76px;
+
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ base -- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Reserve the scrollbar so locking body scroll for the palette does not
+     shift the page horizontally. */
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  /* Keep anchored sections and focused elements clear of the fixed header
+     and the fixed player bar. */
+  scroll-padding-top: calc(var(--header-h) + 24px);
+  scroll-padding-bottom: calc(var(--player-h) + 24px);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'Manrope', sans-serif;
-  background: var(--pine-950);
-  color: var(--cream);
+  min-height: 100vh;
+  background: var(--ink-950);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* a single faint ember bloom anchored top-left, so the page has a light source */
+  background-image: radial-gradient(
+    120vw 70vh at 12% -10%,
+    rgba(255, 106, 43, 0.07),
+    transparent 60%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-a { color: inherit; }
-button, input { font: inherit; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
 
 ::selection {
-  background: rgba(233, 169, 110, .35);
+  background: rgba(255, 106, 43, 0.28);
   color: #fff;
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #101914; }
-::-webkit-scrollbar-thumb { background: #4f604f; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #778678; }
-
-.glass,
-.glass-dark {
-  background: rgba(19, 29, 23, .82);
-  border: 1px solid rgba(255,255,255,.09);
-  backdrop-filter: blur(20px) saturate(1.1);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink-900);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink-600);
+  border: 2px solid var(--ink-900);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #39424e;
 }
 
-.font-mono { font-family: 'DM Mono', monospace; }
+/* `hidden` must beat any display utility. Tailwind's preflight rule has the
+   same specificity as `.flex` and loses on cascade order, which silently leaves
+   [hidden] elements on screen. */
+[hidden] {
+  display: none !important;
+}
 
-/* Navigation */
-.summit-nav {
-  position: fixed;
-  z-index: 70;
-  top: 0;
-  left: 0;
-  right: 0;
-  min-height: 76px;
-  padding: 14px clamp(18px, 4vw, 64px);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 24px;
-  color: white;
-  transition: background .3s ease, border-color .3s ease, min-height .3s ease;
-  border-bottom: 1px solid transparent;
+/* Every interactive element gets the same visible focus ring. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+  border-radius: var(--r-1);
 }
-.summit-nav--scrolled {
-  min-height: 64px;
-  background: rgba(16, 25, 20, .84);
-  border-bottom-color: rgba(255,255,255,.08);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
+
+/* ------------------------------------------------------------ primitives -- */
+@layer components {
+  /* Page shell */
+  .shell {
+    width: 100%;
+    max-width: var(--shell, 1320px);
+    margin-inline: auto;
+    padding-inline: clamp(18px, 4vw, 44px);
+  }
+
+  /* Raised surface. One recipe, used everywhere a panel is needed. */
+  /* The brighter top edge is what makes a panel sit on the ground rather than
+     read as an outlined region — a black shadow is invisible on #07080a. */
+  .panel {
+    background: linear-gradient(180deg, var(--ink-850), var(--ink-900));
+    border: 1px solid var(--hair);
+    border-top-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--r-3);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .panel-flat {
+    background: var(--ink-850);
+    border: 1px solid var(--hair);
+    border-radius: var(--r-3);
+  }
+
+  /* Eyebrow / section label — mono, tracked, quiet */
+  /* Carries section labels, form labels and live-region counts, so it is held
+     at 11px rather than the 10px that reads as decoration. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--paper-3);
+  }
+
+  .eyebrow-accent {
+    color: var(--ember);
+  }
+
+  /* Display headline — the serif is the voice of the site */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+  }
+
+  /* Data readouts */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Small caps-ish chip */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding-inline: 8px;
+    border: 1px solid var(--hair-2);
+    border-radius: var(--r-1);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper-2);
+    white-space: nowrap;
+  }
+
+  .chip-accent {
+    border-color: var(--ember);
+    background: var(--ember-ghost);
+    color: var(--ember-2);
+  }
+
+  /* Pressed/active state for segmented controls. The inset bar is the cue that
+     survives when the 1.1:1 background tint does not. */
+  .seg {
+    border-radius: var(--r-1);
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--paper-3);
+    background: transparent;
+    box-shadow: inset 0 -2px 0 transparent;
+    transition: color 0.18s var(--ease-out), background 0.18s var(--ease-out),
+      box-shadow 0.18s var(--ease-out);
+  }
+  .seg:hover {
+    color: var(--paper);
+  }
+  .seg[aria-pressed='true'] {
+    color: var(--paper);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: inset 0 -2px 0 var(--ember);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding-inline: 16px;
+    border: 1px solid var(--hair-2);
+    border-radius: var(--r-2);
+    background: transparent;
+    color: var(--paper);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s var(--ease-out), border-color 0.18s var(--ease-out),
+      transform 0.18s var(--ease-out), color 0.18s var(--ease-out);
+  }
+  .btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    background: var(--ember);
+    border-color: var(--ember);
+    color: var(--on-ember);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: var(--ember-2);
+    border-color: var(--ember-2);
+  }
+
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--paper-2);
+  }
+  .btn-ghost:hover {
+    color: var(--paper);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: transparent;
+  }
+
+  .btn-sm {
+    height: 32px;
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  /* Text field */
+  .field {
+    width: 100%;
+    height: 40px;
+    padding-inline: 12px;
+    background: var(--ink-900);
+    border: 1px solid var(--edge);
+    border-radius: var(--r-2);
+    color: var(--paper);
+    font-size: 14px;
+    transition: border-color 0.18s var(--ease-out), background 0.18s var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--paper-3);
+  }
+  .field:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  .field:focus {
+    border-color: var(--ember);
+    background: var(--ink-850);
+  }
+
+  /* Inline alert. One recipe rather than the same tinted box written out at
+     each call site. */
+  .alert {
+    border-radius: var(--r-2);
+    padding: 10px 12px;
+    font-size: 14px;
+    background: var(--neg-ghost);
+    border: 1px solid var(--neg-edge);
+    color: var(--neg-text);
+  }
+
+  /* Hairline rule that fades at both ends — used between sections */
+  .rule {
+    height: 1px;
+    border: 0;
+    margin: 0;
+    background: linear-gradient(90deg, transparent, var(--hair-2) 18%, var(--hair-2) 82%, transparent);
+  }
 }
-.summit-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  width: max-content;
-}
-.summit-brand strong {
-  display: block;
-  font-size: 13px;
-  letter-spacing: .02em;
-}
-.summit-brand small {
-  display: block;
-  margin-top: 2px;
-  font: 400 9px/1 'DM Mono', monospace;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.6);
-}
-.summit-mark {
-  width: 34px;
-  height: 26px;
+
+/* --------------------------------------------------------- interactions -- */
+
+/* Cursor-tracked spotlight on cards. The component sets --mx/--my on hover. */
+.spotlight {
   position: relative;
-  display: block;
-}
-.summit-mark i {
-  position: absolute;
-  bottom: 2px;
-  width: 2px;
-  transform-origin: bottom;
-  background: var(--cream);
-}
-.summit-mark i:nth-child(1) { left: 4px; height: 13px; transform: rotate(42deg); }
-.summit-mark i:nth-child(2) { left: 15px; height: 24px; transform: rotate(27deg); }
-.summit-mark i:nth-child(3) { left: 26px; height: 15px; transform: rotate(-35deg); }
-.summit-links {
-  display: flex;
-  gap: 28px;
-  align-items: center;
-}
-.summit-links a {
-  text-decoration: none;
-  font: 500 10px/1 'DM Mono', monospace;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.72);
-  transition: color .2s ease;
-}
-.summit-links a:hover { color: white; }
-.summit-status {
-  justify-self: end;
-  text-decoration: none;
-  font: 500 10px/1 'DM Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,.72);
-}
-.summit-status span,
-.mountain-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #c7dd9a;
-  box-shadow: 0 0 0 4px rgba(199,221,154,.14);
-}
-
-/* Hero — sticky scene with scroll-driven layers */
-.mountain-hero {
-  --hero-progress: 0;
-  position: relative;
-  height: 220vh;
-  background: #203226;
-}
-.mountain-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  min-height: 680px;
-  overflow: hidden;
   isolation: isolate;
 }
-.mountain-photo,
-.mountain-vignette,
-.mountain-cloud {
-  position: absolute;
-  inset: -7%;
-  pointer-events: none;
-}
-.mountain-photo {
-  background-size: cover;
-  background-position: center;
-  will-change: transform, opacity, filter;
-}
-.mountain-photo--sunset {
-  background-image: url('/colorado/colorado-sunset-wide.webp');
-  transform: scale(calc(1.07 + var(--hero-progress) * .06)) translateY(calc(var(--hero-progress) * -2.5%));
-  filter: saturate(.9) contrast(1.02);
-}
-.mountain-photo--ridge {
-  background-image: url('/colorado/colorado-sunset-ridge.webp');
-  background-position: 50% 56%;
-  opacity: calc(var(--hero-progress) * .9);
-  transform: scale(calc(1.1 + var(--hero-progress) * .08)) translateY(calc(var(--hero-progress) * -4%));
-  mix-blend-mode: soft-light;
-  filter: contrast(1.08) saturate(.9);
-}
-.mountain-photo--day {
-  background-image: url('/colorado/colorado-day-ridge.webp');
-  background-position: 50% 46%;
-  opacity: calc(max(0, (var(--hero-progress) - .62) * 1.6));
-  transform: scale(1.14) translateY(calc((1 - var(--hero-progress)) * 3%));
-  filter: saturate(.75) brightness(.72);
-  mix-blend-mode: screen;
-}
-.mountain-cloud {
-  z-index: 3;
-  inset: auto;
-  width: 46vw;
-  height: 20vh;
-  min-width: 480px;
-  min-height: 130px;
-  border-radius: 50%;
-  background:
-    radial-gradient(ellipse at 35% 55%, rgba(255,255,255,.42) 0 24%, transparent 55%),
-    radial-gradient(ellipse at 60% 45%, rgba(255,255,255,.32) 0 28%, transparent 60%);
-  filter: blur(18px);
-  opacity: .34;
-  mix-blend-mode: screen;
-}
-.mountain-cloud--one {
-  top: 12vh;
-  left: -8vw;
-  transform: translateX(calc(var(--hero-progress) * 34vw));
-}
-.mountain-cloud--two {
-  top: 25vh;
-  right: -14vw;
-  opacity: .22;
-  transform: translateX(calc(var(--hero-progress) * -26vw)) scale(.8);
-}
-.mountain-vignette {
-  z-index: 4;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(8,13,10,.62) 0%, rgba(8,13,10,.16) 50%, rgba(8,13,10,.24) 100%),
-    linear-gradient(0deg, rgba(10,17,13,.82) 0%, transparent 42%, rgba(8,12,10,.18) 100%);
-}
-.mountain-copy {
-  position: absolute;
-  z-index: 8;
-  left: clamp(24px, 7vw, 112px);
-  bottom: clamp(110px, 17vh, 180px);
-  max-width: 760px;
-  transform: translateY(calc(var(--hero-progress) * -34px));
-  opacity: calc(1 - var(--hero-progress) * .35);
-}
-.mountain-kicker,
-.section-eyebrow {
-  font: 500 10px/1.3 'DM Mono', monospace;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-}
-.mountain-kicker {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 22px;
-  color: rgba(255,255,255,.74);
-}
-.mountain-copy h1 {
-  max-width: 820px;
-  margin: 0;
-  font-size: clamp(48px, 7vw, 108px);
-  line-height: .91;
-  letter-spacing: -.055em;
-  font-weight: 500;
-  text-wrap: balance;
-}
-.mountain-copy h1 span {
-  display: block;
-  color: rgba(255,255,255,.7);
-}
-.mountain-deck {
-  max-width: 610px;
-  margin: 28px 0 0;
-  font-size: clamp(15px, 1.4vw, 19px);
-  line-height: 1.65;
-  color: rgba(255,255,255,.7);
-}
-.mountain-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 30px;
-}
-.mountain-button {
-  min-height: 46px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.34);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  cursor: pointer;
-  font: 600 10px/1 'DM Mono', monospace;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  transition: transform .2s ease, background .2s ease, border-color .2s ease;
-}
-.mountain-button:hover { transform: translateY(-2px); }
-.mountain-button--primary {
-  color: #1b261d;
-  border-color: var(--cream);
-  background: var(--cream);
-}
-.mountain-button--ghost {
-  color: white;
-  background: rgba(20,29,23,.2);
-  backdrop-filter: blur(8px);
-}
-.mountain-scroll-cue {
-  position: absolute;
-  z-index: 8;
-  right: clamp(24px, 5vw, 72px);
-  bottom: 40px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: rgba(255,255,255,.58);
-  font: 500 9px/1 'DM Mono', monospace;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-.mountain-scroll-cue i {
-  width: 52px;
-  height: 1px;
-  background: rgba(255,255,255,.36);
-  position: relative;
-  overflow: hidden;
-}
-.mountain-scroll-cue i::after {
+.spotlight::before {
   content: '';
   position: absolute;
-  width: 20px;
-  height: 1px;
-  background: white;
-  animation: trailScan 2s ease-in-out infinite;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 106, 43, 0.1),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+  pointer-events: none;
+  z-index: 0;
 }
-@keyframes trailScan {
-  from { transform: translateX(-20px); }
-  to { transform: translateX(54px); }
+.spotlight:hover::before,
+.spotlight:focus-within::before {
+  opacity: 1;
 }
-
-.summit-nav + main:not(.colorado-site) { padding-top: 84px; }
-
-/* Dashboard */
-.colorado-site {
-  background:
-    radial-gradient(circle at 10% 30%, rgba(185,111,81,.08), transparent 30%),
-    linear-gradient(#142019, #101914);
-}
-.dashboard-section {
+.spotlight > * {
   position: relative;
-  z-index: 10;
-  max-width: 1260px;
-  margin: 0 auto;
-  padding: 120px clamp(20px, 4vw, 56px);
+  z-index: 1;
 }
-.dashboard-section--first { padding-top: 140px; }
-.dashboard-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
-  gap: 48px;
-  align-items: end;
-  margin-bottom: 42px;
+
+/* Scroll reveal. Reveal.tsx adds [data-reveal] after mount, so nothing is ever
+   hidden by CSS alone — see the comment in that component. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
 }
-.section-eyebrow { color: var(--sun); }
-.dashboard-heading h2 {
-  font-size: clamp(36px, 5vw, 72px);
-  line-height: .96;
-  letter-spacing: -.045em;
-  font-weight: 500;
-  margin: 12px 0 0;
+[data-reveal][data-shown='true'] {
+  opacity: 1;
+  transform: none;
 }
-.dashboard-heading p {
-  margin: 0;
-  color: rgba(242,236,223,.56);
-  line-height: 1.7;
-  font-size: 14px;
-  max-width: 440px;
+/* Tabbing into a section that has not revealed yet must not focus something
+   invisible — show it immediately rather than waiting out the transition. */
+[data-reveal]:focus-within {
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
-.mountain-panel {
-  border: 1px solid rgba(255,255,255,.09);
-  background: rgba(26,38,30,.72);
-  box-shadow: 0 26px 80px rgba(0,0,0,.24);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  overflow: hidden;
-}
-.mountain-panel--news { padding: 4px; }
-.mountain-panel--ticker { margin-top: 14px; border-radius: 16px; }
-.mountain-panel--archive { padding: 8px; }
-.archive-toolbar {
-  min-height: 58px;
-  padding: 12px 14px 12px 18px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+
+/* Marquee ticker */
+.marquee {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 70s) linear infinite;
 }
-.archive-toolbar > span {
-  flex: 0 0 auto;
-  color: rgba(242,236,223,.48);
-  font: 500 10px/1 'DM Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: .14em;
+.marquee-viewport:hover .marquee,
+.marquee-viewport:focus-within .marquee,
+.marquee-viewport[data-paused='true'] .marquee {
+  animation-play-state: paused;
 }
-.dashboard-section--archive { padding-top: 40px; }
-.trail-break {
-  min-height: 72vh;
-  display: flex;
-  align-items: flex-end;
-  padding: 70px clamp(24px, 7vw, 110px);
-  background:
-    linear-gradient(0deg, rgba(15,23,18,.86), rgba(15,23,18,.05) 62%),
-    url('/colorado/colorado-day-ridge.webp') center 45% / cover no-repeat;
-}
-.trail-break > div { max-width: 680px; }
-.trail-break p {
-  margin: 14px 0 0;
-  max-width: 620px;
-  font-size: clamp(40px, 5vw, 76px);
-  line-height: .98;
-  letter-spacing: -.045em;
-  text-wrap: balance;
-}
-
-/* Re-skin legacy dashboard components without touching their data or behavior. */
-.colorado-site [style*="color: rgb(0, 255, 65)"],
-.colorado-site [style*="color: #00FF41"],
-.colorado-site [style*="color: rgba(0,255,65"],
-.colorado-site [style*="color: rgba(0, 255, 65"] {
-  color: var(--sun) !important;
-}
-.colorado-site [style*="background: rgb(0, 255, 65)"],
-.colorado-site [style*="background: #00FF41"] {
-  background: var(--sun) !important;
-  color: #17231c !important;
-}
-.colorado-site [style*="border-left: 2px solid rgba(0, 255, 65"] {
-  border-left-color: var(--sun) !important;
-}
-.colorado-site [style*="box-shadow: 0px 0px"],
-.colorado-site [style*="text-shadow"] {
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-/* Keep admin readable while the public shell changes. */
-body:has(main.admin-shell),
-body:has(form[action*="admin"]) {
-  background: #0b0f0c;
-}
-
-/* Audio controls stay functional but inherit the landscape palette. */
-input[type="range"] { accent-color: var(--sun); }
-input[type="range"]::-webkit-slider-thumb { background: var(--sun); }
-
-@media (max-width: 900px) {
-  .summit-nav {
-    grid-template-columns: 1fr auto;
-    min-height: 66px;
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
   }
-  .summit-links { display: none; }
-  .summit-status { display: none; }
-  .dashboard-heading { grid-template-columns: 1fr; gap: 18px; }
-  .mountain-copy { bottom: 105px; max-width: calc(100% - 48px); }
-  .mountain-copy h1 { font-size: clamp(46px, 13vw, 80px); }
-  .mountain-cloud { min-width: 360px; }
-}
-@media (max-width: 620px) {
-  .mountain-hero { height: 190vh; }
-  .mountain-stage { min-height: 620px; }
-  .mountain-photo { inset: -3%; }
-  .mountain-photo--sunset { background-position: 58% center; }
-  .mountain-copy {
-    left: 20px;
-    right: 20px;
-    bottom: 92px;
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
-  .mountain-copy h1 { letter-spacing: -.06em; }
-  .mountain-deck { font-size: 14px; line-height: 1.55; }
-  .mountain-scroll-cue { display: none; }
-  .dashboard-section { padding: 90px 18px; }
-  .dashboard-section--archive { padding-top: 10px; }
-  .dashboard-heading h2 { font-size: 42px; }
-  .archive-toolbar { align-items: flex-start; flex-direction: column; }
-  .trail-break { min-height: 62vh; padding: 44px 20px; }
 }
 
+/* Loading spinner. CSS rather than SVG SMIL so the reduced-motion block below
+   actually stops it — `animation-duration: 0.01ms` does nothing to SMIL. */
+.spin {
+  transform-origin: 50% 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Live indicator */
+.pulse {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pos);
+  flex-shrink: 0;
+}
+.pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  color: var(--pos);
+  animation: pulse-ring 2.4s var(--ease-out) infinite;
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.pulse-idle {
+  background: var(--paper-3);
+}
+.pulse-idle::after {
+  display: none;
+}
+
+/* Link with an underline that draws in from the left */
+.link-draw {
+  position: relative;
+  display: inline-block;
+  color: var(--ember);
+}
+.link-draw::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-out);
+}
+.link-draw:hover::after {
+  transform: scaleX(1);
+}
+
+/* Line-clamp helpers (no plugin dependency).
+   Declared in the components layer, not here at the top level: these set
+   `display`, and at top level they outrank Tailwind's `hidden`/`block`
+   utilities on cascade order — so `clamp-1 hidden md:block` stayed visible at
+   every width. The layer puts utilities back on top, where they belong. */
+@layer components {
+  .clamp-1,
+  .clamp-2,
+  .clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .clamp-1 {
+    -webkit-line-clamp: 1;
+  }
+  .clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+  .clamp-3 {
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Screen-reader-only, but focusable (skip link) */
+.sr-only-focusable {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 200;
+  padding: 10px 14px;
+  background: var(--ember);
+  color: var(--on-ember);
+  border-radius: var(--r-2);
+  font-size: 13px;
+  font-weight: 600;
+  transform: translateY(-160%);
+  transition: transform 0.2s var(--ease-out);
+}
+.sr-only-focusable:focus {
+  transform: none;
+}
+
+/* Range input — used by the player scrubber */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--ember) 0%,
+    var(--ember) var(--range-progress, 0%),
+    var(--ink-600) var(--range-progress, 0%),
+    var(--ink-600) 100%
+  );
+}
+input[type='range']::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ink-600);
+}
+input[type='range']::-moz-range-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ember);
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 0;
+  box-shadow: 0 0 0 4px rgba(255, 106, 43, 0.001);
+  transition: box-shadow 0.18s var(--ease-out), transform 0.18s var(--ease-out);
+}
+input[type='range']:hover::-webkit-slider-thumb,
+input[type='range']:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(255, 106, 43, 0.22);
+}
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 0;
+}
+
+/* -------------------------------------------------------------- a11y ------ */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .mountain-photo,
-  .mountain-cloud,
-  .mountain-copy { transform: none !important; }
-  .mountain-scroll-cue i::after { animation: none; }
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .marquee {
+    animation: none;
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --hair: rgba(255, 255, 255, 0.2);
+    --hair-2: rgba(255, 255, 255, 0.34);
+    --edge: rgba(255, 255, 255, 0.55);
+    --paper-2: #c9d0d7;
+    /* Held further from --paper-2 than the default palette, not closer: a user
+       who asks for more contrast should not get a flatter hierarchy. */
+    --paper-3: #8f98a3;
+  }
 }

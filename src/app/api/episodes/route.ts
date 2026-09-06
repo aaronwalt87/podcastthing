@@ -8,6 +8,9 @@ export async function GET() {
     const episodes = await getAllEpisodes()
     return NextResponse.json(episodes)
   } catch (error) {
+    if (error instanceof Error && error.message === 'Storage is not configured') {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error('GET /api/episodes error:', error)
     return NextResponse.json({ error: 'Failed to fetch episodes' }, { status: 500 })
   }
@@ -16,7 +19,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category } = body
+    const { title, showName, description, audioUrl, audioType, thumbnailUrl, category, transcriptUrl, sourceUrl } =
+      body
 
     if (!title || !showName || !audioUrl || !audioType) {
       return NextResponse.json(
@@ -40,10 +44,15 @@ export async function POST(request: Request) {
       audioType,
       thumbnailUrl: thumbnailUrl || undefined,
       category: category || undefined,
+      transcriptUrl: transcriptUrl || undefined,
+      sourceUrl: sourceUrl || undefined,
     })
 
     return NextResponse.json(episode, { status: 201 })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Storage is not configured') {
+      return NextResponse.json({ error: 'Storage is not configured' }, { status: 503 })
+    }
     console.error('POST /api/episodes error:', error)
     return NextResponse.json({ error: 'Failed to create episode' }, { status: 500 })
   }

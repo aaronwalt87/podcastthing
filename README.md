@@ -1,108 +1,141 @@
-# PODCAST//TERM — AI Tech Terminal
+# Signal
 
-An AI/tech news terminal with a curated podcast episode archive. Features a live intelligence feed aggregating headlines from OpenAI, VentureBeat, The Verge, TechCrunch, Ars Technica, Wired, and Hacker News — displayed alongside podcast episodes in an editorial layout.
+A personal technology dashboard: a tech-news feed, a market board for the names
+that move it, and a podcast archive with a real player — in one place, cached
+server-side and refreshed on a schedule.
 
-## Stack
+Built with **Next.js 14 (App Router)**, TypeScript, Tailwind, Upstash Redis and
+Vercel Blob. The design system is documented in [`design.md`](./design.md).
 
-- **Next.js 14** (App Router)
-- **Tailwind CSS** — The Analog Frontier design system (dark terminal aesthetic)
-- **Vercel Blob** — audio file storage (public CDN)
-- **Upstash Redis** — episode metadata + news feed cache
+---
 
-## Local Development
-
-### 1. Install dependencies
+## Quick start
 
 ```bash
 npm install
+npm run dev
 ```
 
-### 2. Set up environment variables
+Open <http://localhost:3000>.
+
+**No credentials required to run locally.** With no Redis configured and
+`NODE_ENV !== 'production'`, the site renders development fixtures
+(`src/lib/sample-data.ts`) so the layout is immediately reviewable. Production
+never uses them — an unconfigured production deploy shows real empty states.
+
+To run against real data, copy the example env file and fill in what you need:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-| Variable | Description |
-|---|---|
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store token |
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis auth token |
-| `ADMIN_PASSWORD` | Admin panel password |
-| `CRON_SECRET` | Bearer token for the news refresh endpoint |
+| Variable | Required | Purpose |
+|---|---|---|
+| `UPSTASH_REDIS_REST_URL` | for real data | Cache + episode store |
+| `UPSTASH_REDIS_REST_TOKEN` | for real data | — |
+| `ADMIN_PASSWORD` | for `/admin` | Shared admin password |
+| `CRON_SECRET` | for refresh jobs | Bearer token on the refresh endpoints |
+| `BLOB_READ_WRITE_TOKEN` | for uploads | Vercel Blob audio storage |
+| `FINNHUB_TOKEN` | optional | Intraday quotes; without it the board uses keyless end-of-day closes |
+| `NEWS_TTL_SECONDS` | optional | News cache TTL, default `7200` |
 
-Generate `CRON_SECRET` with: `openssl rand -hex 32`
+---
 
-### 3. Run dev server
+## What's in it
 
-```bash
-npm run dev
-```
+### News — `/news`
+Sixteen RSS and Atom feeds plus six Hacker News queries, parsed server-side,
+deduplicated by content hash, and classified by keyword so a story lands in the
+section it belongs to rather than the one its publisher sits in. Searchable and
+filterable by category and source.
 
-Open [http://localhost:3000](http://localhost:3000).
+### Markets — `/markets`
+Sixteen tech names and two index proxies with 60-day trend lines, a sortable
+board, sector heatmap and breadth readout.
 
-## News Feed
+Quotes come from Finnhub when `FINNHUB_TOKEN` is set, and fall back to Stooq
+end-of-day closes when it isn't — so the board renders without any key, and each
+quote records which source it came from. Sparklines are server-rendered SVG; no
+charting library ships to the browser.
 
-The `[LIVE_TELEMETRY_]` sidebar pulls from:
-- **RSS:** OpenAI blog, VentureBeat AI, The Verge AI, TechCrunch AI, Ars Technica, Wired AI
-- **Hacker News:** Top AI/LLM stories via Algolia search API
+### Podcasts — `/podcasts`
+Searchable, filterable and sortable archive. The player keeps a per-episode
+position in `localStorage`, supports playback rate, ±15/30s skip, a queue, OS
+media controls via the Media Session API, and keyboard shortcuts.
 
-Refresh the cache manually:
-```bash
-curl -X GET https://<your-domain>/api/news/refresh \
-  -H "Authorization: Bearer $CRON_SECRET"
-```
+### Command palette
+`⌘K` / `Ctrl-K`, or `/` outside a text field. Searches episodes, headlines and
+tickers through `/api/search`.
 
-Cache TTL: `NEWS_TTL_SECONDS` env var (default 7200s = 2h).
+### Admin — `/admin`
+Password-gated episode CRUD with direct-to-Blob audio upload.
 
-## Vercel Deployment
+---
 
-```bash
-npx vercel --prod
-```
+## Architecture notes
 
-1. Connect a **Blob store** in Vercel dashboard → Storage → `BLOB_READ_WRITE_TOKEN` auto-added
-2. Install **Upstash Redis** from Vercel Marketplace → tokens auto-added
-3. Add `ADMIN_PASSWORD` and `CRON_SECRET` manually in Vercel → Settings → Environment Variables
-4. After deploy, seed the news cache: `curl .../api/news/refresh -H "Authorization: Bearer $CRON_SECRET"`
-
-## Project Structure
+- **Server components by default.** `'use client'` appears only where a
+  component needs interactivity. News rows, sparklines and quote cards render
+  on the server.
+- **Playback position lives in its own React context** (`ClockContext`)
+  separate from transport state, so the clock ticking four times a second
+  re-renders the scrubber and nothing else.
+- **Redis is lazy and null-safe.** A missing or failing store degrades to an
+  empty state, never a 500.
+- **All colour comes from CSS custom properties** in `src/app/globals.css`,
+  mapped into Tailwind by `tailwind.config.ts`. No component hard-codes a hex.
 
 ```
 src/
-├── app/
-│   ├── layout.tsx               # Root layout: TopNav + PlayerProvider + AudioPlayerBar
-│   ├── page.tsx                 # Homepage: 2-column (episodes + news sidebar)
-│   ├── globals.css              # Analog Frontier tokens, IBM Plex Mono, animations
-│   ├── admin/page.tsx           # Admin dashboard (client component)
-│   └── api/
-│       ├── auth/                # Login/logout cookie auth
-│       ├── episodes/            # Episode CRUD
-│       ├── news/route.ts        # GET cached news items
-│       ├── news/refresh/route.ts # GET (cron) — refresh news cache
-│       └── upload/route.ts      # Vercel Blob upload handler
+├── app/                    # routes: / /news /markets /podcasts /admin + api
 ├── components/
-│   ├── TopNav.tsx               # Fixed top nav bar (hidden on /admin)
-│   ├── NewsReadout.tsx          # LIVE_TELEMETRY_ sidebar list
-│   ├── EpisodeGrid.tsx          # Featured-first editorial grid
-│   ├── EpisodeCard.tsx          # 16:9 editorial article card
-│   ├── AudioPlayerBar.tsx       # Fixed bottom audio player
-│   ├── CategoryTabs.tsx         # Category filter chips
-│   └── admin/                   # Admin-only components
-├── context/PlayerContext.tsx    # Global audio player state
-├── lib/
-│   ├── episodes.ts              # Episode CRUD (Redis)
-│   ├── news.ts                  # RSS + HN fetch, Redis cache
-│   └── redis.ts                 # Upstash client
+│   ├── nav/                # SiteHeader, CommandPalette
+│   ├── home/               # Hero, SignalField (canvas)
+│   ├── news/               # NewsFeed, NewsDigest, NewsRow
+│   ├── markets/            # MarketStrip, MarketTable, SectorHeatmap, Sparkline, QuoteCard, Delta
+│   ├── podcasts/           # EpisodeArchive, EpisodeCard, EpisodeArtwork, PlayButton
+│   ├── player/             # PlayerBar
+│   ├── admin/              # EpisodeForm, EpisodeList, LoginForm
+│   └── ui/                 # Reveal, Spotlight, SectionHeader
+├── context/PlayerContext.tsx
+├── lib/                    # episodes, news, stocks, redis, format, auth, sample-data
 └── types/
-    ├── episode.ts
-    └── news.ts                  # NewsItem interface
 ```
 
-## Admin
+---
 
-Navigate to `/admin`. Protected by `ADMIN_PASSWORD` via HMAC-SHA256 cookie session.
+## Scheduled refresh
 
-- Add episodes via URL paste or file upload (MP3, M4A, OGG, WAV, AAC, FLAC — 200 MB limit)
-- Edit metadata and categories
-- Delete episodes
+Two cron jobs (see `vercel.json`) hit authenticated refresh endpoints:
+
+```bash
+curl https://<your-domain>/api/news/refresh   -H "Authorization: Bearer $CRON_SECRET"
+curl https://<your-domain>/api/stocks/refresh -H "Authorization: Bearer $CRON_SECRET"
+```
+
+Vercel's Hobby plan allows daily crons only; the schedules in `vercel.json`
+reflect that.
+
+---
+
+## Deployment
+
+1. Import the repo on Vercel (Next.js is auto-detected).
+2. **Storage → Blob** — connect a store (`BLOB_READ_WRITE_TOKEN` is added
+   automatically).
+3. **Marketplace → Upstash Redis** — install it (both Redis vars are added
+   automatically).
+4. Add `ADMIN_PASSWORD`, `CRON_SECRET`, and optionally `FINNHUB_TOKEN` under
+   **Settings → Environment Variables**.
+5. Redeploy.
+
+---
+
+## Checks
+
+```bash
+npm run lint
+npm run build
+```
+
+There is no test runner configured; lint and a production build are the gate.

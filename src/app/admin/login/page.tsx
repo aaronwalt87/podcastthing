@@ -1,43 +1,35 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import LoginForm from '@/components/admin/LoginForm'
+
+export const metadata: Metadata = {
+  title: 'Sign in',
+  robots: { index: false, follow: false },
+}
 
 export default function LoginPage() {
   return (
-    <main className="fixed inset-0 flex items-center justify-center px-4" style={{ zIndex: 2 }}>
-      <div className="w-full max-w-sm glass rounded-lg overflow-hidden">
-        {/* Traffic light title bar */}
-        <div
-          className="flex items-center gap-3 px-4 py-3"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
-        >
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
-            <div className="w-3 h-3 rounded-full" style={{ background: '#fdbb2c' }} />
-            <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
+    <div className="flex min-h-screen items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm">
+        <div className="panel p-8" style={{ boxShadow: 'var(--shadow-panel)' }}>
+          <p className="eyebrow eyebrow-accent">Restricted</p>
+          <h1 className="display mt-3 text-3xl">Admin</h1>
+          <p className="mt-2 text-sm text-paper-3">
+            Enter the shared password to manage the episode archive.
+          </p>
+
+          <div className="mt-8">
+            <LoginForm />
           </div>
-          <span className="font-mono text-xs ml-2" style={{ color: 'rgba(0,255,65,0.5)', fontSize: '11px' }}>
-            AUTH_GATE {'// ROOT@PODCAST_TERM'}
-          </span>
         </div>
 
-        {/* Form body */}
-        <div className="p-8">
-          <div className="mb-8 text-center">
-            <h1
-              className="text-xl font-bold tracking-widest uppercase"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#ffffff' }}
-            >
-              ADMIN ACCESS
-            </h1>
-            <p
-              className="text-xs mt-2 uppercase tracking-wider"
-              style={{ color: 'rgba(0,255,65,0.55)', fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              ENTER CREDENTIALS TO CONTINUE
-            </p>
-          </div>
-          <LoginForm />
-        </div>
+        <Link
+          href="/"
+          className="mt-6 block text-center text-xs text-paper-3 transition-colors hover:text-paper-2"
+        >
+          ← Back to the site
+        </Link>
       </div>
-    </main>
+    </div>
   )
 }

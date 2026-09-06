@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { upload } from '@vercel/blob/client'
 import type { Episode } from '@/types/episode'
 
@@ -11,38 +11,36 @@ interface EpisodeFormProps {
   categories?: string[]
 }
 
-const inputStyle: React.CSSProperties = {
-  background: 'transparent',
-  borderBottom: '1px solid rgba(93,63,60,0.5)',
-  color: '#e5e2e1',
-  outline: 'none',
-  width: '100%',
-  padding: '8px 0',
-  fontSize: '0.875rem',
+function Field({
+  id,
+  label,
+  hint,
+  children,
+}: {
+  id: string
+  label: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="eyebrow mb-1.5 block">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="mt-1.5 text-xs text-paper-3">{hint}</p>}
+    </div>
+  )
 }
 
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '0.7rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.1em',
-  color: '#67d7e1',
-  marginBottom: '4px',
-  fontFamily: "'Space Grotesk', sans-serif",
-}
-
-function onFocusGlow(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-  e.target.style.borderBottomColor = '#FF3B3B'
-  e.target.style.boxShadow = '0 4px 0 rgba(255,59,59,0.12)'
-}
-
-function onBlurGlow(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-  e.target.style.borderBottomColor = 'rgba(93,63,60,0.5)'
-  e.target.style.boxShadow = 'none'
-}
-
-export default function EpisodeForm({ episode, onSuccess, onCancel, categories = [] }: EpisodeFormProps) {
+export default function EpisodeForm({
+  episode,
+  onSuccess,
+  onCancel,
+  categories = [],
+}: EpisodeFormProps) {
   const isEditing = Boolean(episode)
+  const uid = useId()
 
   const [form, setForm] = useState({
     title: episode?.title ?? '',
@@ -51,7 +49,9 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
     audioUrl: episode?.audioUrl ?? '',
     thumbnailUrl: episode?.thumbnailUrl ?? '',
     category: episode?.category ?? '',
-    audioType: episode?.audioType ?? 'url' as 'upload' | 'url',
+    transcriptUrl: episode?.transcriptUrl ?? '',
+    sourceUrl: episode?.sourceUrl ?? '',
+    audioType: episode?.audioType ?? ('url' as 'upload' | 'url'),
   })
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -71,12 +71,10 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
       setError('Title and show name are required.')
       return
     }
-
     if (form.audioType === 'url' && !form.audioUrl.trim()) {
       setError('Audio URL is required.')
       return
     }
-
     if (form.audioType === 'upload' && !file && !isEditing) {
       setError('Please select an audio file to upload.')
       return
@@ -97,11 +95,8 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
       }
 
       setSaving(true)
-      const url = isEditing ? `/api/episodes/${episode!.id}` : '/api/episodes'
-      const method = isEditing ? 'PUT' : 'POST'
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(isEditing ? `/api/episodes/${episode!.id}` : '/api/episodes', {
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: form.title.trim(),
@@ -111,11 +106,13 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
           audioType: form.audioType,
           thumbnailUrl: form.thumbnailUrl.trim() || undefined,
           category: form.category.trim() || undefined,
+          transcriptUrl: form.transcriptUrl.trim() || undefined,
+          sourceUrl: form.sourceUrl.trim() || undefined,
         }),
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
         throw new Error(data.error || 'Failed to save episode')
       }
 
@@ -132,185 +129,178 @@ export default function EpisodeForm({ episode, onSuccess, onCancel, categories =
   const isLoading = uploading || saving
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Audio source toggle */}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {!isEditing && (
-        <div className="flex overflow-hidden" style={{ borderBottom: '1px solid rgba(93,63,60,0.5)' }}>
+        <div
+          className="flex rounded-sm border border-hair p-0.5"
+          role="group"
+          aria-label="Audio source"
+        >
           {(['url', 'upload'] as const).map((type) => (
             <button
               key={type}
               type="button"
+              aria-pressed={form.audioType === type}
               onClick={() => {
                 update('audioType', type)
                 setFile(null)
                 update('audioUrl', '')
               }}
-              className="flex-1 py-2 text-xs font-medium uppercase tracking-wider transition-colors"
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                background: form.audioType === type ? '#FF3B3B' : 'transparent',
-                color: form.audioType === type ? '#410003' : '#e5e2e1',
-                boxShadow: form.audioType === type ? '0 0 8px rgba(255,59,59,0.3)' : undefined,
-              }}
+              className={`flex-1 rounded-xs py-2 text-xs transition-colors ${
+                form.audioType === type
+                  ? 'bg-white/[0.07] text-paper'
+                  : 'text-paper-3 hover:text-paper'
+              }`}
             >
-              {type === 'url' ? 'Paste URL' : 'Upload File'}
+              {type === 'url' ? 'Paste a URL' : 'Upload a file'}
             </button>
           ))}
         </div>
       )}
 
-      {/* Audio source input */}
       {form.audioType === 'url' ? (
-        <div>
-          <label style={labelStyle}>Audio URL</label>
+        <Field
+          id={`${uid}-audio`}
+          label="Audio URL"
+          hint="Some podcast CDNs block cross-origin playback; test the link after saving."
+        >
           <input
+            id={`${uid}-audio`}
             type="url"
             value={form.audioUrl}
             onChange={(e) => update('audioUrl', e.target.value)}
             placeholder="https://example.com/episode.mp3"
-            style={inputStyle}
+            className="field"
             required={!isEditing}
-            onFocus={onFocusGlow}
-            onBlur={onBlurGlow}
           />
-          <p className="text-xs mt-1" style={{ color: '#e5e2e1', opacity: 0.3, fontFamily: "'Space Grotesk', sans-serif" }}>
-            Note: Some podcast CDNs block cross-origin requests.
-          </p>
-        </div>
+        </Field>
       ) : (
-        <div>
-          <label style={labelStyle}>Audio File</label>
+        <Field
+          id={`${uid}-file`}
+          label="Audio file"
+          hint="Up to 200 MB — MP3, M4A, OGG, WAV, AAC or FLAC."
+        >
           <input
+            id={`${uid}-file`}
             type="file"
             accept="audio/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full text-sm cursor-pointer"
-            style={{ color: '#e5e2e1' }}
+            className="w-full cursor-pointer text-sm text-paper-2 file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-white/[0.07] file:px-3 file:py-2 file:text-xs file:text-paper"
           />
-          <p className="text-xs mt-1" style={{ color: '#e5e2e1', opacity: 0.3, fontFamily: "'Space Grotesk', sans-serif" }}>
-            Max 200 MB. MP3, M4A, OGG, WAV, AAC, FLAC.
-          </p>
-        </div>
+        </Field>
       )}
 
-      {/* Title */}
-      <div>
-        <label style={labelStyle}>Title</label>
+      <Field id={`${uid}-title`} label="Title">
         <input
+          id={`${uid}-title`}
           type="text"
           value={form.title}
           onChange={(e) => update('title', e.target.value)}
           placeholder="Episode title"
-          style={inputStyle}
+          className="field"
           required
-          onFocus={onFocusGlow}
-          onBlur={onBlurGlow}
         />
-      </div>
+      </Field>
 
-      {/* Show Name */}
-      <div>
-        <label style={labelStyle}>Show Name</label>
+      <Field id={`${uid}-show`} label="Show name">
         <input
+          id={`${uid}-show`}
           type="text"
           value={form.showName}
           onChange={(e) => update('showName', e.target.value)}
           placeholder="Podcast show name"
-          style={inputStyle}
+          className="field"
           required
-          onFocus={onFocusGlow}
-          onBlur={onBlurGlow}
         />
-      </div>
+      </Field>
 
-      {/* Description */}
-      <div>
-        <label style={labelStyle}>Description</label>
+      <Field id={`${uid}-desc`} label="Description">
         <textarea
+          id={`${uid}-desc`}
           value={form.description}
           onChange={(e) => update('description', e.target.value)}
           placeholder="Short description (optional)"
           rows={3}
-          style={{ ...inputStyle, resize: 'none' }}
-          onFocus={onFocusGlow}
-          onBlur={onBlurGlow}
+          className="field resize-none py-2.5"
+          style={{ height: 'auto' }}
         />
-      </div>
+      </Field>
 
-      {/* Thumbnail URL */}
-      <div>
-        <label style={labelStyle}>Thumbnail URL (optional)</label>
+      <Field id={`${uid}-thumb`} label="Thumbnail URL (optional)">
         <input
+          id={`${uid}-thumb`}
           type="url"
           value={form.thumbnailUrl}
           onChange={(e) => update('thumbnailUrl', e.target.value)}
           placeholder="https://example.com/cover.jpg"
-          style={inputStyle}
-          onFocus={onFocusGlow}
-          onBlur={onBlurGlow}
+          className="field"
         />
-      </div>
+      </Field>
 
-      {/* Category */}
-      <div>
-        <label style={labelStyle}>Category (optional)</label>
+      <Field id={`${uid}-cat`} label="Category (optional)">
         <input
+          id={`${uid}-cat`}
           type="text"
-          list="episode-categories"
+          list={`${uid}-categories`}
           value={form.category}
           onChange={(e) => update('category', e.target.value)}
-          placeholder="e.g. Technology, True Crime…"
-          style={inputStyle}
-          onFocus={onFocusGlow}
-          onBlur={onBlurGlow}
+          placeholder="Infrastructure, AI, Systems…"
+          className="field"
         />
         {categories.length > 0 && (
-          <datalist id="episode-categories">
+          <datalist id={`${uid}-categories`}>
             {categories.map((cat) => (
               <option key={cat} value={cat} />
             ))}
           </datalist>
         )}
-      </div>
+      </Field>
 
-      {/* Error */}
+      <Field
+        id={`${uid}-transcript`}
+        label="Transcript URL (optional)"
+        hint="Audio-only content needs a text alternative (WCAG 1.2.1). Link the publisher's transcript where one exists — many podcast feeds carry one."
+      >
+        <input
+          id={`${uid}-transcript`}
+          type="url"
+          value={form.transcriptUrl}
+          onChange={(e) => update('transcriptUrl', e.target.value)}
+          placeholder="https://example.com/episode/transcript"
+          className="field"
+        />
+      </Field>
+
+      <Field
+        id={`${uid}-source`}
+        label="Episode page (optional)"
+        hint="Shown when there is no transcript, so a listener still has somewhere to go."
+      >
+        <input
+          id={`${uid}-source`}
+          type="url"
+          value={form.sourceUrl}
+          onChange={(e) => update('sourceUrl', e.target.value)}
+          placeholder="https://example.com/episode"
+          className="field"
+        />
+      </Field>
+
       {error && (
-        <div
-          className="px-3 py-2 text-sm"
-          style={{ background: 'rgba(255,59,59,0.08)', borderLeft: '2px solid #FF3B3B', color: '#ffb3ac' }}
+        <p
+          role="alert"
+          className="alert"
         >
           {error}
-        </div>
+        </p>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex-1 py-2 px-4 text-sm font-medium uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            background: '#FF3B3B',
-            color: '#410003',
-            fontFamily: "'Space Grotesk', sans-serif",
-            boxShadow: '0 0 8px rgba(255,59,59,0.3)',
-          }}
-        >
-          {uploading ? 'Uploading…' : saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Add Episode'}
+      <div className="flex gap-3 pt-1">
+        <button type="submit" disabled={isLoading} className="btn btn-primary flex-1 disabled:opacity-50">
+          {uploading ? 'Uploading…' : saving ? 'Saving…' : isEditing ? 'Save changes' : 'Add episode'}
         </button>
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isLoading}
-            className="py-2 px-4 text-sm uppercase tracking-wider transition-colors disabled:opacity-50"
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(93,63,60,0.5)',
-              color: '#e5e2e1',
-              fontFamily: "'Space Grotesk', sans-serif",
-            }}
-          >
+          <button type="button" onClick={onCancel} disabled={isLoading} className="btn disabled:opacity-50">
             Cancel
           </button>
         )}

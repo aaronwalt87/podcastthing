@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import type { Episode } from '@/types/episode'
 import EpisodeForm from './EpisodeForm'
+import EpisodeArtwork from '@/components/podcasts/EpisodeArtwork'
+import { longDate } from '@/lib/format'
+import type { Episode } from '@/types/episode'
 
 interface EpisodeListProps {
   episodes: Episode[]
@@ -11,20 +13,27 @@ interface EpisodeListProps {
   categories?: string[]
 }
 
-export default function EpisodeList({ episodes, onUpdate, onDelete, categories = [] }: EpisodeListProps) {
+export default function EpisodeList({
+  episodes,
+  onUpdate,
+  onDelete,
+  categories = [],
+}: EpisodeListProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this episode? This cannot be undone.')) return
+  const handleDelete = async (episode: Episode) => {
+    if (!confirm(`Delete “${episode.title}”? This cannot be undone.`)) return
 
-    setDeletingId(id)
+    setDeletingId(episode.id)
+    setError(null)
     try {
-      const res = await fetch(`/api/episodes/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/episodes/${episode.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete')
-      onDelete(id)
+      onDelete(episode.id)
     } catch {
-      alert('Failed to delete episode. Please try again.')
+      setError(`Could not delete “${episode.title}”. Please try again.`)
     } finally {
       setDeletingId(null)
     }
@@ -32,27 +41,28 @@ export default function EpisodeList({ episodes, onUpdate, onDelete, categories =
 
   if (episodes.length === 0) {
     return (
-      <p
-        className="text-sm text-center py-8 uppercase tracking-wider"
-        style={{ color: '#e5e2e1', opacity: 0.35, fontFamily: "'Space Grotesk', sans-serif" }}
-      >
+      <p className="panel-flat px-6 py-12 text-center text-sm text-paper-3">
         No episodes yet. Add one above.
       </p>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
+      {error && (
+        <p
+          role="alert"
+          className="alert"
+        >
+          {error}
+        </p>
+      )}
+
       {episodes.map((episode) => (
-        <div key={episode.id} style={{ background: '#1c1b1b' }}>
+        <div key={episode.id} className="panel-flat overflow-hidden">
           {editingId === episode.id ? (
-            <div className="p-4">
-              <p
-                className="text-xs uppercase tracking-wider mb-4"
-                style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}
-              >
-                Editing episode
-              </p>
+            <div className="p-5">
+              <p className="eyebrow eyebrow-accent mb-4">Editing episode</p>
               <EpisodeForm
                 episode={episode}
                 onSuccess={(updated) => {
@@ -64,97 +74,39 @@ export default function EpisodeList({ episodes, onUpdate, onDelete, categories =
               />
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-3">
-              {/* Thumbnail */}
-              {episode.thumbnailUrl ? (
-                <img
-                  src={episode.thumbnailUrl}
-                  alt={episode.title}
-                  className="w-12 h-12 object-cover flex-shrink-0"
-                />
-              ) : (
-                <div
-                  className="w-12 h-12 flex-shrink-0 flex items-center justify-center"
-                  style={{ background: '#131313' }}
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <path
-                      d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                      fill="#353534"
-                    />
-                  </svg>
-                </div>
-              )}
+            <div className="flex items-center gap-4 p-3">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm bg-ink-800">
+                <EpisodeArtwork episode={episode} />
+              </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: '#e5e2e1' }}>
-                  {episode.title}
-                </p>
-                <p
-                  className="text-xs truncate uppercase tracking-wider"
-                  style={{ color: '#67d7e1', fontFamily: "'Space Grotesk', sans-serif" }}
-                >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-paper">{episode.title}</p>
+                <p className="num truncate text-[11px] uppercase tracking-wider text-paper-2">
                   {episode.showName}
                 </p>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span
-                    className="text-xs px-1.5 py-0.5 uppercase tracking-wider"
-                    style={{
-                      background: '#353534',
-                      borderLeft: `1px solid ${episode.audioType === 'upload' ? '#67d7e1' : 'rgba(93,63,60,0.5)'}`,
-                      color: episode.audioType === 'upload' ? '#67d7e1' : '#e5e2e1',
-                      fontFamily: "'Space Grotesk', sans-serif",
-                    }}
-                  >
-                    {episode.audioType === 'upload' ? 'Blob' : 'URL'}
-                  </span>
-                  {episode.category && (
-                    <span
-                      className="text-xs px-1.5 py-0.5 uppercase tracking-wider"
-                      style={{
-                        background: '#353534',
-                        borderLeft: '1px solid #67d7e1',
-                        color: '#67d7e1',
-                        fontFamily: "'Space Grotesk', sans-serif",
-                      }}
-                    >
-                      {episode.category}
-                    </span>
-                  )}
-                  <span
-                    className="text-xs uppercase tracking-wider"
-                    style={{ color: '#e5e2e1', opacity: 0.3, fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {new Date(episode.addedAt).toLocaleDateString()}
-                  </span>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <span className="chip">{episode.audioType === 'upload' ? 'Blob' : 'URL'}</span>
+                  {episode.category && <span className="chip chip-accent">{episode.category}</span>}
+                  <span className="num text-[11px] text-paper-3">{longDate(episode.addedAt)}</span>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex shrink-0 gap-2">
                 <button
+                  type="button"
                   onClick={() => setEditingId(episode.id)}
-                  className="text-xs px-2.5 py-1.5 uppercase tracking-wider transition-colors"
-                  style={{
-                    background: '#353534',
-                    color: '#e5e2e1',
-                    fontFamily: "'Space Grotesk', sans-serif",
-                  }}
+                  className="btn btn-sm"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(episode.id)}
+                  type="button"
+                  onClick={() => handleDelete(episode)}
                   disabled={deletingId === episode.id}
-                  className="text-xs px-2.5 py-1.5 uppercase tracking-wider transition-colors disabled:opacity-50"
-                  style={{
-                    background: '#353534',
-                    color: '#FF3B3B',
-                    fontFamily: "'Space Grotesk', sans-serif",
-                  }}
+                  className="btn btn-sm disabled:opacity-50"
+                  style={{ color: 'var(--neg)', borderColor: 'rgba(240,90,82,0.3)' }}
                 >
-                  {deletingId === episode.id ? '…' : 'Delete'}
+                  {deletingId === episode.id ? 'Deleting…' : 'Delete'}
                 </button>
               </div>
             </div>

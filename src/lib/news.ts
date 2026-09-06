@@ -1,8 +1,17 @@
-import redis from './redis'
+import 'server-only'
+import { waitUntil } from '@vercel/functions'
+import { acquireLock, getRedis } from './redis'
+import { sampleNews, sampleDataEnabled } from './sample-data'
 import type { NewsItem, NewsCategory } from '@/types/news'
 
 const NEWS_KEY = 'news:cache'
-const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 7200)
+/**
+ * The TTL must comfortably outlive the refresh interval, or the cache expires
+ * long before the next cron run and the site renders empty in between. Vercel's
+ * Hobby plan only allows daily crons, so 48h leaves a full run of slack: a
+ * stale headline beats a blank page.
+ */
+const NEWS_TTL_SECONDS = Number(process.env.NEWS_TTL_SECONDS ?? 172_800)
 const MAX_ITEMS = 60
 
 const RSS_SOURCES: { url: string; name: string; type: 'rss'; category: NewsCategory }[] = [
@@ -92,8 +101,28 @@ function classifyTitle(title: string, fallback: NewsCategory): NewsCategory {
   return fallback
 }
 
-function makeId(source: string, link: string): string {
-  const str = source + '|' + link
+/**
+ * Normalise before hashing: the same story arriving from the HN RSS feed and
+ * from the Algolia index used to hash under two different source names and
+ * survive the dedupe as two rows.
+ */
+function normaliseLink(link: string): string {
+  try {
+    const url = new URL(link)
+    url.hash = ''
+    const drop: string[] = []
+    url.searchParams.forEach((_value, key) => {
+      if (key.startsWith('utm_') || key === 'ref' || key === 'source') drop.push(key)
+    })
+    for (const key of drop) url.searchParams.delete(key)
+    return `${url.host.replace(/^www\./, '')}${url.pathname.replace(/\/$/, '')}${url.search}`
+  } catch {
+    return link
+  }
+}
+
+function makeId(link: string): string {
+  const str = normaliseLink(link)
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57
   for (let i = 0; i < str.length; i++) {
     const c = str.charCodeAt(i)
@@ -116,7 +145,7 @@ function parseRss2Feed(xml: string, sourceName: string, category: NewsCategory):
     const summary = stripHtml(description).slice(0, 200)
     const publishedAt = pubDate ? new Date(pubDate).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
+    items.push({ id: makeId(link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
@@ -131,7 +160,7 @@ function parseAtomFeed(xml: string, sourceName: string, category: NewsCategory):
     const summary = stripHtml(extractField(block, 'summary') || extractField(block, 'content')).slice(0, 200)
     const publishedAt = updated ? new Date(updated).getTime() : Date.now()
     if (!title || !link) continue
-    items.push({ id: makeId(sourceName, link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
+    items.push({ id: makeId(link), title, link, source: sourceName, sourceType: 'rss', publishedAt: isNaN(publishedAt) ? Date.now() : publishedAt, summary, category: category === 'Misc' ? classifyTitle(title, 'Misc') : category })
   }
   return items
 }
@@ -184,7 +213,7 @@ async function fetchHNQuery(query: string, category: NewsCategory): Promise<News
     return (json.hits ?? [])
       .filter((h) => h.url && h.points > 5)
       .map((h) => ({
-        id: makeId('HackerNews', h.url!),
+        id: makeId(h.url!),
         title: h.title,
         link: h.url!,
         source: 'Hacker News',
@@ -219,18 +248,57 @@ export async function refreshNews(): Promise<NewsItem[]> {
     .sort((a, b) => b.publishedAt - a.publishedAt)
     .slice(0, MAX_ITEMS)
 
-  await redis.set(NEWS_KEY, JSON.stringify(deduped), { ex: NEWS_TTL_SECONDS })
+  const redis = getRedis()
+  if (redis) {
+    try {
+      await redis.set(NEWS_KEY, JSON.stringify(deduped), { ex: NEWS_TTL_SECONDS })
+    } catch (err) {
+      console.error('[news] cache write failed', err)
+    }
+  }
   return deduped
 }
 
 export async function getCachedNews(): Promise<NewsItem[]> {
+  const redis = getRedis()
+  // Local dev with no credentials renders fixtures; production renders empty.
+  if (!redis) return sampleDataEnabled() ? sampleNews() : []
+
   try {
     const raw = await redis.get(NEWS_KEY)
-    if (!raw) return []
+    if (!raw) {
+      // A cold cache — first deploy, a flush, or a key rename — would otherwise
+      // leave the page blank until the next daily cron. Warm it in the
+      // background so the following request is served, and take a lock so a
+      // spike triggers one refresh rather than sixty.
+      if (await acquireLock('lock:news:refresh', 120)) {
+        // waitUntil, not a bare promise: on Vercel the container is frozen once
+        // the response is flushed, so a fire-and-forget refresh never finishes
+        // — it just holds the lock while doing nothing. This only shows up in
+        // production; a long-lived `next dev` process completes it either way.
+        //
+        // Off Vercel this is a silent no-op (the request-context symbol is
+        // absent), which is correct on any host that keeps the process alive.
+        // On another FREEZING host — Lambda via OpenNext, Netlify, Workers —
+        // the original bug would return with no error and no log line.
+        waitUntil(
+          refreshNews().catch((err) =>
+            console.error('[news] warm refresh failed', err)
+          )
+        )
+      }
+      return []
+    }
     if (Array.isArray(raw)) return raw as NewsItem[]
     if (typeof raw === 'string') return JSON.parse(raw) as NewsItem[]
     return []
-  } catch {
+  } catch (err) {
+    console.error('[news] cache read failed', err)
     return []
   }
+}
+
+/** Distinct source names present in the cache, for the news source filter. */
+export function newsSources(items: NewsItem[]): string[] {
+  return Array.from(new Set(items.map((i) => i.source))).sort()
 }

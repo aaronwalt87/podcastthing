@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { refreshNews } from '@/lib/news'
 
 export const dynamic = 'force-dynamic'
+// Sixteen feeds plus six HN queries needs more than the default 10s budget.
+export const maxDuration = 60
 
 // Vercel Cron always sends GET requests
 export async function GET(request: Request) {
