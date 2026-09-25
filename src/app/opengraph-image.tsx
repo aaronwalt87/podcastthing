@@ -56,7 +56,7 @@ export default function OpengraphImage() {
             {profile.tagline}
           </div>
           <div style={{ display: 'flex', fontSize: 28, color: '#9aa4ae' }}>
-            Live tech news · markets · listening archive
+            Tech signals · market context · episodes worth finishing
           </div>
         </div>
 
@@ -70,7 +70,7 @@ export default function OpengraphImage() {
           }}
         >
           <div style={{ display: 'flex', width: 60, height: 3, background: '#ff6a2b' }} />
-          Built and refreshed on a schedule
+          Built in public. Refreshed on a schedule.
         </div>
       </div>
     ),
