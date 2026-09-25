@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Podcasts',
-  description: 'A curated archive of technology and infrastructure podcast episodes.',
+  description: 'Technology and infrastructure podcast episodes that earned their place in the archive.',
 }
 
 interface PodcastsPageProps {
@@ -34,9 +34,9 @@ export default async function PodcastsPage({ searchParams }: PodcastsPageProps) 
         <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
           {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
           {totalShows > 0 && ` across ${totalShows} ${totalShows === 1 ? 'show' : 'shows'}`}, picked
-          one at a time — the ones I&rsquo;d send a colleague, not everything I subscribe to. Search
-          it, filter it, and pick up any episode where you left off; positions live in your browser,
-          not on a server.
+          one at a time. These are the episodes I would actually send someone, not the full backlog
+          quietly judging me from a podcast app. Search it, filter it, and pick up where you left
+          off; playback positions stay in your browser, where they belong.
         </p>
       </header>
 
