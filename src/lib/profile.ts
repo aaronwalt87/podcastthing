@@ -54,7 +54,7 @@ export interface Decision {
 export const profile = {
   name: 'Aaron Walters',
   /** Shown in the header lockup, the hero kicker and the about page. */
-  location: 'Colorado',
+  location: 'Wisconsin',
   /** One line. Appears in metadata and on the social card. */
   tagline: 'Infrastructure, and the code on top of it.',
 
