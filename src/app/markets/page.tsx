@@ -19,7 +19,7 @@ export const maxDuration = 60
 
 export const metadata: Metadata = {
   title: 'Markets',
-  description: 'Tech equities and index proxies with 60-day trend lines and sector breadth.',
+  description: 'The technology companies and broad market signals I watch for context, not prophecy.',
 }
 
 export default async function MarketsPage() {
@@ -53,9 +53,10 @@ export default async function MarketsPage() {
         </p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Markets</h1>
         <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
-          Index proxies, semiconductors, platforms and the infrastructure vendors underneath them.
-          Quotes come from a live API when a key is configured and from end-of-day closes when it
-          is not — the board says which, underneath it.
+          Broad indices, semiconductors, platforms, and the infrastructure vendors underneath them —
+          the part of the market I follow to understand the weather around technology. This is
+          context, not prophecy; the internet already has enough men confidently predicting what
+          a chart will do next. The board labels whether quotes are live or end-of-day.
         </p>
       </header>
 
@@ -63,9 +64,8 @@ export default async function MarketsPage() {
         <div className="panel-flat my-14 px-6 py-20 text-center">
           <p className="display text-2xl text-paper">The board is dark.</p>
           <p className="mx-auto mt-3 max-w-[52ch] text-sm text-paper-2">
-            Quotes are fetched on a schedule and cached. Either the window between runs is open or
-            the upstream is unavailable — the end-of-day fallback covers the second case, so this
-            usually means the first.
+            The quote cache is empty. The upstream may be unavailable, the scheduled job may be between
+            runs, or the market may simply be enjoying a rare moment without my supervision.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link href="/news" className="btn btn-sm">
@@ -155,7 +155,7 @@ export default async function MarketsPage() {
                 index="02"
                 eyebrow="By sector"
                 title="Where the move is concentrated"
-                description="Hue is direction, opacity is magnitude, capped at ±2% so one outlier can't wash out the board."
+                description="Color shows direction and opacity shows magnitude, capped at ±2% so one dramatic stock cannot turn the whole board into its personal mood ring."
               />
             </Reveal>
             <Reveal delay={60}>

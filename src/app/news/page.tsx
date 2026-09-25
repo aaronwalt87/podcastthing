@@ -14,7 +14,7 @@ export const maxDuration = 60
 export const metadata: Metadata = {
   title: 'News',
   description:
-    'AI, hardware, infrastructure and tech-finance headlines, parsed server-side and refreshed on a schedule.',
+    'Technology and infrastructure news I genuinely follow, cleaned up and refreshed on a schedule.',
 }
 
 export default async function NewsPage() {
@@ -30,9 +30,10 @@ export default async function NewsPage() {
         <p className="eyebrow eyebrow-accent">Live intelligence</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">News</h1>
         <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
-          RSS, Atom and the Hacker News index, parsed server-side, deduplicated by normalised link,
-          and sorted newest first. Headlines are classified by keyword, so a story lands in the
-          section it belongs to rather than the one its publisher sits in.
+          The technology and infrastructure stories I genuinely want to keep up with, gathered from
+          RSS, Atom, and Hacker News. The site cleans up duplicates, sorts everything by recency,
+          and makes a reasonable attempt to classify the headlines. It is less glamorous than an
+          algorithm and considerably less interested in making me angry.
         </p>
 
         {items.length > 0 && (
@@ -58,8 +59,8 @@ export default async function NewsPage() {
           <div className="panel-flat px-6 py-20 text-center">
             <p className="display text-2xl text-paper">The feed is idle.</p>
             <p className="mx-auto mt-3 max-w-[52ch] text-sm text-paper-2">
-              Headlines are fetched on a schedule and cached; the cache is empty between runs or
-              just after a deploy. Nothing is broken — it refills on the next pass.
+              The scheduled refresh has not left anything in the cache yet. Nothing is necessarily broken;
+              the robots may simply be between chores.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/markets" className="btn btn-sm">

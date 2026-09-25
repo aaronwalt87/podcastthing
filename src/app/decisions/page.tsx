@@ -8,7 +8,7 @@ import SignalPlate from '@/components/home/SignalPlate'
 export const metadata: Metadata = {
   title: 'Decisions',
   description:
-    'A record of the choices made in building this site, the alternatives they were chosen over, and what each one cost.',
+    'The choices behind this site, the alternatives they beat, and the tradeoffs that came along for the ride.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -29,9 +29,9 @@ export default async function DecisionsPage() {
         <p className="eyebrow eyebrow-accent">On the record</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Decisions</h1>
         <p className="mt-6 max-w-[62ch] text-[17px] leading-relaxed text-paper-2">
-          Every part of this site is a choice that could have gone the other way. These are the ones
-          worth defending, each with the alternative it beat and the price it charged. An entry with
-          no cost isn&rsquo;t a decision — it&rsquo;s an advertisement.
+          Every useful system is a pile of tradeoffs wearing a clean interface. These are the choices
+          behind this one: what I picked, what I did not, and what the decision cost. If a choice has
+          no downside, it is probably marketing copy wearing a hard hat.
         </p>
       </header>
 
@@ -79,7 +79,7 @@ export default async function DecisionsPage() {
       <div className="border-t border-hair py-10">
         <p className="max-w-[58ch] text-[15px] leading-relaxed text-paper-2">
           {links.length > 0
-            ? 'Disagree with one of these? That’s the conversation worth having.'
+            ? 'Disagree with one of these? Good. Those are usually the useful conversations.'
             : // Without a contact route, an invitation to reply is a closed
               // loop — the same problem /about's closing block had.
               'Every one of these is visible in the source, costs and all. The pages below are the same decisions running.'}

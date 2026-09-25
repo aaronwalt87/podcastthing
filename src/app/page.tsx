@@ -64,7 +64,7 @@ export default async function HomePage() {
             index="01"
             eyebrow="Live intelligence"
             title="What's moving right now"
-            description="Headlines from every tech and infrastructure feed worth reading, plus the Hacker News index — parsed server-side and cached, with the tape underneath them."
+            description="A deliberately opinionated pile of technology and infrastructure headlines, cleaned up, deduplicated, and put in one place so I can stop opening seventeen tabs before coffee."
             action={{ label: 'All headlines', href: '/news' }}
           />
         </Reveal>
@@ -128,7 +128,7 @@ export default async function HomePage() {
             index="02"
             eyebrow="Listening archive"
             title="Episodes worth finishing"
-            description="Hand-picked, not a feed — the ones I'd send a colleague, on infrastructure, AI, and how technology work actually gets done. Playback picks up where you left it."
+            description="Not everything I subscribe to — just the episodes I would actually send someone, mostly about infrastructure, AI, security, and how technology work gets done when the conference talk is over."
             action={{ label: 'Full archive', href: '/podcasts' }}
           />
         </Reveal>
@@ -137,8 +137,8 @@ export default async function HomePage() {
           <div className="panel-flat mt-10 px-6 py-20 text-center">
             <p className="display text-2xl text-paper">Nothing in the archive yet.</p>
             <p className="mx-auto mt-3 max-w-[46ch] text-sm text-paper-2">
-              This is a curated list rather than a firehose — episodes land here as they turn out to
-              be worth the time.
+              This is a curated list, not an RSS guilt pile. Episodes land here after they prove
+              they were worth the time.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link href="/news" className="btn btn-sm">
@@ -176,18 +176,17 @@ export default async function HomePage() {
             <div>
               <p className="eyebrow eyebrow-accent">About this build</p>
               <p className="display mt-4 text-[clamp(26px,3.4vw,44px)]">
-                I&rsquo;ve run infrastructure for years. This is what happened when I started
-                writing the code myself.
+                I&rsquo;ve led technology for years. I still read the logs.
               </p>
             </div>
 
             <div>
               <p className="max-w-[54ch] text-[15px] leading-relaxed text-paper-2">
-                Everything here is fetched, cached and refreshed on a schedule — feeds parsed
-                server-side and deduplicated into Redis, quotes from a live API with a keyless
-                daily-close fallback so the board still renders when the upstream is down, and a
-                player that keeps your position per episode and talks to the OS media controls. The
-                decisions are the interesting part, and I&rsquo;ll happily defend any of them.
+                This started as a useful place to collect the things I follow and became a very
+                effective way to avoid choosing a normal hobby. The feeds are parsed and cached,
+                the market board has a fallback when its upstream wanders off, and the player
+                remembers where you stopped. The code is newer territory for me; designing systems
+                that survive contact with reality is not.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">

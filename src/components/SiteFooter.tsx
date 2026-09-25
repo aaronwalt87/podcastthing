@@ -30,8 +30,8 @@ export default function SiteFooter() {
         <div className="lg:col-span-2">
           <p className="display text-2xl text-paper">{profile.name}</p>
           <p className="mt-2 max-w-[46ch] text-sm text-paper-2">
-            Built and maintained in {profile.location}. A career in hosting, IT and support; now
-            writing the code too.
+            Built in {profile.location} after 14 years in infrastructure and technology leadership.
+            Still learning the code. Still checking the logs.
           </p>
           <p className="eyebrow mt-5">Next.js · Redis · Vercel</p>
         </div>
@@ -96,7 +96,7 @@ export default function SiteFooter() {
         <p className="eyebrow">
           © {new Date().getFullYear()} {profile.name}
         </p>
-        <p className="eyebrow">Refreshed on a schedule</p>
+        <p className="eyebrow">Refreshed while I do other things</p>
       </div>
     </footer>
   )

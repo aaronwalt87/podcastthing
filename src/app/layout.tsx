@@ -33,8 +33,8 @@ const mono = JetBrains_Mono({
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aaronwalters.dev'
 
 const DESCRIPTION =
-  `${profile.name} — a career in hosting, IT and support, now writing the software too. ` +
-  `A live technology news, markets and podcast dashboard, built and maintained in ${profile.location}.`
+  `${profile.name} — 14 years in infrastructure and technology leadership, still close enough to the work to read the logs. ` +
+  `Technology news, market context, and podcast episodes worth finishing — built in ${profile.location}.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -1,35 +1,4 @@
-/**
- * Everything about the site's owner lives here.
- *
- * ─────────────────────────────────────────────────────────────────────────────
- *  READ THIS BEFORE DEPLOYING.
- *
- *  The `about` copy below was drafted from a general description of this
- *  background. The shape is right; the specifics are missing, and a biography
- *  made only of categories reads as "nothing to point to" — which is the
- *  opposite of true for a long operations career.
- *
- *  Nothing here renders as a placeholder: the site ships clean as-is. But the
- *  four items below are what turn it from competent into convincing.
- *
- *  BEFORE THIS GOES LIVE:
- *    1. `links` — at minimum an email. GitHub matters more than usual here:
- *       the whole claim is "new to writing code, here is my code", and without
- *       it there is nothing to read. An empty href is omitted, never rendered
- *       dead, so fill them in one at a time.
- *    2. `lookingFor` — the page has no ask without it. Left empty, the section
- *       simply does not render.
- *    3. Put real nouns in `about`. Years, the kind of company, one story you
- *       actually remember. See the notes above each entry — every concrete
- *       detail you add is worth a paragraph of prose.
- *    4. Set NEXT_PUBLIC_SITE_URL. It feeds the canonical tags and the social
- *       card; the default is a guess and, if the domain is not yours, points
- *       every share at a stranger's site.
- *
- *  `tagline`, `heroLead` and `heroLeadMuted` are the first words anyone reads.
- *  Say them the way you would say them out loud.
- * ─────────────────────────────────────────────────────────────────────────────
- */
+/** Shared profile copy for the public site. */
 
 export interface ProfileLink {
   label: string
@@ -56,47 +25,32 @@ export const profile = {
   /** Shown in the header lockup, the hero kicker and the about page. */
   location: 'Wisconsin',
   /** One line. Appears in metadata and on the social card. */
-  tagline: 'Infrastructure, and the code on top of it.',
+  tagline: 'Infrastructure, modernization, and the logs in between.',
 
   /** The hero headline, in two lines. Keep both short. */
-  heroLead: 'I run infrastructure.',
-  heroLeadMuted: 'Now I build it too.',
+  heroLead: 'I lead technology.',
+  heroLeadMuted: 'I still read the logs.',
 
-  /**
-   * The line that introduces you, used in the hero AND at the top of /about.
-   * Four beats: credential, concession, evidence, what-it-is. The concession
-   * sits in the middle, where it reads as confidence rather than apology.
-   *
-   * Sharper with a number: "I've spent fifteen years keeping other people's
-   * software running…". Add one if you are comfortable stating it.
-   */
+  /** Used in the hero and at the top of the About page. */
   standfirst:
-    "I've spent my career keeping other people's software running — hosting, IT, support, and the delivery process around all three. I'm new to writing it. This site is the largest thing I've built: technology news, the market underneath it, and the episodes worth finishing, collected and refreshed on a schedule. It's where I learn in public.",
+    "I've spent 14 years keeping B2B software and infrastructure useful, available, and moving forward — leading teams, migrating systems, and modernizing platforms with more history than documentation. I'm still learning to write software, but I'm shipping real things while I do it. This dashboard collects the technology news, market signals, and podcast episodes I genuinely follow. It is also what happened when I needed a hobby and apparently rejected several normal ones.",
 
   about: [
     {
-      title: 'Where I come from',
-      /**
-       * TO SHARPEN: name the kind of company ("a regional hosting provider",
-       * "an MSP serving mid-market healthcare"), and add two sentences about
-       * one thing you actually did — the migration you ran, the outage you
-       * still think about, the process you rebuilt and what changed. That is
-       * the highest-value edit on this page.
-       */
-      body: `Hosting, IT, and support, and the software delivery process that runs between them. I've spent my career on the operational side of technology: the systems other people's code lands on, the escalation paths, the ticket queue, and the slow work of turning a support function into something that produces information instead of noise. I know what a system looks like at three in the morning — and how much of whether it holds was decided months earlier, by people who never got paged.`,
+      title: 'Fourteen years in the machinery',
+      body: `I came up through hosting, IT, support, and the unglamorous systems that keep software companies functioning after the launch post is forgotten. Over 14 years, that grew into leading infrastructure and cloud migrations, modernizing legacy products, and building technical teams that can improve a system without first setting it on fire. I have developed a particular affection for important platforms with three generations of architecture and half a generation of documentation.`,
     },
     {
-      title: "What I'm doing now",
-      /**
-       * TO SHARPEN: say when you started and what the first thing was, however
-       * small. "A script that reconciled two ticket systems" beats any
-       * adjective.
-       */
-      body: `Writing the software myself. I'm newer at that than I am at operations, and I'd rather say so here than have it come out in a technical screen. What I bring to it is a long view of how software actually gets run — which turns out to be a decent editorial sense for what's worth building, and a low tolerance for things that only work on the happy path.`,
+      title: 'Leading without leaving the keyboard',
+      body: `Today I work where technology leadership, infrastructure, and product overlap. I help set direction, assess systems, lead technical teams, and turn vague concerns about reliability or technical debt into work somebody can actually finish. I also still open the logs when the dashboard says everything is healthy and everyone in the room knows that it is lying.`,
+    },
+    {
+      title: 'Learning to build in public',
+      body: `Software development is newer territory for me, and I am not going to dress 14 years of adjacent experience in a tiny fake mustache and call it 14 years of coding. What I do have is a long view of how software behaves once real people depend on it. I am learning by shipping useful things, documenting the tradeoffs, and resisting the urge to call every side project a platform.`,
     },
     {
       title: 'Why this site exists',
-      body: `I wanted one page that told me what happened in technology today, what the market underneath it did, and what was worth listening to. Nothing available did all three without an account, so I built it. Every part of it is a decision I can defend: why the cache sits where it does, why there's no charting library, why headlines are classified by keyword rather than by publisher.`,
+      body: `I wanted one place for the technology news I actually read, the market signals I use for context, and the podcast episodes worth finishing. Nothing quite matched the way I follow those things, so I built it. The result is equal parts personal dashboard, engineering playground, and evidence that I should probably have chosen a less complicated hobby.`,
     },
   ] as AboutSection[],
 
@@ -165,13 +119,9 @@ export const profile = {
     },
   ] as Decision[],
 
-  /**
-   * The ask. Renders as its own section, and is skipped entirely while empty.
-   * Something like: "Platform, infrastructure or support-engineering work,
-   * remote or around Colorado. I'm most useful where operations and product
-   * meet — the place where what customers report turns into what gets built."
-   */
-  lookingFor: '',
+  /** The kind of work this site should quietly attract. */
+  lookingFor:
+    "I'm most interested in infrastructure and platform leadership, especially when a business has inherited a critical system with good bones, old scars, and nobody particularly eager to touch it. That is usually where I am most useful.",
 
   /**
    * Contact and profile links. FILL THESE IN — an empty href is hidden.

@@ -5,29 +5,29 @@ import Reveal from '@/components/ui/Reveal'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: `${profile.name} — ${profile.tagline} A live technology news, markets and podcast dashboard, built and maintained in ${profile.location}.`,
+  description: `${profile.name} — 14 years in infrastructure and technology leadership, now learning to build and shipping real software.`,
 }
 
 const BUILD_NOTES: [string, string][] = [
   [
     'Rendering',
-    'Server components by default. The news rows, trend lines and quote cards elsewhere on this site were rendered on the server; only the parts that need interactivity ship JavaScript.',
+    'Server components by default. The browser gets JavaScript only when a feature actually needs it; it has enough responsibilities already.',
   ],
   [
     'Caching',
-    'Feeds and quotes are fetched by scheduled jobs and cached in Redis, so a page load never waits on a dozen-plus upstream services — and one slow publisher cannot hold up the rest. A missing or failing cache degrades to an empty state, never to an error page.',
+    'Scheduled jobs fetch feeds and quotes into Redis, so one sleepy publisher cannot hold the entire page hostage. If the cache fails, the site shows an honest empty state instead of a dramatic error page.',
   ],
   [
     'Charts',
-    'There is no charting library. The trend lines are server-rendered SVG, and the ridge on the home page is a hand-written canvas driven by the same market series shown on the board.',
+    'There is no charting library. The trend lines are server-rendered SVG, and the animated ridge is a hand-written canvas. This was educational, which is the dignified way to say I made more work for myself.',
   ],
   [
     'Fallbacks',
-    'Quotes come from a live API when a key is configured and from end-of-day closes when it is not, so the board renders either way — and every quote records which source it came from.',
+    'Quotes use a live API when configured and end-of-day closes when it is not. The board labels the source because stale data is acceptable; pretending it is live is not.',
   ],
   [
     'Playback',
-    'The player keeps a position per episode in your browser, supports variable speed and a queue, and registers with the operating system media controls.',
+    'The player remembers each episode in your browser, supports speed and queue controls, and talks to the operating system. It does not require an account to remember that you stopped at 31:42.',
   ],
 ]
 
@@ -37,7 +37,7 @@ export default function AboutPage() {
   return (
     <div className="shell" style={{ paddingTop: 'calc(var(--header-h) + 56px)' }}>
       <header className="max-w-3xl">
-        <p className="eyebrow eyebrow-accent">Who is building this</p>
+        <p className="eyebrow eyebrow-accent">The person behind the logs</p>
         <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">{profile.name}</h1>
         <p className="mt-6 max-w-[58ch] text-[17px] leading-relaxed text-paper-2">
           {profile.standfirst}
@@ -72,7 +72,7 @@ export default function AboutPage() {
 
           <Reveal>
             <section>
-              <h2 className="display text-[clamp(22px,2.6vw,30px)]">How this one is built</h2>
+              <h2 className="display text-[clamp(22px,2.6vw,30px)]">How I made this harder than necessary</h2>
               <dl className="mt-5 flex flex-col">
                 {BUILD_NOTES.map(([term, detail]) => (
                   <div
@@ -148,10 +148,10 @@ export default function AboutPage() {
 
       <div className="mt-16 border-t border-hair py-10">
         <p className="display max-w-[24ch] text-[clamp(22px,2.6vw,32px)]">
-          Want to argue with a decision on this page?
+          See a decision you would have made differently?
         </p>
         <p className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-paper-2">
-          That&rsquo;s the conversation I want to have.{' '}
+          That is probably the most interesting conversation we could have.{' '}
           {links.length > 0
             ? 'Any of the links above reaches me.'
             : // With no contact link configured, an invitation to reply would be
