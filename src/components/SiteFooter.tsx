@@ -92,7 +92,6 @@ export default function SiteFooter() {
 
       <div className={styles.footerWordmark}>
         <span>{profile.name}</span>
-        <span className={styles.footerAsterisk} aria-hidden="true">✳</span>
       </div>
       <div className={styles.footerBottom}>
         <p>

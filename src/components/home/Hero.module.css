@@ -10,17 +10,16 @@
 .aboutLink { display: inline-flex; align-items: center; gap: .75rem; padding: .7rem 0; font-size: .85rem; border-bottom: 1px solid var(--hair-2); }
 .aboutLink:hover { color: var(--ember); border-color: currentColor; }
 .stage { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--olive); color: var(--cream); min-height: 650px; border-radius: 3px; }
-.stageTop, .stageBottom { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 1rem; padding: 1.8rem; font-size: .8rem; line-height: 1.45; }
+.stageTop, .stageBottom { position: relative; z-index: 4; display: flex; justify-content: space-between; gap: 1rem; padding: 1.8rem; font-size: .8rem; line-height: 1.45; pointer-events: none; }
 .stageTop { align-items: center; }
-.stageTop > :last-child { font-size: 1.5rem; }
 .stageBottom { margin-top: auto; align-items: end; }
-.stageGlyph { font-size: 2.8rem; line-height: 1; }
+.stageLabel { display: inline-block; padding: .58rem .76rem; border-radius: 999px; background: color-mix(in oklab, var(--charcoal) 80%, var(--olive)); color: var(--cream); box-shadow: 0 1px 0 color-mix(in oklab, var(--cream) 20%, transparent); }
+.stageArrow { display: grid; width: 2.65rem; height: 2.65rem; place-items: center; border: 1px solid color-mix(in oklab, var(--cream) 50%, transparent); border-radius: 50%; background: color-mix(in oklab, var(--charcoal) 80%, var(--olive)); color: var(--cream); font-size: 1.35rem; }
 .sculpture { --turn: 0deg; --tilt: 0deg; position: absolute; inset: 3.5rem -1.3rem 2rem; display: grid; align-items: center; perspective: 1000px; }
 .assembly { width: 100%; max-height: 100%; overflow: visible; transform: rotateY(var(--turn)) rotateX(var(--tilt)); transition: transform 450ms ease-out; }
 .machine { transform-origin: 300px 310px; transform: rotate(calc(-14deg + var(--scene-progress, 0) * 48deg)) scale(calc(1 - var(--scene-progress, 0) * .1)); }
 .top { transform: translateY(calc(var(--scene-progress, 0) * -84px)); }
 .bottom { transform: translateY(calc(var(--scene-progress, 0) * 74px)); }
-.stageGlyph { transform: rotate(calc(var(--scene-progress, 0) * 180deg)); }
 @media (prefers-reduced-motion: no-preference) {
   .copy > * { animation: hero-enter 850ms var(--ease-out) both; }
   .copy > :nth-child(2) { animation-delay: 90ms; }
@@ -74,7 +73,7 @@
   .stats dd { font-size: .94rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .assembly, .top, .bottom, .stageGlyph, .title span { transform: none; transition: none; }
+  .assembly, .top, .bottom, .title span { transform: none; transition: none; }
   .machine { transform: rotate(-14deg); }
   .copy > * { animation: none; }
 }

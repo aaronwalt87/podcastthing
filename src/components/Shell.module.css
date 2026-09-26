@@ -38,7 +38,6 @@
 .footerLinks a:hover { text-decoration-color: currentColor; }
 .footer a:focus-visible { outline-color: var(--inverse-paper); }
 .footerWordmark { display: flex; justify-content: space-between; padding: 30px 0 35px; border-top: 1px solid var(--inverse-hair); font-family: var(--font-display); font-size: clamp(45px, 10.5vw, 154px); font-weight: 650; line-height: .92; letter-spacing: -.07em; }
-.footerAsterisk { color: var(--inverse-muted); font-size: .85em; }
 .footerBottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; border-top: 1px solid var(--inverse-hair); padding-top: 23px; color: var(--inverse-muted); font-size: 11px; }
 
 @media (max-width: 1050px) {
