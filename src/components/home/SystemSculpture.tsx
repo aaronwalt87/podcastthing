@@ -19,16 +19,12 @@ export default function SystemSculpture() {
     const reset = () => {
       node.style.setProperty('--turn', '0deg')
       node.style.setProperty('--tilt', '0deg')
-      node.style.setProperty('--spread', '0px')
     }
     const update = () => {
       frame = 0
       if (motion.matches || document.hidden || !visible) return
-      const rect = node.getBoundingClientRect()
-      const progress = Math.max(0, Math.min(1, -rect.top / Math.max(rect.height, 1)))
-      node.style.setProperty('--turn', `${pointerX * 5 + progress * 7}deg`)
+      node.style.setProperty('--turn', `${pointerX * 8}deg`)
       node.style.setProperty('--tilt', `${pointerY * -4}deg`)
-      node.style.setProperty('--spread', `${progress * 32 + Math.abs(pointerX) * 9}px`)
     }
     const schedule = () => {
       if (!frame && !motion.matches && !document.hidden && visible) frame = requestAnimationFrame(update)
@@ -57,7 +53,6 @@ export default function SystemSculpture() {
     observer?.observe(node)
     node.addEventListener('pointermove', handlePointer)
     node.addEventListener('pointerleave', handleLeave)
-    window.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('resize', schedule, { passive: true })
     document.addEventListener('visibilitychange', handleEnvironment)
     motion.addEventListener('change', handleEnvironment)
@@ -67,7 +62,6 @@ export default function SystemSculpture() {
       observer?.disconnect()
       node.removeEventListener('pointermove', handlePointer)
       node.removeEventListener('pointerleave', handleLeave)
-      window.removeEventListener('scroll', schedule)
       window.removeEventListener('resize', schedule)
       document.removeEventListener('visibilitychange', handleEnvironment)
       motion.removeEventListener('change', handleEnvironment)

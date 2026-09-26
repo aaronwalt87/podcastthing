@@ -1,5 +1,5 @@
 .hero { padding-top: var(--header-h); }
-.composition { display: grid; grid-template-columns: 1.06fr 1fr; align-items: stretch; gap: 2rem; padding-top: 1.5rem; }
+.composition { display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); align-items: stretch; gap: clamp(2rem, 4vw, 5rem); padding-top: 1.5rem; }
 .copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2rem, 4vw, 4.5rem) 0; }
 .kicker { display: flex; align-items: center; gap: .7rem; color: var(--paper-2); }
 .marker { width: .55rem; height: .55rem; border-radius: 50%; background: var(--ember); }
@@ -9,17 +9,29 @@
 .actions { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; margin-top: 2rem; }
 .aboutLink { display: inline-flex; align-items: center; gap: .75rem; padding: .7rem 0; font-size: .85rem; border-bottom: 1px solid var(--hair-2); }
 .aboutLink:hover { color: var(--ember); border-color: currentColor; }
-.stage { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--olive); color: var(--cream); min-height: 650px; border-radius: 3px; }
-.stageTop, .stageBottom { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 1rem; padding: 1.8rem; font-size: .8rem; line-height: 1.45; }
-.stageTop { align-items: center; }
-.stageTop > :last-child { font-size: 1.5rem; }
-.stageBottom { margin-top: auto; align-items: end; }
-.stageGlyph { font-size: 2.8rem; line-height: 1; }
-.sculpture { --turn: 0deg; --tilt: 0deg; --spread: 0px; position: absolute; inset: 3.5rem -1.3rem 2rem; display: grid; align-items: center; perspective: 1000px; }
+.stage { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; isolation: isolate; background: var(--olive); color: var(--cream); min-height: 690px; border-radius: 3px; }
+.stage::before { content: ''; position: absolute; z-index: 0; width: min(72%, 34rem); aspect-ratio: 1; left: 50%; top: 50%; border: 1px solid color-mix(in oklab, var(--cream) 18%, transparent); border-radius: 50%; background: radial-gradient(circle, color-mix(in oklab, var(--cream) 8%, transparent), transparent 68%); transform: translate(-50%, -50%) scale(calc(.78 + var(--scene-progress, 0) * .22)); opacity: calc(.45 + var(--scene-progress, 0) * .55); }
+.stage::after { content: ''; position: absolute; z-index: 2; inset: 1rem; border: 1px solid color-mix(in oklab, var(--cream) 14%, transparent); border-radius: inherit; pointer-events: none; }
+.sculpture { --turn: 0deg; --tilt: 0deg; position: absolute; z-index: 1; inset: -1rem -3rem -1.5rem; display: grid; align-items: center; perspective: 1000px; }
 .assembly { width: 100%; max-height: 100%; overflow: visible; transform: rotateY(var(--turn)) rotateX(var(--tilt)); transition: transform 450ms ease-out; }
-.machine { transform-origin: 300px 310px; transform: rotate(-14deg); }
-.top { transform: translateY(calc(-1 * var(--spread))); transition: transform 450ms ease-out; }
-.bottom { transform: translateY(var(--spread)); transition: transform 450ms ease-out; }
+.machine { transform-origin: 300px 310px; transform: rotate(calc(-14deg + var(--scene-progress, 0) * 48deg)) scale(calc(1 - var(--scene-progress, 0) * .1)); }
+.top { transform: translateY(calc(var(--scene-progress, 0) * -84px)); }
+.bottom { transform: translateY(calc(var(--scene-progress, 0) * 74px)); }
+@media (prefers-reduced-motion: no-preference) {
+  .copy > * { animation: hero-enter 850ms var(--ease-out) both; }
+  .copy > :nth-child(2) { animation-delay: 90ms; }
+  .copy > :nth-child(3) { animation-delay: 170ms; }
+  .copy > :nth-child(4) { animation-delay: 250ms; }
+  .title span { transform: translateX(calc(var(--scene-progress, 0) * 24px)); }
+}
+@keyframes hero-enter { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 900px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  [data-motion='on'] > .composition { height: calc(100svh - var(--header-h)); padding-block: 18px 26px; }
+  [data-motion='on'] > .composition .stage { min-height: 0; border-radius: calc(3px + var(--scene-progress) * 40px); }
+  [data-motion='on'] > .composition .copy { padding-block: 12px; }
+  [data-motion='on'] > .composition .title { font-size: clamp(56px, 6vw, 90px); margin-top: 24px; }
+  [data-motion='on'] > .composition .summary { margin-top: 22px; }
+}
 .intro { display: grid; grid-template-columns: 1fr 1.3fr; gap: 4rem; padding-top: clamp(4rem, 7vw, 7rem); padding-bottom: 3.5rem; }
 .introHeading h2 { margin-top: 1.3rem; font-size: clamp(2.5rem, 4.2vw, 4.4rem); font-weight: 500; line-height: 1.03; letter-spacing: -.06em; }
 .introBody > p { max-width: 62ch; font-size: clamp(1rem, 1.4vw, 1.2rem); line-height: 1.75; color: var(--paper-2); }
@@ -38,8 +50,7 @@
   .composition { gap: 1.25rem; }
   .title { font-size: clamp(3.4rem, 6.5vw, 4.6rem); }
   .stage { min-height: 600px; }
-  .sculpture { inset-inline: -2rem; }
-  .stageTop, .stageBottom { padding: 1.3rem; }
+  .sculpture { inset-inline: -3.5rem; }
 }
 @media (max-width: 700px) {
   .composition { grid-template-columns: 1fr; padding-top: .5rem; }
@@ -47,8 +58,9 @@
   .title { font-size: clamp(3.3rem, 12vw, 5.5rem); max-width: 11ch; margin-top: 2rem; }
   .summary { margin-top: 1.4rem; }
   .actions { margin-top: 1.5rem; }
-  .stage { min-height: 0; aspect-ratio: 1 / 1.06; }
-  .sculpture { inset: 0; }
+  .stage { min-height: 0; aspect-ratio: 1 / 1.04; }
+  .stage::after { inset: .65rem; }
+  .sculpture { inset: -1rem -2.5rem; }
   .intro { grid-template-columns: 1fr; gap: 1.75rem; padding-top: 3.5rem; padding-bottom: 2.5rem; }
   .introHeading h2 { margin-top: 1rem; }
   .introBody > p { font-size: 1rem; }
@@ -58,5 +70,8 @@
   .stats dd { font-size: .94rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .assembly, .top, .bottom { transform: none; transition: none; }
+  .assembly, .top, .bottom, .title span { transform: none; transition: none; }
+  .machine { transform: rotate(-14deg); }
+  .copy > * { animation: none; }
+  .stage::before { transform: translate(-50%, -50%); }
 }

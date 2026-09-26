@@ -1,0 +1,17 @@
+.scene { --scene-progress: 0; }
+.scene[data-scene='chapter'] { --scene-progress: 1; }
+.scene[data-motion='on'][data-scene='chapter'] > * {
+  transform: translate3d(0, calc((1 - var(--scene-progress)) * 60px), 0);
+  border-radius: calc((1 - var(--scene-progress)) * 48px) calc((1 - var(--scene-progress)) * 48px) 0 0;
+}
+.scene[data-motion='on'] [data-scroll-layer='back'] { transform: translate3d(0, calc((1 - var(--scene-progress)) * 55px), 0); }
+.scene[data-motion='on'] [data-scroll-layer='front'] { transform: translate3d(0, calc((1 - var(--scene-progress)) * 18px), 0); }
+.scene:focus-within > *, .scene:focus-within [data-scroll-layer] { transform: none; }
+@media (min-width: 900px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  .scene[data-motion='on'][data-scene='hero'] { height: 185svh; }
+  .scene[data-motion='on'][data-scene='hero'] > * { position: sticky; top: var(--header-h); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene[data-motion='on'][data-scene='chapter'] > *,
+  .scene[data-motion='on'] [data-scroll-layer] { transform: none; border-radius: 0; }
+}

@@ -114,6 +114,13 @@ No invented quotes, fake uptime, or fabricated live telemetry.
 
 ## 6. Interaction
 
+- ScrollScene drives a normalized progress token with a time-based easing loop.
+  The desktop hero pins for 185svh only at widths >=900px and heights >=700px;
+  smaller viewports use natural-flow sculpture motion. No wheel/touch interception.
+  Sculpture layers separate and rotate through the scene; chapter surfaces and
+  text travel at different depths. Loops stop when settled, offscreen or hidden.
+  Reduced motion disables pinning and transforms at runtime. Without hydration,
+  the page remains a normal readable layout. Hero copy enters in a short stagger.
 - Spotlight writes `--mx`/`--my` to the DOM, never rerendering on pointer move.
 - Reveal is visible before hydration, hides only mounted off-screen content,
   has a failsafe, and remains visible when IntersectionObserver is unavailable.
