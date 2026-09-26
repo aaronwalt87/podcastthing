@@ -7,29 +7,29 @@ import styles from '@/components/ui/PageMasthead.module.css'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: `${profile.name} — 14 years in infrastructure and technology leadership, now learning to build and shipping real software.`,
+  description: `About ${profile.name}'s personal collection of news, markets, and podcasts.`,
 }
 
 const BUILD_NOTES: [string, string][] = [
   [
     'Rendering',
-    'Server components by default. The browser gets JavaScript only when a feature actually needs it; it has enough responsibilities already.',
+    'Pages render on the server; interactive features run in the browser.',
   ],
   [
     'Caching',
-    'Scheduled jobs fetch feeds and quotes into Redis, so one sleepy publisher cannot hold the entire page hostage. If the cache fails, the site shows an honest empty state instead of a dramatic error page.',
+    'Feeds and quotes refresh on a schedule and are cached in Redis for quick page loads.',
   ],
   [
     'Charts',
-    'There is no charting library. The trend lines are server-rendered SVG, and the animated market ridge is a hand-written canvas. This was educational, which is the dignified way to say I made more work for myself.',
+    'SVG trend lines and a hand-written canvas for the market ridge. No charting library.',
   ],
   [
     'Fallbacks',
-    'Quotes use a live API when configured and end-of-day closes when it is not. The board labels the source because stale data is acceptable; pretending it is live is not.',
+    'Quotes use a live API when configured, or end-of-day closes. The source is always labeled.',
   ],
   [
     'Playback',
-    'The player remembers each episode in your browser, supports speed and queue controls, and talks to the operating system. It does not require an account to remember that you stopped at 31:42.',
+    'Playback positions stay in your browser. Queue and speed controls work without an account.',
   ],
 ]
 
@@ -38,7 +38,7 @@ export default function AboutPage() {
 
   return (
     <div className={`shell ${styles.page}`}>
-      <PageMasthead index="05" eyebrow="The person behind the logs" title={profile.name}>
+      <PageMasthead index="05" eyebrow="A little context" title="About this site">
         <p>
           {profile.standfirst}
         </p>
@@ -49,7 +49,7 @@ export default function AboutPage() {
           {profile.about.map((section, i) => (
             <Reveal key={section.title} delay={i * 60}>
               <section className={styles.story}>
-                <p className="eyebrow mb-6"><span className="num">0{i + 1}</span> / Background</p>
+                <p className="eyebrow mb-6"><span className="num">0{i + 1}</span> / The project</p>
                 <h2 className={styles.storyTitle}>{section.title}</h2>
                 <p className={styles.storyCopy}>
                   {section.body}
@@ -58,24 +58,10 @@ export default function AboutPage() {
             </Reveal>
           ))}
 
-          {profile.lookingFor.trim().length > 0 && (
-            <Reveal>
-              <section className={styles.story}>
-                <p className="eyebrow mb-6">Next chapter</p>
-                <h2 className={styles.storyTitle}>
-                  What I&rsquo;m looking for
-                </h2>
-                <p className={styles.storyCopy}>
-                  {profile.lookingFor}
-                </p>
-              </section>
-            </Reveal>
-          )}
-
           <Reveal>
             <section className={styles.story}>
               <p className="eyebrow mb-6">Under the hood</p>
-              <h2 className={styles.storyTitle}>How I made this harder than necessary</h2>
+              <h2 className={styles.storyTitle}>How it works</h2>
               <dl className="mt-5 flex flex-col">
                 {BUILD_NOTES.map(([term, detail]) => (
                   <div

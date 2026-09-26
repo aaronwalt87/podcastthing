@@ -30,10 +30,9 @@ export default function SiteFooter() {
       <div className={`shell ${styles.footerInner}`}>
       <div className={styles.footerTop}>
         <div className={styles.footerBio}>
-          <p className={styles.footerStatement}>Still learning.<br />Still checking<br />the logs.</p>
+          <p className={styles.footerStatement}>See you on<br />the next refresh.</p>
           <p className={styles.footerCopy}>
-            Built in {profile.location} after 14 years in infrastructure and technology leadership.
-            Still learning the code.
+            A small corner of the internet, collected by {profile.name}.
           </p>
           <p className={`${styles.footerLabel} ${styles.footerStack}`}>Next.js · Redis · Vercel</p>
         </div>

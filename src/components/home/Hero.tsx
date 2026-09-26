@@ -23,20 +23,20 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
         <div className={styles.copy}>
           <p className={`eyebrow ${styles.kicker}`}><span className={styles.marker} aria-hidden="true" />Aaron Walters · {profile.location}</p>
           <h1 id="hero-title" className={styles.title}>{profile.heroLead}<span>{profile.heroLeadMuted}</span></h1>
-          <p className={styles.summary}>Infrastructure, modernization,<br />and the human side of keeping things running.</p>
+          <p className={styles.summary}>Technology news, market context,<br />and episodes worth your time.</p>
           <div className={styles.actions}>
             <Link href="/news" className="btn btn-primary">Explore the dashboard <span aria-hidden="true">↗</span></Link>
-            <Link href="/about" className={styles.aboutLink}>A little about me <span aria-hidden="true">→</span></Link>
+            <Link href="/about" className={styles.aboutLink}>About this site <span aria-hidden="true">→</span></Link>
           </div>
         </div>
         <div className={styles.stage}>
           <div className={styles.stageTop}><span>Always a work in progress.</span><span aria-hidden="true">↗</span></div>
           <SystemSculpture />
-          <div className={styles.stageBottom}><span>Good systems.<br />Many moving parts.</span><span className={styles.stageGlyph} aria-hidden="true">✳</span></div>
+          <div className={styles.stageBottom}><span>A few things<br />worth following.</span><span className={styles.stageGlyph} aria-hidden="true">✳</span></div>
         </div>
       </div>
       <div className={`shell ${styles.intro}`}>
-        <div className={styles.introHeading}><p className="eyebrow">A personal field guide</p><h2>Curiosity,<br />put to work.</h2></div>
+        <div className={styles.introHeading}><p className="eyebrow">The collection</p><h2>A little less<br />tab hopping.</h2></div>
         <div className={styles.introBody}>
           <p>{profile.standfirst}</p>
           {latestEpisode && latestEpisode.audioUrl.trim().length > 0 && (

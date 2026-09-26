@@ -63,7 +63,7 @@ export default async function HomePage() {
             index="01"
             eyebrow="Live intelligence"
             title="What's moving right now"
-            description="A deliberately opinionated pile of technology and infrastructure headlines, cleaned up, deduplicated, and put in one place so I can stop opening seventeen tabs before coffee."
+            description="Technology and infrastructure headlines, gathered in one feed."
             action={{ label: 'All headlines', href: '/news' }}
           />
         </Reveal>
@@ -117,16 +117,15 @@ export default async function HomePage() {
 
       <section className={`inverse-band ${styles.interlude}`} aria-labelledby="working-title">
         <div className="shell">
-          <p className="eyebrow">The work behind the dashboard</p>
+          <p className="eyebrow">Pick a starting point</p>
           <div className={styles.interludeGrid}>
-            <Reveal><h2 id="working-title" className={styles.interludeTitle}>Good systems.<br /><span>Less drama.</span></h2></Reveal>
+            <Reveal><h2 id="working-title" className={styles.interludeTitle}>Read. Listen.<br /><span>Catch up.</span></h2></Reveal>
             <div>
               <div className={styles.principles}>
-                {['Infrastructure & cloud', 'Legacy modernization', 'Technical leadership'].map((label, index) => (
-                  <Link href="/about" className={styles.principle} key={label}><span>0{index + 1}</span><strong>{label}</strong><span aria-hidden="true">↗</span></Link>
+                {[{ label: 'The news feed', href: '/news' }, { label: 'The market board', href: '/markets' }, { label: 'The listening list', href: '/podcasts' }].map(({ label, href }, index) => (
+                  <Link href={href} className={styles.principle} key={label}><span>0{index + 1}</span><strong>{label}</strong><span aria-hidden="true">↗</span></Link>
                 ))}
               </div>
-              <p className="mt-7 max-w-[42ch] text-paper-2">Still close enough to the work to know when the dashboard is lying.</p>
             </div>
           </div>
         </div>
@@ -141,7 +140,7 @@ export default async function HomePage() {
             index="02"
             eyebrow="Listening archive"
             title="Episodes worth finishing"
-            description="Not everything I subscribe to — just the episodes I would actually send someone, mostly about infrastructure, AI, security, and how technology work gets done when the conference talk is over."
+            description="A hand-picked listening list. Pick an episode and carry on where you left off."
             action={{ label: 'Full archive', href: '/podcasts' }}
           />
         </Reveal>
@@ -190,17 +189,14 @@ export default async function HomePage() {
             <div>
               <p className="eyebrow eyebrow-accent">About this build</p>
               <h2 className={styles.buildTitle}>
-                I&rsquo;ve led technology for years. I still read the logs.
+                A useful little side project.
               </h2>
             </div>
 
             <div className={styles.buildText}>
               <p className="max-w-[54ch] text-[15px] leading-relaxed text-paper-2">
-                This started as a useful place to collect the things I follow and became a very
-                effective way to avoid choosing a normal hobby. The feeds are parsed and cached,
-                the market board has a fallback when its upstream wanders off, and the player
-                remembers where you stopped. The code is newer territory for me; designing systems
-                that survive contact with reality is not.
+                Feeds refresh on a schedule. The player remembers your place.
+                The decisions page explains the choices behind it all.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -208,7 +204,7 @@ export default async function HomePage() {
                   Read the decisions <span aria-hidden="true">→</span>
                 </Link>
                 <Link href="/about" className="btn btn-sm">
-                  Who I am <span aria-hidden="true">→</span>
+                  About the site <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>

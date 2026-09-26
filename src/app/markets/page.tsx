@@ -55,10 +55,8 @@ export default async function MarketsPage() {
         </p>
       }>
         <p>
-          Broad indices, semiconductors, platforms, and the infrastructure vendors underneath them —
-          the part of the market I follow to understand the weather around technology. This is
-          context, not prophecy; the internet already has enough men confidently predicting what
-          a chart will do next. The board labels whether quotes are live or end-of-day.
+          Indices and technology stocks, with trend lines and sector views.
+          Each quote is labeled live or end-of-day. No crystal ball included.
         </p>
       </PageMasthead>
 

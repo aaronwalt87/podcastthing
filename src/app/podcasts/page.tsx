@@ -34,9 +34,7 @@ export default async function PodcastsPage({ searchParams }: PodcastsPageProps) 
         <p>
           {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
           {totalShows > 0 && ` across ${totalShows} ${totalShows === 1 ? 'show' : 'shows'}`}, picked
-          one at a time. These are the episodes I would actually send someone, not the full backlog
-          quietly judging me from a podcast app. Search it, filter it, and pick up where you left
-          off; playback positions stay in your browser, where they belong.
+          one at a time. Browse, filter, and listen. Your place is saved in this browser.
         </p>
       </PageMasthead>
 

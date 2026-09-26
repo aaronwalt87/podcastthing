@@ -36,10 +36,8 @@ export default async function NewsPage() {
         </dl>
       ) : undefined}>
         <p>
-          The technology and infrastructure stories I genuinely want to keep up with, gathered from
-          RSS, Atom, and Hacker News. The site cleans up duplicates, sorts everything by recency,
-          and makes a reasonable attempt to classify the headlines. It is less glamorous than an
-          algorithm and considerably less interested in making me angry.
+          Technology and infrastructure stories from RSS, Atom, and Hacker News.
+          Duplicates removed, newest first.
         </p>
 
       </PageMasthead>
