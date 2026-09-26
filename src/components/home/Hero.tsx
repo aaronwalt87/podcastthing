@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import SystemSculpture from './SystemSculpture'
+import ScrollScene from '@/components/ui/ScrollScene'
+import Reveal from '@/components/ui/Reveal'
 import styles from './Hero.module.css'
 import PlayButton from '@/components/podcasts/PlayButton'
 import { profile } from '@/lib/profile'
@@ -19,6 +21,7 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
   const total = snapshot.advancers + snapshot.decliners
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
+      <ScrollScene kind="hero">
       <div className={`shell ${styles.composition}`}>
         <div className={styles.copy}>
           <p className={`eyebrow ${styles.kicker}`}><span className={styles.marker} aria-hidden="true" />Aaron Walters · {profile.location}</p>
@@ -29,15 +32,16 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
             <Link href="/about" className={styles.aboutLink}>About this site <span aria-hidden="true">→</span></Link>
           </div>
         </div>
-        <div className={styles.stage}>
+        <div className={styles.stage} data-scroll-anchor>
           <div className={styles.stageTop}><span>Always a work in progress.</span><span aria-hidden="true">↗</span></div>
           <SystemSculpture />
           <div className={styles.stageBottom}><span>A few things<br />worth following.</span><span className={styles.stageGlyph} aria-hidden="true">✳</span></div>
         </div>
       </div>
+      </ScrollScene>
       <div className={`shell ${styles.intro}`}>
-        <div className={styles.introHeading}><p className="eyebrow">The collection</p><h2>A little less<br />tab hopping.</h2></div>
-        <div className={styles.introBody}>
+        <Reveal className={styles.introHeading}><p className="eyebrow">The collection</p><h2>A little less<br />tab hopping.</h2></Reveal>
+        <Reveal delay={120} className={styles.introBody}>
           <p>{profile.standfirst}</p>
           {latestEpisode && latestEpisode.audioUrl.trim().length > 0 && (
             <div className={styles.episode}>
@@ -45,7 +49,7 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
               <div className={styles.episodeCopy}><span className="eyebrow">On the listening list</span><Link href="/podcasts" className={styles.episodeTitle}>{latestEpisode.title}</Link></div>
             </div>
           )}
-        </div>
+        </Reveal>
       </div>
       <div className={`shell ${styles.statBar}`}>
         <p className={`eyebrow ${styles.status}`}><span className={snapshot.marketState === 'REGULAR' ? 'pulse' : 'pulse pulse-idle'} aria-hidden="true" />{MARKET_STATE_LABEL[snapshot.marketState]}</p>

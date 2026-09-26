@@ -11,6 +11,7 @@ import EpisodeCard from '@/components/podcasts/EpisodeCard'
 import EpisodeIndex from '@/components/podcasts/EpisodeIndex'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Reveal from '@/components/ui/Reveal'
+import ScrollScene from '@/components/ui/ScrollScene'
 import styles from './Home.module.css'
 
 export const dynamic = 'force-dynamic'
@@ -115,12 +116,13 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <ScrollScene>
       <section className={`inverse-band ${styles.interlude}`} aria-labelledby="working-title">
         <div className="shell">
           <p className="eyebrow">Pick a starting point</p>
           <div className={styles.interludeGrid}>
-            <Reveal><h2 id="working-title" className={styles.interludeTitle}>Read. Listen.<br /><span>Catch up.</span></h2></Reveal>
-            <div>
+            <div data-scroll-layer="back"><h2 id="working-title" className={styles.interludeTitle}>Read. Listen.<br /><span>Catch up.</span></h2></div>
+            <div data-scroll-layer="front">
               <div className={styles.principles}>
                 {[{ label: 'The news feed', href: '/news' }, { label: 'The market board', href: '/markets' }, { label: 'The listening list', href: '/podcasts' }].map(({ label, href }, index) => (
                   <Link href={href} className={styles.principle} key={label}><span>0{index + 1}</span><strong>{label}</strong><span aria-hidden="true">↗</span></Link>
@@ -131,8 +133,10 @@ export default async function HomePage() {
         </div>
         <SignalPlate quote={ridge} height={140} />
       </section>
+      </ScrollScene>
 
       {/* --------------------------------------------------------- archive -- */}
+      <ScrollScene>
       <div className={styles.listening}>
       <section id="archive" className={`shell ${styles.chapter}`}>
         <Reveal>
@@ -178,6 +182,7 @@ export default async function HomePage() {
         )}
       </section>
       </div>
+      </ScrollScene>
 
       {/* ----------------------------------------------------------- about -- */}
       <section className="shell">
