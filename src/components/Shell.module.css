@@ -11,9 +11,15 @@
 
 .headerScrolled { border-color: var(--hair-2); box-shadow: var(--shadow-lift); }
 .headerInner { height: 100%; display: flex; align-items: center; gap: 24px; }
-.brand { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 0; }
+.brandMark { display: block; overflow: visible; }
+.brandOrbit { stroke: var(--edge); stroke-width: 1; transition: stroke 220ms ease, transform 500ms var(--ease-out); transform-origin: center; }
+.brandLigature { stroke-dasharray: 112; stroke-dashoffset: 0; }
+.brandSatellite { fill: var(--ember); transform-origin: 29px 22px; }
 .brandName { font-size: 15px; font-weight: 650; line-height: 1; letter-spacing: -.045em; }
 .brandDot { color: var(--ember); }
+.brand:hover .brandOrbit { stroke: var(--ember); transform: scale(1.04); }
+.brand:hover .brandSatellite { animation-duration: 1.4s; }
 .desktopNav { display: flex; align-items: center; gap: 2px; margin-left: auto; padding: 5px; border-radius: 999px; background: var(--paper); color: var(--ink-950); }
 .navLink { padding: 10px 16px; border-radius: 999px; font-size: 12px; font-weight: 500; transition: background 180ms ease, color 180ms ease; }
 .navLink:hover { background: var(--ink-700); color: var(--paper); }
@@ -51,7 +57,7 @@
   .desktopNav { display: none; }
   .searchButton { margin-left: auto; }
   .menuButton { display: inline-flex; }
-  .brand svg { width: 38px; }
+  .brand svg { width: 48px; }
   .brandName { font-size: 13px; }
   .mobileNav { display: block; background: var(--ink-950); border-bottom: 1px solid var(--edge); max-height: calc(100dvh - var(--header-h)); overflow-y: auto; }
   .mobileNavInner { display: flex; flex-direction: column; padding-block: 16px 28px; }
@@ -67,4 +73,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .header, .navLink, .searchButton, .menuButton, .footerLinks a { transition: none; }
+  .brandOrbit { transition: none; }
+  .brandSatellite { animation: none; }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .brandLigature { animation: brand-draw 900ms var(--ease-out) both; }
+  .brandSatellite { animation: brand-orbit 8s linear infinite; }
+}
+
+@keyframes brand-draw { from { stroke-dashoffset: 112; } }
+@keyframes brand-orbit { to { transform: rotate(360deg); } }

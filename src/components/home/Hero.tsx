@@ -33,14 +33,7 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
           </div>
         </div>
         <div className={styles.stage} data-scroll-anchor>
-          <div className={styles.stageTop}>
-            <span className={styles.stageLabel}>Always a work in progress.</span>
-            <span className={styles.stageArrow} aria-hidden="true">↗</span>
-          </div>
           <SystemSculpture />
-          <div className={styles.stageBottom}>
-            <span className={styles.stageLabel}>A few things<br />worth following.</span>
-          </div>
         </div>
       </div>
       </ScrollScene>

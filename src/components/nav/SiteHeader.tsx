@@ -18,17 +18,20 @@ function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname.startsWith(href)
 }
 
-/** A single continuous AW ligature, drawn for this site. */
+/** A custom AW ligature held in a quiet orbital brand system. */
 function BrandMark() {
   return (
-    <svg width="44" height="32" viewBox="0 0 44 32" fill="none" aria-hidden="true">
+    <svg className={styles.brandMark} width="58" height="44" viewBox="0 0 58 44" fill="none" aria-hidden="true">
+      <ellipse className={styles.brandOrbit} cx="29" cy="22" rx="26" ry="19" />
       <path
-        d="M3 27L13 5L23 27L31 8L37 27L42 5M7 19H19"
+        className={styles.brandLigature}
+        d="M12 31L21 11L30 31L37 14L42 31L47 11M15 24H27"
         stroke="currentColor"
-        strokeWidth="3.5"
+        strokeWidth="3.2"
         strokeLinecap="square"
         strokeLinejoin="bevel"
       />
+      <g className={styles.brandSatellite}><circle cx="55" cy="22" r="2.6" /></g>
     </svg>
   )
 }
