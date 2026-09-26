@@ -50,7 +50,7 @@ function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonP
         height: box,
         background: 'var(--ember)',
         color: 'var(--on-ember)',
-        boxShadow: playingThis ? '0 0 0 4px rgba(255,106,43,0.2)' : undefined,
+        boxShadow: playingThis ? '0 0 0 4px var(--ember-ghost)' : undefined,
       }}
     >
       {loadingThis ? (

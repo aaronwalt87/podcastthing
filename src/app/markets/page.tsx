@@ -8,6 +8,8 @@ import Delta from '@/components/markets/Delta'
 import Reveal from '@/components/ui/Reveal'
 import SignalPlate from '@/components/home/SignalPlate'
 import SectionHeader from '@/components/ui/SectionHeader'
+import PageMasthead from '@/components/ui/PageMasthead'
+import styles from '@/components/ui/PageMasthead.module.css'
 import { timeAgo } from '@/lib/format'
 import Link from 'next/link'
 
@@ -37,9 +39,9 @@ export default async function MarketsPage() {
   const breadth = total > 0 ? (snapshot.advancers / total) * 100 : 0
 
   return (
-    <div className="shell" style={{ paddingTop: 'calc(var(--header-h) + 56px)' }}>
-      <header className="max-w-3xl">
-        <p className="eyebrow eyebrow-accent flex items-center gap-2.5">
+    <div className={`shell ${styles.page}`}>
+      <PageMasthead index="02" eyebrow="The market board" title="Markets" meta={
+        <p className="eyebrow flex flex-wrap items-center gap-2.5">
           <span className={live ? 'pulse' : 'pulse pulse-idle'} aria-hidden="true" />
           {MARKET_STATE_LABEL[snapshot.marketState]}
           {snapshot.updatedAt > 0 && (
@@ -51,14 +53,12 @@ export default async function MarketsPage() {
             </>
           )}
         </p>
-        <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Markets</h1>
-        <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
-          Broad indices, semiconductors, platforms, and the infrastructure vendors underneath them —
-          the part of the market I follow to understand the weather around technology. This is
-          context, not prophecy; the internet already has enough men confidently predicting what
-          a chart will do next. The board labels whether quotes are live or end-of-day.
+      }>
+        <p>
+          Indices and technology stocks, with trend lines and sector views.
+          Each quote is labeled live or end-of-day. No crystal ball included.
         </p>
-      </header>
+      </PageMasthead>
 
       {snapshot.quotes.length === 0 ? (
         <div className="panel-flat my-14 px-6 py-20 text-center">
@@ -78,15 +78,13 @@ export default async function MarketsPage() {
         </div>
       ) : (
         <>
-          <SignalPlate
-            quote={snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null}
-            height={188}
-            className="mt-10"
-          />
-
           {/* Indices + breadth */}
-          <section className="mt-6" aria-label="Index proxies and breadth">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <section className={styles.body} aria-label="Index proxies and breadth">
+            <div className={styles.sectionLabel}>
+              <h2 className="eyebrow">At a glance</h2>
+              <span className="eyebrow">Indices &amp; market breadth</span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {indices.map((quote) => (
                 <Reveal key={quote.symbol} className="h-full">
                   <QuoteCard quote={quote} emphasis now={now} />
@@ -135,6 +133,10 @@ export default async function MarketsPage() {
               )}
             </div>
           </section>
+
+          <div className="inverse-band mt-10 overflow-hidden rounded-[var(--r-3)]">
+            <SignalPlate quote={snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null} height={180} />
+          </div>
 
           {/* Full board */}
           <section className="mt-20" aria-label="Full board">

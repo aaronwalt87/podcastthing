@@ -1,0 +1,61 @@
+.page {
+  padding-top: calc(var(--header-h) + 44px);
+  padding-bottom: 64px;
+}
+.page.adminPage { padding-top: 44px; }
+.masthead { padding-bottom: clamp(36px, 6vw, 80px); }
+.topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--hair-2);
+}
+.topline > span { font-size: 11px; color: var(--paper-3); }
+.title {
+  margin: 28px 0 34px;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(58px, 11.4vw, 160px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.075em;
+  overflow-wrap: anywhere;
+}
+.period { color: var(--ember); }
+.intro { display: grid; grid-template-columns: 1fr 1.35fr; gap: 40px; }
+.chapter { display: flex; align-items: flex-start; gap: 20px; color: var(--olive); }
+.chapter > .chapterMark { font-size: clamp(48px, 7vw, 88px); line-height: .9; }
+.chapter > span:last-child { padding-top: 8px; font-size: 12px; }
+.description { max-width: 64ch; color: var(--paper-2); font-size: clamp(16px, 1.4vw, 18px); line-height: 1.7; }
+.meta { margin-top: 36px; padding-top: 22px; border-top: 1px solid var(--hair-2); }
+.body { padding-top: 30px; border-top: 1px solid var(--hair-2); }
+.sectionLabel { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 28px; }
+.storyLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .42fr); gap: clamp(32px, 7vw, 100px); }
+.story { border-top: 1px solid var(--hair-2); padding: 34px 0 46px; }
+.storyTitle { font-size: clamp(28px, 3.4vw, 44px); font-weight: 500; letter-spacing: -.055em; line-height: 1.12; max-width: 21ch; }
+.storyCopy { margin-top: 22px; max-width: 62ch; color: var(--paper-2); font-size: 16px; line-height: 1.8; }
+.contactCard { background: var(--olive-light); padding: 32px; border-radius: var(--r-3); }
+.contactCard, .closing, .cost, .loginPanel { --paper-3: var(--paper-2); }
+.closing { margin-top: 64px; background: var(--olive-light); padding: clamp(28px, 5vw, 64px); border-radius: var(--r-3); }
+.decision { display: grid; grid-template-columns: 70px minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; padding: 38px 0; border-top: 1px solid var(--hair-2); }
+.decisionNumber { font-family: var(--font-sans), sans-serif; color: var(--olive); font-size: 42px; line-height: 1; letter-spacing: -.06em; }
+.cost { align-self: stretch; padding: 26px; background: var(--olive-light); border-radius: var(--r-2); }
+.adminBody { max-width: 900px; margin-left: auto; }
+.login { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: clamp(36px, 10vw, 140px); padding: 48px 0; border-top: 1px solid var(--hair-2); }
+.loginTitle { font-size: clamp(30px, 5vw, 66px); line-height: 1.04; letter-spacing: -.06em; max-width: 12ch; }
+.loginPanel { background: var(--olive-light); padding: clamp(24px, 4vw, 44px); border-radius: var(--r-3); }
+@media (max-width: 700px) {
+  .page { padding-top: calc(var(--header-h) + 28px); padding-bottom: 32px; }
+  .title { margin: 26px 0 30px; }
+  .intro { grid-template-columns: 38px minmax(0, 1fr); gap: 18px; }
+  .chapter { flex-direction: column; gap: 14px; }
+  .chapter > .chapterMark { font-size: 36px; }
+  .chapter > span:last-child { padding: 0; }
+  .storyLayout, .login { grid-template-columns: minmax(0, 1fr); }
+  .decision { grid-template-columns: 38px minmax(0, 1fr); gap: 20px; padding: 30px 0; }
+  .decisionNumber { font-size: 28px; }
+  .cost { grid-column: 2; padding: 20px; }
+  .contactCard { padding: 24px; }
+}

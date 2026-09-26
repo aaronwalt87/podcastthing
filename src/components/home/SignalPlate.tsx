@@ -43,7 +43,7 @@ export default function SignalPlate({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`relative isolate overflow-hidden ${className}`}
       style={{ height: typeof height === 'number' ? `${height}px` : height }}
     >
       <div
@@ -51,8 +51,8 @@ export default function SignalPlate({
         style={{
           // A mask rather than borders: hard seams would make this read as a
           // container instead of a moment in the page.
-          maskImage: 'linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent)',
-          WebkitMaskImage: 'linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent)',
+          maskImage: 'linear-gradient(180deg, transparent, black 26%, black 74%, transparent)',
+          WebkitMaskImage: 'linear-gradient(180deg, transparent, black 26%, black 74%, transparent)',
         }}
       >
         <SignalField series={quote?.history ?? []} variant={variant} />
@@ -63,11 +63,11 @@ export default function SignalPlate({
         className="absolute inset-0 -z-10"
         style={{
           background:
-            'linear-gradient(90deg, var(--ink-950) 0%, rgba(7,8,10,0.28) 10%, rgba(7,8,10,0.28) 90%, var(--ink-950) 100%)',
+            'linear-gradient(90deg, var(--ink-950), transparent 20%, transparent 80%, var(--ink-950))',
         }}
       />
 
-      <div className="shell flex h-full items-center justify-between gap-6">
+      <div className="shell flex h-full flex-wrap items-center justify-between gap-3">
         {/* Both labels get a literal plate: the ridge's visual mass is centred
             too, so anything vertically centred would have the line running
             through the type at some viewport width. */}
@@ -77,7 +77,7 @@ export default function SignalPlate({
           // nothing for a screen reader to attach to. The sr-only sentence
           // carries the same provenance in a form that stands alone.
           <p
-            className="eyebrow shrink-0 whitespace-nowrap rounded-xs bg-ink-950/75 px-2.5 py-1 backdrop-blur-[2px]"
+            className="eyebrow rounded-xs bg-ink-950 px-2.5 py-1"
             style={{ color: 'var(--paper-3)' }}
           >
             <span aria-hidden="true">{caption}</span>

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { getCachedNews } from '@/lib/news'
 import NewsFeed from '@/components/news/NewsFeed'
 import Reveal from '@/components/ui/Reveal'
+import PageMasthead from '@/components/ui/PageMasthead'
+import styles from '@/components/ui/PageMasthead.module.css'
 import { timeAgo } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -25,36 +27,22 @@ export default async function NewsPage() {
   const sources = new Set(items.map((i) => i.source)).size
 
   return (
-    <div className="shell" style={{ paddingTop: 'calc(var(--header-h) + 56px)' }}>
-      <header className="max-w-3xl">
-        <p className="eyebrow eyebrow-accent">Live intelligence</p>
-        <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">News</h1>
-        <p className="mt-5 max-w-[62ch] text-[16px] leading-relaxed text-paper-2">
-          The technology and infrastructure stories I genuinely want to keep up with, gathered from
-          RSS, Atom, and Hacker News. The site cleans up duplicates, sorts everything by recency,
-          and makes a reasonable attempt to classify the headlines. It is less glamorous than an
-          algorithm and considerably less interested in making me angry.
+    <div className={`shell ${styles.page}`}>
+      <PageMasthead index="01" eyebrow="The reading room" title="News" meta={items.length > 0 ? (
+        <dl className="flex flex-wrap gap-x-14 gap-y-5">
+          <div><dt className="eyebrow">Headlines</dt><dd className="num m-0 mt-2 text-2xl">{items.length}</dd></div>
+          <div><dt className="eyebrow">Sources</dt><dd className="num m-0 mt-2 text-2xl">{sources}</dd></div>
+          <div><dt className="eyebrow">Newest</dt><dd className="num m-0 mt-2 text-2xl">{timeAgo(newest, now)} ago</dd></div>
+        </dl>
+      ) : undefined}>
+        <p>
+          Technology and infrastructure stories from RSS, Atom, and Hacker News.
+          Duplicates removed, newest first.
         </p>
 
-        {items.length > 0 && (
-          <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-4">
-            <div>
-              <dt className="eyebrow">Headlines</dt>
-              <dd className="num m-0 mt-1 text-lg text-paper">{items.length}</dd>
-            </div>
-            <div>
-              <dt className="eyebrow">Sources</dt>
-              <dd className="num m-0 mt-1 text-lg text-paper">{sources}</dd>
-            </div>
-            <div>
-              <dt className="eyebrow">Newest</dt>
-              <dd className="num m-0 mt-1 text-lg text-paper">{timeAgo(newest, now)} ago</dd>
-            </div>
-          </dl>
-        )}
-      </header>
+      </PageMasthead>
 
-      <div className="mt-12 pb-8">
+      <div className={styles.body}>
         {items.length === 0 ? (
           <div className="panel-flat px-6 py-20 text-center">
             <p className="display text-2xl text-paper">The feed is idle.</p>

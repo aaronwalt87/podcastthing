@@ -1,229 +1,172 @@
 # SIGNAL — Design System
 
-**Status:** active. Supersedes *Kernel Glass* (2026-04-19) and *The Analog Frontier*.
+**Status:** active. Oryzo-inspired editorial redesign, September 2026.
+Supersedes the dark instrument-panel and Colorado-landscape presentations.
 
-This document describes what is actually implemented. The tokens below live in
-`src/app/globals.css` under `:root`, and `tailwind.config.ts` maps them to
-utilities. **A component must never hard-code a hex value** — if a colour is
-missing, add a token rather than a literal.
-
-> Two previous systems were only ever half-applied, which left the site
-> overriding one palette with another at runtime. That is the failure this
-> document exists to prevent.
-
----
+`src/app/globals.css` is the source of truth; `tailwind.config.ts` exposes those
+tokens as utilities. Components use tokens, never raw hex colors. Metadata and
+server-generated social images cannot inherit CSS and may mirror palette values.
 
 ## 1. North star
 
-An **instrument**, not a website.
+A personal technology publication with the confidence and tactility of a good
+design studio. Oversized tight sans typography, warm paper, olive physical
+objects, restrained orange interactions, and sections with room to breathe.
+The influence is Oryzo's material realism, strong type, playful compositions,
+and scroll storytelling—not its branding, assets, or commercial claims.
 
-Aviation panels, spectrum analysers, and well-made mechanical tools — things
-built to be read at a glance and trusted. Dark surfaces so data can glow, one
-warm accent so hierarchy is unambiguous, and typography with an editorial voice
-so the page reads as a publication rather than a dashboard template.
+The content remains Aaron's: hands-on technology leadership, useful news,
+market context, and a real podcast archive. Wit is understated and self-aware.
+Wisconsin is home; Colorado was a visit, not a professional location.
 
-Deliberately **not**: Matrix-green hacker cliché, glassmorphism-everywhere, or
-a landscape-photography blog wrapped around tech content.
+Deliberately not: a dark terminal, a landscape-photography site, neon data glow,
+glassmorphism everywhere, or a fake SaaS product with invented metrics.
 
----
+## 2. Color and materials
 
-## 2. Colour
+Legacy `ink-*` names are **surface roles**, now light; `paper*` names are text
+roles, now dark. This compatibility keeps data components consistent without
+maintaining a second competing design system.
 
-### Canvas
-
-| Token | Value | Use |
+| Token | Value | Role |
 |---|---|---|
-| `--ink-950` | `#07080a` | Page ground |
-| `--ink-900` | `#0b0d10` | Panel base (gradient bottom) |
-| `--ink-850` | `#101318` | Panel top, flat surfaces |
-| `--ink-800` | `#14181e` | Artwork wells, image backgrounds |
-| `--ink-700` | `#1b2027` | Track backgrounds, inactive bars |
-| `--ink-600` | `#262c35` | Scrollbar thumb, sparkline baselines |
+| `--cream`, `--ink-950` | `#f2f1e9` | Page ground |
+| `--ink-900` | `#faf9f3` | Raised paper panels |
+| `--ink-850` | `#e9eade` | Muted surfaces |
+| `--ink-800` | `#e1e3d6` | Artwork wells |
+| `--olive-light`, `--ink-700` | `#d9dccb` | Pale olive material |
+| `--ink-600` | `#b0b6a3` | Inactive tracks |
+| `--charcoal`, `--paper` | `#252820` | Primary text |
+| `--paper-2` | `#4b5146` | Body/secondary text |
+| `--paper-3` | `#606657` | Metadata/placeholders |
+| `--olive` | `#4b593c` | Sculptural objects and inverse feature areas |
+| `--ember` | `#b34523` | CTA, links, focus, selection accent |
+| `--ember-2` | `#963b20` | Accent hover |
+| `--on-ember` | `#fff9ed` | Text on the accent |
+| `--edge` | `#7b826e` | Interactive boundaries |
 
-### Ink
+`--hair`/`--hair-2` are decorative lines, not sufficient boundaries for inputs.
+`--chrome-bg`, `--overlay-bg`, `--scrim`, `--surface-hover`,
+`--surface-active`, and `--highlight` describe material roles for shared chrome.
+`--inverse-paper`, `--inverse-muted`, and `--inverse-hair` serve intentionally
+dark material compositions.
 
-| Token | Value | Use |
+`.inverse-band` scopes semantic surface/text/accent/data overrides to a dark
+section. Its text remains warm cream, its accent is a readable light apricot,
+and its controls and hairlines use local contrast values. Use this class when
+shared components sit on charcoal; never patch inline styles by substring.
+
+### Data semantics
+
+| Token | Value | Role |
 |---|---|---|
-| `--paper` | `#f2f0ec` | Primary text — a warm white, never pure `#fff` |
-| `--paper-2` | `#9aa4ae` | Body copy, secondary labels |
-| `--paper-3` | `#646d79` | Metadata, timestamps, placeholders |
+| `--pos` | `#267044` | Gains/live status |
+| `--neg` | `#ad3345` | Losses/errors |
+| `--warn` | `#85610d` | Warnings |
+| `--cool` | `#365ea1` | Secondary data |
 
-### Lines
-
-| Token | Value | Use |
-|---|---|---|
-| `--hair` | `rgba(255,255,255,0.07)` | Default 1px border |
-| `--hair-2` | `rgba(255,255,255,0.13)` | Hover / emphasis border, dividers |
-
-### Accent — one, and only one
-
-| Token | Value | Use |
-|---|---|---|
-| `--ember` | `#ff6a2b` | CTAs, active nav, brand mark, focus ring, the hero series line |
-| `--ember-2` | `#ffa877` | Hover state of the above, link hover |
-| `--ember-ghost` | `rgba(255,106,43,0.13)` | Accent chip fill |
-
-### Data semantics — never the accent
-
-Keeping "up" out of the brand colour means a rising stock never reads as
-"selected", and the accent never reads as "good news".
-
-| Token | Value | Use |
-|---|---|---|
-| `--pos` | `#38c98e` | Gains, advancing, live indicator |
-| `--neg` | `#f05a52` | Losses, declining, errors |
-| `--warn` | `#f0b429` | Warnings |
-| `--cool` | `#6fa8ff` | Reserved secondary data hue |
-
-**Colour is never the only signal.** Every `Delta` pairs its hue with a ▲/▼
-glyph and a signed number; the market heatmap prints the percentage inside each
-tile.
-
----
+Gains are not the branding olive and losses are not the orange CTA. Every Delta
+also has a signed number and direction glyph; heatmaps print percentages.
+Alerts have dedicated text, border, and tinted-fill tokens.
 
 ## 3. Typography
 
-Loaded and self-hosted by `next/font/google` in `src/app/layout.tsx` — no
-third-party request, no layout shift.
+Fonts are self-hosted through `next/font/google` in `src/app/layout.tsx`.
 
 | Role | Family | Token |
 |---|---|---|
-| Display | **Instrument Serif** 400 | `--font-display` |
-| UI / body | **Instrument Sans** 400–700 | `--font-sans` |
-| Data | **JetBrains Mono** 400/500/700 | `--font-mono` |
+| Display | Instrument Sans, 650 | `--font-display` |
+| Body/UI | Instrument Sans | `--font-sans` |
+| Data | JetBrains Mono, 400/500/700 | `--font-mono` |
 
-- `.display` — the serif. Headlines and pull quotes only. `line-height: 0.98`,
-  `letter-spacing: -0.025em`.
-- `.eyebrow` — 10px mono, `0.18em` tracking, uppercase. Section labels.
-- `.num` — mono with `tabular-nums`. **Every number on the site**: prices,
-  percentages, timestamps, counts, durations. Digits must not shift width as
-  they tick.
-- Body copy is sans at 15px / 1.6.
+`.display` uses `line-height: .96` and `letter-spacing: -.065em`. Hero/page
+headlines scale fluidly with `clamp()`. Use generous composition around large
+type, not extra ornament. Body is 15px/1.6; small labels remain at least 11px.
+`.eyebrow` is 11px tracked uppercase mono. `.num` is tabular mono for prices,
+dates, counts, durations, and percentages. Do not load Instrument Serif.
 
-Headline sizes use `clamp()` rather than breakpoints, so type scales
-continuously instead of stepping.
+## 4. Geometry and motion
 
----
+`--r-1: 6px`, `--r-2: 14px`, `--r-3: 24px`, `--r-4: 36px`.
+Buttons and compact metadata chips are capsules. Panels are paper-like, softly
+rounded objects with restrained shadows and a thin inset highlight. Main
+surfaces must not become a stack of translucent glass cards.
 
-## 4. Radius, elevation, motion
+`--ease-out` is `cubic-bezier(.22,1,.36,1)`; `--ease-spring` is reserved for
+small press feedback. State changes take about 180ms, hover 300ms, and reveal
+700ms. Scroll-linked ornament supports the hierarchy rather than blocking
+reading. Do not hijack scrolling or make content depend on animation.
 
-| Token | Value | Use |
-|---|---|---|
-| `--r-1` | `2px` | Chips, segmented controls |
-| `--r-2` | `6px` | Buttons, inputs, small cards |
-| `--r-3` | `12px` | Panels |
-| `--r-4` | `20px` | Reserved |
+`.shell` is max 1320px with fluid 20–64px gutters. The fixed header reserves
+80px. Player scroll clearance is 170px below 768px and 100px above it; actual
+content must remain operable at 320px without hiding controls.
 
-Elevation is a 1px inset highlight plus a long, soft shadow (`--shadow-lift`,
-`--shadow-panel`) — light from above, the way a physical panel sits in a case.
-No glow-as-elevation.
+## 5. Shared recipes
 
-Motion uses `--ease-out` (`cubic-bezier(.22,1,.36,1)`) for entrances and
-`--ease-spring` for press feedback. Durations: 180ms for state, 300ms for
-hover reveals, 700ms for scroll entrances.
+`globals.css` owns `.shell`, `.panel`, `.panel-flat`, `.btn` variants,
+`.field`, `.chip`, `.seg`, `.eyebrow`, `.display`, `.num`, `.rule`,
+`.spotlight`, `.link-draw`, `.pulse`, and `.marquee`. Composition-specific
+CSS modules may consume tokens, but must not create a competing global palette.
 
----
-
-## 5. Component recipes
-
-Defined once in `globals.css` under `@layer components`:
-
-| Class | What it is |
-|---|---|
-| `.shell` | Page container — max 1320px, fluid gutters |
-| `.panel` / `.panel-flat` | The one raised-surface recipe |
-| `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-sm`, `.btn-icon` | Buttons |
-| `.field` | Text input, select, textarea |
-| `.chip` / `.chip-accent` | Metadata tags |
-| `.eyebrow`, `.display`, `.num` | Typographic roles |
-| `.rule` | Section divider that fades at both ends |
-| `.spotlight` | Cursor-tracked highlight (see below) |
-| `.link-draw` | Underline that draws in from the left |
-| `.pulse` | Live indicator with an expanding ring |
-| `.marquee` | Market tape; pauses on hover and focus |
-
----
+Keep existing behavior: sortable market tables, search/filter/pagination,
+command palette, episode uploads/admin, audio transport and persistence.
+No invented quotes, fake uptime, or fabricated live telemetry.
 
 ## 6. Interaction
 
-- **Spotlight** (`Spotlight.tsx`) writes `--mx`/`--my` straight to the DOM node
-  on pointer move — a cursor move never triggers a React render.
-- **Reveal** (`Reveal.tsx`) renders content *visible* and only hides it after
-  mount, and only when it sits below the fold. A failed hydration, a missing
-  `IntersectionObserver`, or a dropped callback therefore leaves content
-  showing rather than stranding a blank gap. A 2s failsafe backs that up.
-- **Command palette** — `⌘K` / `Ctrl-K`, or `/` outside a text field. Full
-  combobox semantics, roving `aria-activedescendant`, focus returned on close.
-- **Player shortcuts** — space or `k` toggle, `j`/`←` back 15s, `l`/`→`
-  forward 30s, `m` mute. Suppressed while typing.
-
----
+- Spotlight writes `--mx`/`--my` to the DOM, never rerendering on pointer move.
+- Reveal is visible before hydration, hides only mounted off-screen content,
+  has a failsafe, and remains visible when IntersectionObserver is unavailable.
+- Command palette uses Cmd/Ctrl-K; its opt-in single-key shortcut is suppressed
+  while typing. It is a full combobox/listbox with focus return and a Tab trap.
+- Player transport/queue state stays separate from frequently updating clock
+  state. Keyboard shortcuts never steal input from focused controls.
 
 ## 7. Accessibility contract
 
-Target: **WCAG 2.2 Level AA.** Checked every review round with computed ratios;
-known gaps are named below rather than left implied.
+Target: WCAG 2.2 AA; static checks complement rather than replace browser tests.
 
-1. Every interactive element takes a visible `:focus-visible` ring in `--ember`
-   (7.0:1 on the page ground, 6.5:1 on a panel).
-2. **Colour never carries meaning alone.** Every `Delta` pairs hue with a ▲/▼
-   glyph and a signed number; heatmap tiles print the percentage; the playing
-   episode carries a Playing/Paused chip, not just an ember row number;
-   selected segmented controls carry a 2px inset `--ember` bar, because the
-   background tint behind them is only 1.2:1.
-3. Text contrast: `--paper` 17.6:1, `--paper-2` 7.9:1, `--paper-3` 5.1:1 on the
-   page ground and 4.8:1 on a panel. **`--paper-3` must not be used on
-   `--ink-700` or lighter** (4.2:1 there). Nothing renders text below 11px.
-4. Control boundaries meet 1.4.11: `--edge` is 3.2:1 against a field's own fill
-   and 3.3:1 against the page. `--hair` and `--hair-2` are decorative only and
-   must never be the sole boundary of a control.
-5. `prefers-reduced-motion: reduce` stops the marquee, the canvas rAF loop, the
-   scroll reveals, the loading spinners and smooth scrolling. **No SMIL** — a
-   CSS `.spin` class, so the media query actually reaches it. `SignalField` and
-   `Reveal` re-evaluate the query at runtime, not only at mount.
-6. `prefers-contrast: more` raises hairlines, control edges and both secondary
-   ink levels, and widens the gap *between* them rather than narrowing it.
-7. A skip link precedes the header; `<main>` is focusable; `scroll-padding-top`
-   and `scroll-padding-bottom` keep focused elements clear of the fixed header
-   and the fixed player bar (2.4.11).
-8. **Single-key shortcuts are off by default** and opt-in per browser, because
-   `j`/`k`/`l`/`m` collide with screen-reader quick-nav keys (2.1.4). The
-   handler yields to whatever control has focus, via `FOCUSABLE_SELECTOR`.
-9. Filter, sort and pagination results are announced with `aria-live="polite"`,
-   into regions that are already mounted when their text changes.
-10. Decorative canvas and SVG are `aria-hidden`; anything a hidden drawing
-    captions carries its own text alternative. Data tables have a `<caption>`
-    and `aria-sort`.
-11. The command palette is a full combobox/listbox: roving
-    `aria-activedescendant`, options owned directly by the listbox, Tab trapped
-    inside the dialog, background scroll locked, focus returned on close.
-12. Nothing is removed at a breakpoint to make a layout fit. The player's rate
-    and shortcut controls sit behind a disclosure available at every width, so
-    the bar reflows to 320px without losing functionality (1.4.10).
-13. `[hidden]` is forced with `!important` in `globals.css`: a Tailwind display
-    utility has the same specificity as the preflight rule and wins on cascade
-    order, which silently leaves hidden elements on screen.
+1. All controls retain a visible `:focus-visible` ring. On the standard light
+   surfaces, ember is at least 4.55:1; cream button text exceeds 5:1 on ember.
+2. Primary/secondary/tertiary ink are at least 12.32/6.74/4.89:1 on the three
+   normal page/panel surfaces. Do not use tertiary ink on darker material wells
+   without checking contrast. Check additional module-specific combinations.
+3. `--edge` defines interactive boundaries; decorative hairlines do not. A
+   selected segmented control retains its inset accent bar, not only a tint.
+4. Color never stands alone: signed deltas, playing/paused labels, text alerts,
+   and heatmap percentages remain. Every normal text label is at least 11px.
+5. `prefers-reduced-motion` stops marquees, reveals, spinners, canvas animation,
+   scroll-linked transforms and smooth scroll. Components subscribe to changes
+   at runtime. Use CSS animations, never inaccessible SVG SMIL spinners.
+6. `prefers-contrast: more` strengthens control edges, hairlines and both
+   secondary ink levels in light and inverse materials.
+7. The skip link precedes the header; `<main>` is focusable. Scroll padding
+   keeps focused content clear of the fixed header and audio player.
+8. Single-key shortcuts are off by default, opt-in per browser, and yield to
+   focused controls via `FOCUSABLE_SELECTOR` (screen-reader quick navigation).
+9. Filter/sort/pagination results use already-mounted polite live regions.
+10. Decorative canvas/SVG is aria-hidden; meaningful data has text alternatives.
+    Tables retain captions and aria-sort.
+11. Palette options belong directly to their listbox; active descendant, scroll
+    lock, focus trap and restored focus remain intact.
+12. Reflow to 320px must not remove controls. Player rate and shortcuts remain
+    behind an accessible disclosure at every viewport size.
+13. `[hidden] { display: none !important }` deliberately beats display utilities;
+    do not remove it when cleaning up override rules.
 
-### Known limitation — audio-only content (1.2.1, Level A)
+### Known audio limitation
 
-Episodes are **curated third-party audio**, not produced here, so the text
-alternative is the publisher's own transcript, surfaced per episode through
-`transcriptUrl`. Where a publisher provides none, the UI links the episode page
-and says so to assistive technology rather than staying silent — a two-line
-description is not an equivalent alternative and is never presented as one.
+Episodes are curated third-party audio. `transcriptUrl` links publisher-provided
+transcripts; when absent, the UI links the episode page and discloses the gap.
+A description is not a transcript. Episodes without publisher transcripts do
+not conform to WCAG 1.2.1; the archive reports transcript availability.
 
-**Episodes without a publisher transcript do not conform to 1.2.1.** The archive
-states how many of the listed episodes have one, so the gap is disclosed rather
-than hidden. Adding a `transcriptUrl` in the admin form closes it per episode.
+## 8. Guardrails
 
-## 8. Don'ts
-
-- **Don't** reintroduce `#00FF41`, `#FF3B3B`, `#67d7e1`, or the pine/sage
-  palette. They belong to retired systems.
-- **Don't** override one palette with another via attribute selectors on
-  serialised inline styles. That is what the last redesign did, and it is the
-  reason this rewrite exists.
-- **Don't** use `--ember` for a data value, or `--pos`/`--neg` for branding.
-- **Don't** ship a number in a proportional font.
-- **Don't** add a chart library. Sparklines are server-rendered SVG; the hero
-  is a hand-written canvas. Both stay that way.
+- Run `node scripts/theme-check.mjs`, `npm run lint`, and `npm run build`.
+- Never reintroduce retired neon palette values or dark terminal chrome.
+- Never match serialized inline styles to apply a palette patch.
+- Never use branding colors to replace signed data semantics.
+- Never use a proportional font for changing numeric readouts.
+- No chart-library dependency for simple sparklines or decorative hero objects.
+- No API, authentication, storage, or data-contract changes for visual work.

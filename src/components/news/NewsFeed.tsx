@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import NewsRow from './NewsRow'
 import type { NewsCategory, NewsItem } from '@/types/news'
+import styles from './NewsFeed.module.css'
 
 const CATEGORIES: (NewsCategory | 'All')[] = ['All', 'AI', 'Hardware', 'IT', 'Finance', 'Misc']
 
@@ -39,10 +40,11 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
   }, [items])
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className={styles.feed}>
       {/* Controls */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className={styles.controls}>
+        <h2 className="text-2xl font-medium tracking-tight">Find your signal.</h2>
+        <div className={styles.categories}>
           {CATEGORIES.map((cat) => {
             const active = category === cat
             const count = cat === 'All' ? items.length : (counts.get(cat) ?? 0)
@@ -62,7 +64,7 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
           })}
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className={styles.searches}>
           <div className="relative flex-1">
             <label htmlFor="news-search" className="sr-only">
               Search headlines
@@ -83,7 +85,7 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
             </span>
           </div>
 
-          <div className="sm:w-56">
+          <div>
             <label htmlFor="news-source" className="sr-only">
               Filter by source
             </label>
@@ -103,8 +105,9 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
         </div>
       </div>
 
+      <div className={styles.results}>
       {/* Result count — announced so filtering is perceivable without sight */}
-      <p aria-live="polite" className="eyebrow">
+      <p aria-live="polite" className={`eyebrow ${styles.resultCount}`}>
         {filtered.length} {filtered.length === 1 ? 'headline' : 'headlines'}
         {category !== 'All' && ` · ${category}`}
         {source !== 'All' && ` · ${source}`}
@@ -127,27 +130,11 @@ export default function NewsFeed({ items, now }: NewsFeedProps) {
           </button>
         </div>
       ) : (
-        <div className="panel overflow-hidden md:grid md:grid-cols-2">
-          {(() => {
-            // Split into two columns explicitly so each reads top-to-bottom.
-            // A CSS grid fills row-major, which makes scanning one column skip
-            // every other story.
-            const half = Math.ceil(filtered.length / 2)
-            return [filtered.slice(0, half), filtered.slice(half)].map((column, columnIndex) => (
-              <div
-                key={columnIndex}
-                className={`divide-y divide-hair ${
-                  columnIndex === 0 ? 'md:border-r md:border-hair' : ''
-                } ${columnIndex === 1 && column.length > 0 ? 'border-t border-hair md:border-t-0' : ''}`}
-              >
-                {column.map((item) => (
-                  <NewsRow key={item.id} item={item} now={now} showSummary />
-                ))}
-              </div>
-            ))
-          })()}
+        <div className={styles.rows}>
+          {filtered.map((item) => <NewsRow key={item.id} item={item} now={now} showSummary />)}
         </div>
       )}
+      </div>
     </div>
   )
 }

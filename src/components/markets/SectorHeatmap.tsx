@@ -10,12 +10,9 @@ function tint(changePercent: number): string {
   // wider cap compressed every tile into the bottom fifth of the alpha range,
   // so opacity carried almost no signal.
   const magnitude = Math.min(Math.abs(changePercent) / 2, 1)
-  // The green tint lightens the tile faster than the red one, so its ceiling is
-  // lower: past ~0.60 alpha, --paper on the result drops below 4.5:1.
-  const alpha = 0.1 + magnitude * (changePercent >= 0 ? 0.45 : 0.55)
-  return changePercent >= 0
-    ? `rgba(56, 201, 142, ${alpha.toFixed(3)})`
-    : `rgba(240, 90, 82, ${alpha.toFixed(3)})`
+  // Restrained semantic tints leave dark text legible on the light surface.
+  const weight = 8 + magnitude * 17
+  return `color-mix(in srgb, var(${changePercent >= 0 ? '--pos' : '--neg'}) ${weight.toFixed(2)}%, var(--ink-900))`
 }
 
 export default function SectorHeatmap({ quotes }: { quotes: StockQuote[] }) {

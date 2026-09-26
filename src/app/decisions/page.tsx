@@ -4,6 +4,8 @@ import { activeLinks, profile } from '@/lib/profile'
 import { getMarketSnapshot } from '@/lib/stocks'
 import Reveal from '@/components/ui/Reveal'
 import SignalPlate from '@/components/home/SignalPlate'
+import PageMasthead from '@/components/ui/PageMasthead'
+import styles from '@/components/ui/PageMasthead.module.css'
 
 export const metadata: Metadata = {
   title: 'Decisions',
@@ -24,41 +26,39 @@ export default async function DecisionsPage() {
   const ridge = snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null
 
   return (
-    <div className="shell" style={{ paddingTop: 'calc(var(--header-h) + 56px)' }}>
-      <header className="max-w-3xl">
-        <p className="eyebrow eyebrow-accent">On the record</p>
-        <h1 className="display mt-4 text-[clamp(38px,6vw,76px)]">Decisions</h1>
-        <p className="mt-6 max-w-[62ch] text-[17px] leading-relaxed text-paper-2">
+    <div className={`shell ${styles.page}`}>
+      <PageMasthead index="04" eyebrow="On the record" title="Decisions">
+        <p>
           Every useful system is a pile of tradeoffs wearing a clean interface. These are the choices
           behind this one: what I picked, what I did not, and what the decision cost. If a choice has
           no downside, it is probably marketing copy wearing a hard hat.
         </p>
-      </header>
+      </PageMasthead>
 
       {decisions.length === 0 ? (
         <div className="panel-flat my-14 px-6 py-20 text-center">
           <p className="display text-2xl text-paper">Nothing on the record yet.</p>
         </div>
       ) : (
-        <ol role="list" className="mt-14 flex flex-col pb-8">
+        <ol role="list" className="flex flex-col pb-8">
           {decisions.map((decision, i) => (
             <Reveal key={decision.title} as="li" delay={i * 50}>
               {/* Choice and cost sit side by side rather than stacked in one
                   capped column — the trade-off is the point, and reading them
                   as a pair says so without a word of explanation. */}
-              <article className="grid gap-5 border-t border-hair py-9 md:grid-cols-[2.5rem_minmax(0,1.05fr)_minmax(0,1fr)] md:gap-10">
-                <span aria-hidden="true" className="num text-xs text-paper-3 md:pt-2">
+              <article className={styles.decision}>
+                <span aria-hidden="true" className={styles.decisionNumber}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
 
                 <div>
-                  <h2 className="display text-[clamp(22px,2.8vw,32px)]">{decision.title}</h2>
+                  <h2 className={styles.storyTitle}>{decision.title}</h2>
                   <p className="mt-3 max-w-[46ch] text-[15px] leading-relaxed text-paper-2">
                     {decision.choice}
                   </p>
                 </div>
 
-                <div className="border-l-0 border-hair md:border-l md:pl-10">
+                <div className={styles.cost}>
                   <p className="eyebrow">What it cost</p>
                   <p className="mt-3 max-w-[44ch] text-[15px] leading-relaxed text-paper-2">
                     {decision.cost}
@@ -72,11 +72,11 @@ export default async function DecisionsPage() {
 
       {/* The page that most argues this site is an authored instrument should
           carry the drawing. */}
-      <div className="-mx-[max(18px,4vw)] mt-4">
+      <div className="inverse-band mt-4 overflow-hidden rounded-[var(--r-3)]">
         <SignalPlate quote={ridge} height={148} />
       </div>
 
-      <div className="border-t border-hair py-10">
+      <div className="py-10">
         <p className="max-w-[58ch] text-[15px] leading-relaxed text-paper-2">
           {links.length > 0
             ? 'Disagree with one of these? Good. Those are usually the useful conversations.'

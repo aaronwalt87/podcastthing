@@ -38,8 +38,8 @@ export default function QuoteCard({
           <span className="chip shrink-0">{quote.sector}</span>
         </div>
 
-        <div className="flex items-end justify-between gap-3">
-          <div>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
             <p
               className={`num font-medium tracking-tight text-paper ${
                 emphasis ? 'text-3xl' : 'text-2xl'

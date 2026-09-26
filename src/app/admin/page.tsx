@@ -6,6 +6,8 @@ import Link from 'next/link'
 import EpisodeForm from '@/components/admin/EpisodeForm'
 import EpisodeList from '@/components/admin/EpisodeList'
 import type { Episode } from '@/types/episode'
+import PageMasthead from '@/components/ui/PageMasthead'
+import styles from '@/components/ui/PageMasthead.module.css'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -54,12 +56,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-10 px-5 py-12">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-hair pb-6">
-        <div>
-          <p className="eyebrow eyebrow-accent">Episode archive</p>
-          <h1 className="display mt-2 text-4xl">Admin</h1>
-        </div>
+    <div className={`shell ${styles.page} ${styles.adminPage}`}>
+      <PageMasthead index="A" eyebrow="Behind the scenes" title="Admin" meta={
         <div className="flex items-center gap-2">
           <Link href="/" className="btn btn-sm">
             View site
@@ -68,8 +66,11 @@ export default function AdminPage() {
             Log out
           </button>
         </div>
-      </header>
+      }>
+        <p>The episode archive, from the other side of the desk.</p>
+      </PageMasthead>
 
+      <div className={`${styles.adminBody} flex flex-col gap-10`}>
       <section aria-label="Add an episode">
         {showForm ? (
           <div className="panel p-6">
@@ -132,6 +133,7 @@ export default function AdminPage() {
           />
         )}
       </section>
+      </div>
     </div>
   )
 }

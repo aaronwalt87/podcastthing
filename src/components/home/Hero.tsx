@@ -1,7 +1,9 @@
 import Link from 'next/link'
-import SignalField from './SignalField'
+import SystemSculpture from './SystemSculpture'
+import styles from './Hero.module.css'
 import PlayButton from '@/components/podcasts/PlayButton'
 import { profile } from '@/lib/profile'
+import { num } from '@/lib/format'
 import { MARKET_STATE_LABEL } from '@/types/stocks'
 import type { Episode } from '@/types/episode'
 import type { MarketSnapshot } from '@/types/stocks'
@@ -13,115 +15,44 @@ interface HeroProps {
   snapshot: MarketSnapshot
 }
 
-/** One cell of the hero stat list. `div` grouping inside `dl` is valid HTML5. */
-function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
+export default function Hero({ latestEpisode, headlineCount, sourceCount, snapshot }: HeroProps) {
+  const total = snapshot.advancers + snapshot.decliners
   return (
-    <div className="flex flex-col gap-1">
-      <dt className="eyebrow">{label}</dt>
-      <dd className="num m-0 text-lg text-paper" style={tone ? { color: tone } : undefined}>
-        {value}
-      </dd>
-    </div>
-  )
-}
-
-export default function Hero({
-  latestEpisode,
-  headlineCount,
-  sourceCount,
-  snapshot,
-}: HeroProps) {
-  // Prefer the broad index for the ridge line; fall back to whatever we have.
-  const lead = snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null
-  const live = snapshot.marketState === 'REGULAR'
-
-  return (
-    <section className="relative overflow-hidden" aria-labelledby="hero-title">
-      {/* Below md the ridge sits in the lower band as a horizon rather than
-          running behind the copy, which has the full width on a phone. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[56%] -z-10 md:inset-0">
-        <SignalField series={lead?.history ?? []} />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(7,8,10,0.7) 0%, rgba(7,8,10,0.14) 38%, rgba(7,8,10,0.8) 86%, var(--ink-950) 100%)',
-          }}
-        />
-        {/* Desktop only: keeps the ridge clear of the headline column. */}
-        <div
-          className="absolute inset-0 hidden md:block"
-          style={{
-            background:
-              'linear-gradient(90deg, var(--ink-950) 0%, var(--ink-950) 20%, rgba(7,8,10,0.9) 34%, rgba(7,8,10,0.62) 48%, rgba(7,8,10,0.12) 68%, transparent 100%)',
-          }}
-        />
+    <section className={styles.hero} aria-labelledby="hero-title">
+      <div className={`shell ${styles.composition}`}>
+        <div className={styles.copy}>
+          <p className={`eyebrow ${styles.kicker}`}><span className={styles.marker} aria-hidden="true" />Aaron Walters · {profile.location}</p>
+          <h1 id="hero-title" className={styles.title}>{profile.heroLead}<span>{profile.heroLeadMuted}</span></h1>
+          <p className={styles.summary}>Technology news, market context,<br />and episodes worth your time.</p>
+          <div className={styles.actions}>
+            <Link href="/news" className="btn btn-primary">Explore the dashboard <span aria-hidden="true">↗</span></Link>
+            <Link href="/about" className={styles.aboutLink}>About this site <span aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+        <div className={styles.stage}>
+          <div className={styles.stageTop}><span>Always a work in progress.</span><span aria-hidden="true">↗</span></div>
+          <SystemSculpture />
+          <div className={styles.stageBottom}><span>A few things<br />worth following.</span><span className={styles.stageGlyph} aria-hidden="true">✳</span></div>
+        </div>
       </div>
-
-      <div
-        className="shell flex flex-col justify-end"
-        style={{
-          minHeight: 'min(92vh, 820px)',
-          paddingTop: 'calc(var(--header-h) + 40px)',
-          paddingBottom: '48px',
-        }}
-      >
-        <p className="eyebrow flex items-center gap-2.5">
-          <span className={live ? 'pulse' : 'pulse pulse-idle'} aria-hidden="true" />
-          {MARKET_STATE_LABEL[snapshot.marketState]}
-          <span aria-hidden="true" className="h-2.5 w-px bg-hair-2" />
-          {profile.location}
-        </p>
-
-        <h1 id="hero-title" className="display mt-6 max-w-4xl text-[clamp(44px,8vw,104px)]">
-          {profile.heroLead}
-          <br />
-          <span style={{ color: 'color-mix(in oklab, var(--paper) 54%, transparent)' }}>
-            {profile.heroLeadMuted}
-          </span>
-        </h1>
-
-        {/* One shared line, so the "new to writing it" concession appears on the
-            page that actually gets shared — not only on /about. */}
-        <p className="mt-6 max-w-[56ch] text-[16px] leading-relaxed text-paper-2">
-          {profile.standfirst}
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link href="/news" className="btn btn-primary">
-            Open the feed
-          </Link>
-          <Link href="/about" className="btn">
-            Who I am <span aria-hidden="true">→</span>
-          </Link>
-
+      <div className={`shell ${styles.intro}`}>
+        <div className={styles.introHeading}><p className="eyebrow">The collection</p><h2>A little less<br />tab hopping.</h2></div>
+        <div className={styles.introBody}>
+          <p>{profile.standfirst}</p>
           {latestEpisode && latestEpisode.audioUrl.trim().length > 0 && (
-            <div className="flex min-w-0 items-center gap-3 rounded-md border border-hair bg-ink-900/70 py-2 pl-2 pr-5 backdrop-blur">
+            <div className={styles.episode}>
               <PlayButton episode={latestEpisode} size="md" />
-              <span className="min-w-0">
-                <span className="eyebrow block leading-tight">Latest episode</span>
-                <span className="mt-0.5 block max-w-[36ch] truncate text-[13px] leading-tight text-paper">
-                  {latestEpisode.title}
-                </span>
-              </span>
+              <div className={styles.episodeCopy}><span className="eyebrow">On the listening list</span><Link href="/podcasts" className={styles.episodeTitle}>{latestEpisode.title}</Link></div>
             </div>
           )}
         </div>
-
-        <dl className="mt-9 grid grid-cols-3 gap-6 border-t border-hair pt-6 lg:mt-12">
-          <Stat label="Headlines tracked" value={String(headlineCount)} />
-          <Stat label="Sources" value={String(sourceCount)} />
-          <Stat
-            label="Market breadth"
-            value={
-              snapshot.advancers + snapshot.decliners > 0
-                ? `${snapshot.advancers}/${snapshot.advancers + snapshot.decliners} up`
-                : '—'
-            }
-            tone={
-              snapshot.advancers >= snapshot.decliners ? 'var(--pos)' : 'var(--neg)'
-            }
-          />
+      </div>
+      <div className={`shell ${styles.statBar}`}>
+        <p className={`eyebrow ${styles.status}`}><span className={snapshot.marketState === 'REGULAR' ? 'pulse' : 'pulse pulse-idle'} aria-hidden="true" />{MARKET_STATE_LABEL[snapshot.marketState]}</p>
+        <dl className={styles.stats}>
+          <div><dt>Headlines tracked</dt><dd className="num">{num(headlineCount, 0)}</dd></div>
+          <div><dt>Sources</dt><dd className="num">{num(sourceCount, 0)}</dd></div>
+          <div><dt>Market breadth</dt><dd className="num">{total > 0 ? `${num(snapshot.advancers, 0)}/${num(total, 0)} up` : '—'}</dd></div>
         </dl>
       </div>
     </section>

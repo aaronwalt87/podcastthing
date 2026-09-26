@@ -25,32 +25,24 @@ export const profile = {
   /** Shown in the header lockup, the hero kicker and the about page. */
   location: 'Wisconsin',
   /** One line. Appears in metadata and on the social card. */
-  tagline: 'Infrastructure, modernization, and the logs in between.',
+  tagline: 'News, markets, and good listening.',
 
   /** The hero headline, in two lines. Keep both short. */
-  heroLead: 'I lead technology.',
-  heroLeadMuted: 'I still read the logs.',
+  heroLead: 'Worth a look.',
+  heroLeadMuted: 'Worth a listen.',
 
   /** Used in the hero and at the top of the About page. */
   standfirst:
-    "I've spent 14 years keeping B2B software and infrastructure useful, available, and moving forward — leading teams, migrating systems, and modernizing platforms with more history than documentation. I'm still learning to write software, but I'm shipping real things while I do it. This dashboard collects the technology news, market signals, and podcast episodes I genuinely follow. It is also what happened when I needed a hobby and apparently rejected several normal ones.",
+    'A personal collection of technology news, market updates, and podcast episodes. Fewer tabs. Better things to come back to.',
 
   about: [
     {
-      title: 'Fourteen years in the machinery',
-      body: `I came up through hosting, IT, support, and the unglamorous systems that keep software companies functioning after the launch post is forgotten. Over 14 years, that grew into leading infrastructure and cloud migrations, modernizing legacy products, and building technical teams that can improve a system without first setting it on fire. I have developed a particular affection for important platforms with three generations of architecture and half a generation of documentation.`,
+      title: 'A place for the good stuff',
+      body: 'I’m Aaron. I built this to keep the things I follow in one place: a news feed, a market board, and a hand-picked listening list.',
     },
     {
-      title: 'Leading without leaving the keyboard',
-      body: `Today I work where technology leadership, infrastructure, and product overlap. I help set direction, assess systems, lead technical teams, and turn vague concerns about reliability or technical debt into work somebody can actually finish. I also still open the logs when the dashboard says everything is healthy and everyone in the room knows that it is lying.`,
-    },
-    {
-      title: 'Learning to build in public',
-      body: `Software development is newer territory for me, and I am not going to dress 14 years of adjacent experience in a tiny fake mustache and call it 14 years of coding. What I do have is a long view of how software behaves once real people depend on it. I am learning by shipping useful things, documenting the tradeoffs, and resisting the urge to call every side project a platform.`,
-    },
-    {
-      title: 'Why this site exists',
-      body: `I wanted one place for the technology news I actually read, the market signals I use for context, and the podcast episodes worth finishing. Nothing quite matched the way I follow those things, so I built it. The result is equal parts personal dashboard, engineering playground, and evidence that I should probably have chosen a less complicated hobby.`,
+      title: 'Built as I go',
+      body: 'It’s also where I learn to build. Features get added, ideas get tested, and occasionally I remember to stop adjusting the spacing.',
     },
   ] as AboutSection[],
 
@@ -85,7 +77,7 @@ export const profile = {
       title: 'No charting library',
       choice:
         'The trend lines are server-rendered SVG and the ridge is a hand-written canvas, rather than pulling in a charting package.',
-      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the hero ridge is a canvas, and its drawing code does run in the browser.",
+      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the market ridge is a canvas, and its drawing code does run in the browser.",
     },
     {
       title: 'Cache stale data rather than show none',
@@ -119,9 +111,6 @@ export const profile = {
     },
   ] as Decision[],
 
-  /** The kind of work this site should quietly attract. */
-  lookingFor:
-    "I'm most interested in infrastructure and platform leadership, especially when a business has inherited a critical system with good bones, old scars, and nobody particularly eager to touch it. That is usually where I am most useful.",
 
   /**
    * Contact and profile links. FILL THESE IN — an empty href is hidden.

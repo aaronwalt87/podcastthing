@@ -10,6 +10,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        cream: 'var(--cream)',
+        charcoal: 'var(--charcoal)',
+        olive: {
+          DEFAULT: 'var(--olive)',
+          light: 'var(--olive-light)',
+        },
         ink: {
           950: 'var(--ink-950)',
           900: 'var(--ink-900)',

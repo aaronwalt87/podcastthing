@@ -115,7 +115,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
             {sorted.map((q) => (
               <tr
                 key={q.symbol}
-                className="border-b border-hair/60 transition-colors last:border-0 hover:bg-white/[0.025]"
+                className="border-b border-hair transition-colors last:border-0 hover:bg-ink-850"
               >
                 <th scope="row" className="px-4 py-3 text-left font-normal">
                   <span className="num text-[13px] font-medium text-paper">{q.symbol}</span>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { profile } from '@/lib/profile'
+import styles from '../Shell.module.css'
 
 const LINKS = [
   { label: 'News', href: '/news' },
@@ -17,16 +18,16 @@ function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname.startsWith(href)
 }
 
-/** Three ascending strokes — a ridge line and a rising signal at the same time. */
+/** A single continuous AW ligature, drawn for this site. */
 function BrandMark() {
   return (
-    <svg width="26" height="20" viewBox="0 0 26 20" fill="none" aria-hidden="true">
+    <svg width="44" height="32" viewBox="0 0 44 32" fill="none" aria-hidden="true">
       <path
-        d="M1 19L7 8l5 6 4-9 8 14"
-        stroke="var(--ember)"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M3 27L13 5L23 27L31 8L37 27L42 5M7 19H19"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="square"
+        strokeLinejoin="bevel"
       />
     </svg>
   )
@@ -53,7 +54,7 @@ export default function SiteHeader() {
   // A route change should never leave the mobile sheet hanging open.
   useEffect(() => setMenuOpen(false), [pathname])
 
-  // Escape is the only way out for a keyboard user once the sheet has focus.
+  // Escape closes the disclosure and returns focus to its trigger.
   useEffect(() => {
     if (!menuOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
@@ -70,28 +71,16 @@ export default function SiteHeader() {
   const openPalette = () => window.dispatchEvent(new Event('signal:open-palette'))
 
   return (
-    <header
-      className="fixed inset-x-0 top-0 z-[100] transition-[background-color,border-color,backdrop-filter] duration-300"
-      style={{
-        height: 'var(--header-h)',
-        backgroundColor: scrolled || menuOpen ? 'rgba(7,8,10,0.82)' : 'transparent',
-        borderBottom: `1px solid ${scrolled || menuOpen ? 'var(--hair)' : 'transparent'}`,
-        backdropFilter: scrolled || menuOpen ? 'blur(16px) saturate(1.3)' : 'none',
-        WebkitBackdropFilter: scrolled || menuOpen ? 'blur(16px) saturate(1.3)' : 'none',
-      }}
-    >
-      <div className="shell flex h-full items-center gap-6">
-        <Link href="/" className="flex items-center gap-2.5" aria-label={`${profile.name} — home`}>
+    <header className={`${styles.header} ${scrolled || menuOpen ? styles.headerScrolled : ''}`}>
+      <div className={`shell ${styles.headerInner}`}>
+        <Link href="/" className={styles.brand} aria-label={`${profile.name} — home`}>
           <BrandMark />
-          <span className="block">
-            <span className="block text-[13px] font-medium leading-tight text-paper">
-              {profile.name}
-            </span>
-            <span className="eyebrow hidden leading-tight sm:block">{profile.location}</span>
+          <span className={styles.brandName}>
+            Aaron<br />Walters<span className={styles.brandDot}>.</span>
           </span>
         </Link>
 
-        <nav className="ml-auto hidden items-center gap-1 md:flex" aria-label="Primary">
+        <nav className={styles.desktopNav} aria-label="Primary">
           {LINKS.map(({ label, href }) => {
             const active = isActive(pathname, href)
             return (
@@ -99,18 +88,9 @@ export default function SiteHeader() {
                 key={href}
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`relative px-3 py-2 text-[13px] transition-colors ${
-                  active ? 'text-paper' : 'text-paper-2 hover:text-paper'
-                }`}
+                className={styles.navLink}
               >
                 {label}
-                {active && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-3 -bottom-px h-px"
-                    style={{ background: 'var(--ember)' }}
-                  />
-                )}
               </Link>
             )
           })}
@@ -118,13 +98,16 @@ export default function SiteHeader() {
 
         <button
           type="button"
-          onClick={openPalette}
-          className="ml-auto flex h-9 items-center gap-2.5 rounded-sm border border-hair-2 bg-ink-900/60 px-3 text-xs text-paper-2 transition-colors hover:border-white/40 hover:text-paper md:ml-0"
+          onClick={() => { setMenuOpen(false); openPalette() }}
+          className={styles.searchButton}
           aria-label="Open search"
         >
-          <span aria-hidden="true">⌕</span>
-          <span className="hidden lg:inline">Search</span>
-          <kbd className="num hidden text-[11px] text-paper-2 lg:inline">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="m13 13 4 4" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+          <span className={styles.searchLabel}>Search</span>
+          <kbd className={`num ${styles.searchKey}`}>
             {isMac ? '⌘' : 'Ctrl '}K
           </kbd>
         </button>
@@ -136,8 +119,7 @@ export default function SiteHeader() {
           aria-expanded={menuOpen}
           aria-controls="mobile-nav"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          className="btn btn-icon md:hidden"
-          style={{ borderColor: 'var(--hair)' }}
+          className={styles.menuButton}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path
@@ -154,19 +136,19 @@ export default function SiteHeader() {
         id="mobile-nav"
         hidden={!menuOpen}
         aria-label="Primary"
-        className="border-b border-hair bg-ink-950/95 backdrop-blur md:hidden"
+        className={styles.mobileNav}
       >
-        <div className="shell flex flex-col py-2">
-          {LINKS.map(({ label, href }) => (
+        <div className={`shell ${styles.mobileNavInner}`}>
+          {LINKS.map(({ label, href }, index) => (
             <Link
               key={href}
               href={href}
               aria-current={isActive(pathname, href) ? 'page' : undefined}
-              className={`border-b border-hair py-3.5 text-[15px] last:border-0 ${
-                isActive(pathname, href) ? 'text-ember' : 'text-paper'
-              }`}
+              onClick={() => setMenuOpen(false)}
+              className={styles.mobileNavLink}
             >
-              {label}
+              <span><small className="num" aria-hidden="true">0{index + 1}</small>{label}</span>
+              <span aria-hidden="true">↗</span>
             </Link>
           ))}
         </div>

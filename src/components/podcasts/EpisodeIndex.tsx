@@ -7,6 +7,7 @@ import PlayButton from './PlayButton'
 import TranscriptLink from './TranscriptLink'
 import { longDate } from '@/lib/format'
 import type { Episode } from '@/types/episode'
+import styles from './Podcast.module.css'
 
 interface EpisodeIndexProps {
   episodes: Episode[]
@@ -29,7 +30,7 @@ function Row({
 
   return (
     <li
-      className="group grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-4 border-t border-hair py-3 transition-colors hover:bg-white/[0.02] sm:gap-5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]"
+      className={`${styles.row} group grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-4 border-t border-hair py-4 transition-colors sm:gap-5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto_auto]`}
       aria-current={isCurrent ? 'true' : undefined}
     >
       <span

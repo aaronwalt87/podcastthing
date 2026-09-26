@@ -217,7 +217,7 @@ export default function CommandPalette() {
   return (
     <div
       className="fixed inset-0 z-[120] flex items-start justify-center px-4 pt-[12vh]"
-      style={{ background: 'rgba(4, 5, 7, 0.72)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'var(--scrim)', backdropFilter: 'blur(8px)' }}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) closePalette()
       }}
@@ -228,10 +228,10 @@ export default function CommandPalette() {
         aria-modal="true"
         aria-label="Search the site"
         onKeyDown={onDialogKeyDown}
-        className="panel w-full max-w-xl overflow-hidden"
+        className="panel w-full max-w-xl overflow-hidden rounded-[var(--r-4)]"
         style={{ boxShadow: 'var(--shadow-panel)' }}
       >
-        <div className="flex items-center gap-3 border-b border-hair px-4">
+        <div className="flex items-center gap-3 border-b border-hair px-5">
           <span aria-hidden="true" className="text-paper-3">
             ⌕
           </span>
@@ -246,7 +246,7 @@ export default function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search episodes, headlines, tickers…"
-            className="h-14 flex-1 bg-transparent text-[15px] outline-none placeholder:text-paper-3"
+            className="h-16 min-w-0 flex-1 bg-transparent text-base text-paper outline-none placeholder:text-paper-3"
           />
           <kbd className="chip">Esc</kbd>
         </div>
@@ -266,7 +266,7 @@ export default function CommandPalette() {
           id="palette-results"
           role="listbox"
           aria-label="Search results"
-          className="max-h-[52vh] overflow-y-auto p-1.5"
+          className="max-h-[52vh] overflow-y-auto p-2"
         >
           {results.length === 0 ? (
             <li role="presentation" className="px-3 py-8 text-center text-sm text-paper-3">
@@ -292,12 +292,10 @@ export default function CommandPalette() {
                 aria-selected={i === active}
                 onMouseEnter={() => setActive(i)}
                 onClick={() => choose(record)}
-                className={`flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5 transition-colors ${
-                  i === active ? 'bg-white/[0.07]' : ''
-                }`}
+                className="flex cursor-pointer items-center gap-3 rounded-[var(--r-2)] px-3 py-3 transition-colors"
                 style={
                   i === active
-                    ? { boxShadow: 'inset 2px 0 0 var(--ember)' }
+                    ? { background: 'var(--surface-hover)', boxShadow: 'inset 3px 0 0 var(--ember)' }
                     : undefined
                 }
               >

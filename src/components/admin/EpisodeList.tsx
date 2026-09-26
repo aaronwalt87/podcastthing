@@ -5,6 +5,7 @@ import EpisodeForm from './EpisodeForm'
 import EpisodeArtwork from '@/components/podcasts/EpisodeArtwork'
 import { longDate } from '@/lib/format'
 import type { Episode } from '@/types/episode'
+import styles from './Admin.module.css'
 
 interface EpisodeListProps {
   episodes: Episode[]
@@ -74,7 +75,7 @@ export default function EpisodeList({
               />
             </div>
           ) : (
-            <div className="flex items-center gap-4 p-3">
+            <div className={styles.episode}>
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm bg-ink-800">
                 <EpisodeArtwork episode={episode} />
               </div>
@@ -91,7 +92,7 @@ export default function EpisodeList({
                 </div>
               </div>
 
-              <div className="flex shrink-0 gap-2">
+              <div className={`${styles.actions} flex shrink-0 gap-2`}>
                 <button
                   type="button"
                   onClick={() => setEditingId(episode.id)}
@@ -104,7 +105,7 @@ export default function EpisodeList({
                   onClick={() => handleDelete(episode)}
                   disabled={deletingId === episode.id}
                   className="btn btn-sm disabled:opacity-50"
-                  style={{ color: 'var(--neg)', borderColor: 'rgba(240,90,82,0.3)' }}
+                  style={{ color: 'var(--neg-text)', borderColor: 'var(--neg-edge)' }}
                 >
                   {deletingId === episode.id ? 'Deleting…' : 'Delete'}
                 </button>
