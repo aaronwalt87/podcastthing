@@ -8,6 +8,7 @@ import EpisodeArtwork from './EpisodeArtwork'
 import TranscriptLink from './TranscriptLink'
 import { longDate } from '@/lib/format'
 import type { Episode } from '@/types/episode'
+import styles from './Podcast.module.css'
 
 interface EpisodeCardProps {
   episode: Episode
@@ -59,15 +60,15 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
   return (
     <Spotlight className="h-full">
       <article
-        className={`panel group relative flex h-full overflow-hidden transition-[transform,border-color] duration-300 ease-out hover:-translate-y-0.5 ${
+        className={`${styles.card} panel group relative flex h-full overflow-hidden transition-[transform,border-color] duration-300 ease-out hover:-translate-y-0.5 ${
           featured ? 'flex-col md:grid md:grid-cols-2 md:items-stretch' : 'flex-col'
         }`}
-        style={isCurrent ? { borderColor: 'rgba(255,106,43,0.4)' } : undefined}
+        style={isCurrent ? { borderColor: 'var(--ember)' } : undefined}
         aria-current={isCurrent ? 'true' : undefined}
       >
         <div
-          className={`relative overflow-hidden bg-ink-800 ${
-            featured ? 'aspect-[16/9] md:aspect-auto md:h-full md:min-h-[300px]' : 'aspect-[16/10]'
+          className={`${styles.artworkWell} relative overflow-hidden bg-ink-800 ${
+            featured ? `${styles.featuredWell} aspect-[16/9] md:aspect-auto` : 'aspect-[16/10]'
           }`}
         >
           <EpisodeArtwork
@@ -76,14 +77,14 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
             className="transition-transform duration-700 ease-out group-hover:scale-[1.03]"
           />
 
-          <div
+          {episode.thumbnailUrl && <div
             aria-hidden="true"
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(180deg, rgba(7,8,10,0) 40%, rgba(7,8,10,0.72) 100%)',
+                'linear-gradient(180deg, transparent 55%, var(--scrim) 100%)',
             }}
-          />
+          />}
 
           <div className="absolute bottom-3 left-3 flex items-center gap-3">
             <PlayButton
@@ -94,7 +95,7 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
             {isCurrent && (
               // Opaque backdrop: chips sit over arbitrary remote artwork, where
               // a translucent fill can land at 3.3:1.
-              <span className="chip chip-accent bg-ink-950/80 backdrop-blur">
+              <span className="chip chip-accent" style={{ background: 'var(--ink-900)' }}>
                 {isPlaying ? 'Playing' : 'Paused'}
               </span>
             )}
@@ -102,7 +103,7 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
 
           {/* Featured cards carry the category in their meta row instead. */}
           {episode.category && !featured && (
-            <span className="chip absolute right-3 top-3 bg-ink-950/70 backdrop-blur">
+            <span className="chip absolute right-3 top-3" style={{ background: 'var(--ink-900)' }}>
               {episode.category}
             </span>
           )}
@@ -142,7 +143,7 @@ function EpisodeCard({ episode, queue, featured = false, indexLabel }: EpisodeCa
 
           <h3
             className={`clamp-3 font-medium leading-snug text-paper ${
-              featured ? 'text-xl md:text-[28px] md:leading-[1.15]' : 'clamp-2 text-[15px]'
+              featured ? 'display text-3xl md:text-[38px] md:leading-[1.08]' : 'clamp-2 text-lg'
             }`}
           >
             {episode.title}

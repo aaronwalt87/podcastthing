@@ -18,7 +18,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-12">
-      <div className="max-w-2xl">
+      <div className="max-w-3xl">
         {eyebrow && (
           <p className="eyebrow flex items-center gap-2">
             {index && <span className="eyebrow-accent">{index}</span>}
@@ -26,7 +26,7 @@ export default function SectionHeader({
             {eyebrow}
           </p>
         )}
-        <h2 className={`display text-[clamp(30px,4.4vw,52px)] ${eyebrow ? 'mt-3' : ''}`}>
+        <h2 className={`display max-w-[16ch] text-[clamp(38px,6.5vw,84px)] ${eyebrow ? 'mt-5' : ''}`}>
           {title}
         </h2>
         {description && (

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Instrument_Sans, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
+import { Instrument_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { PlayerProvider } from '@/context/PlayerContext'
 import SiteHeader from '@/components/nav/SiteHeader'
@@ -14,13 +14,6 @@ const sans = Instrument_Sans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-instrument-sans',
-})
-
-const serif = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-  variable: '--font-instrument-serif',
 })
 
 const mono = JetBrains_Mono({
@@ -65,13 +58,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // Must be a literal — Next serialises this into a meta tag, so it cannot
   // reference the --ink-950 custom property it mirrors.
-  themeColor: '#07080a',
-  colorScheme: 'dark',
+  themeColor: '#f2f1e9',
+  colorScheme: 'light',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
         <PlayerProvider>
           <a href="#main" className="sr-only-focusable">

@@ -11,6 +11,7 @@ import EpisodeCard from '@/components/podcasts/EpisodeCard'
 import EpisodeIndex from '@/components/podcasts/EpisodeIndex'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Reveal from '@/components/ui/Reveal'
+import styles from './Home.module.css'
 
 export const dynamic = 'force-dynamic'
 // A cold cache triggers a background refresh through waitUntil, which keeps the
@@ -42,8 +43,6 @@ export default async function HomePage() {
     .slice(0, 4 - Math.min(indices.length, 2))
 
   const spotlight = [...indices.slice(0, 2), ...movers]
-  // The same series the hero draws — two ridge moments showing different
-  // instruments would read as incidental rather than as one drawing.
   const ridge = snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null
 
   return (
@@ -58,7 +57,7 @@ export default async function HomePage() {
       <MarketStrip snapshot={snapshot} />
 
       {/* ---------------------------------------------------------- signal -- */}
-      <section id="signal" className="shell py-20 md:py-28">
+      <section id="signal" className={`shell ${styles.chapter}`}>
         <Reveal>
           <SectionHeader
             index="01"
@@ -85,7 +84,7 @@ export default async function HomePage() {
                   </div>
                   <Link
                     href="/markets"
-                    className="panel-flat flex shrink-0 items-center justify-between px-4 py-3.5 text-sm text-paper-2 transition-colors hover:bg-white/[0.03] hover:text-paper"
+                    className="panel-flat flex shrink-0 items-center justify-between px-4 py-3.5 text-sm text-paper-2 transition-colors hover:text-paper"
                   >
                     <span>
                       <span className="num" style={{ color: 'var(--pos)' }}>
@@ -116,13 +115,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* The ridge returns as a labelled instrument plate. The section eyebrow
-          stays with its own headline below — moving it onto the plate split a
-          single typographic unit across 170px of ridge. */}
-      <SignalPlate quote={ridge} height={172} />
+      <section className={`inverse-band ${styles.interlude}`} aria-labelledby="working-title">
+        <div className="shell">
+          <p className="eyebrow">The work behind the dashboard</p>
+          <div className={styles.interludeGrid}>
+            <Reveal><h2 id="working-title" className={styles.interludeTitle}>Good systems.<br /><span>Less drama.</span></h2></Reveal>
+            <div>
+              <div className={styles.principles}>
+                {['Infrastructure & cloud', 'Legacy modernization', 'Technical leadership'].map((label, index) => (
+                  <Link href="/about" className={styles.principle} key={label}><span>0{index + 1}</span><strong>{label}</strong><span aria-hidden="true">↗</span></Link>
+                ))}
+              </div>
+              <p className="mt-7 max-w-[42ch] text-paper-2">Still close enough to the work to know when the dashboard is lying.</p>
+            </div>
+          </div>
+        </div>
+        <SignalPlate quote={ridge} height={140} />
+      </section>
 
       {/* --------------------------------------------------------- archive -- */}
-      <section id="archive" className="shell pb-20 pt-12 md:pb-28 md:pt-16">
+      <div className={styles.listening}>
+      <section id="archive" className={`shell ${styles.chapter}`}>
         <Reveal>
           <SectionHeader
             index="02"
@@ -165,22 +178,23 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+      </div>
 
       {/* ----------------------------------------------------------- about -- */}
-      <section className="shell pb-24">
+      <section className="shell">
         <Reveal>
           {/* Two columns that both carry weight: the claim on the left, the
               evidence and the way in on the right. A single capped column left
               half the panel empty. */}
-          <div className="panel grid gap-8 p-8 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-14 md:p-12">
+          <div className={styles.build}>
             <div>
               <p className="eyebrow eyebrow-accent">About this build</p>
-              <p className="display mt-4 text-[clamp(26px,3.4vw,44px)]">
+              <h2 className={styles.buildTitle}>
                 I&rsquo;ve led technology for years. I still read the logs.
-              </p>
+              </h2>
             </div>
 
-            <div>
+            <div className={styles.buildText}>
               <p className="max-w-[54ch] text-[15px] leading-relaxed text-paper-2">
                 This started as a useful place to collect the things I follow and became a very
                 effective way to avoid choosing a normal hobby. The feeds are parsed and cached,

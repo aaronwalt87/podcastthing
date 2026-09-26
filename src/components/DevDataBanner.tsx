@@ -14,7 +14,7 @@ export default function DevDataBanner() {
     // scroll-padding-top brought into view, and would paint over the palette.
     <div
       className="border-b border-hair px-4 py-1.5 text-center"
-      style={{ marginTop: 'var(--header-h)', background: 'var(--ink-900)' }}
+      style={{ marginTop: 'var(--header-h)', background: 'var(--warn-ghost)' }}
     >
       <span className="eyebrow" style={{ color: 'var(--warn-text)' }}>
         Local development · sample data

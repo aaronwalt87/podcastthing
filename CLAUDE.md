@@ -21,8 +21,10 @@ serialised inline styles. Do not let that happen again.
 
 1. **One design system.** `design.md` is the contract; `src/app/globals.css`
    `:root` is the source of truth. **Never hard-code a hex value in a
-   component** — add a token instead. Never reintroduce `#00FF41`, `#FF3B3B`,
-   `#67d7e1`, or the pine/sage palette.
+   component** — add a token instead. The active direction is warm cream,
+   charcoal, muted olive and burnt orange with oversized Instrument Sans.
+   Legacy `ink-*` variables are now light surface roles and `paper*` variables
+   are dark text. Never restore the retired neon/terminal palette.
 2. **Never patch one palette over another** with `[style*="…"]` selectors or
    `!important` overrides. Fix the component.
 3. **No dead code.** If a component is imported nowhere, delete it.
@@ -56,7 +58,7 @@ src/
 │       └── upload/                 # Vercel Blob client-upload handler
 ├── components/
 │   ├── nav/       SiteHeader, CommandPalette
-│   ├── home/      Hero, SignalField (canvas, driven by real market history)
+│   ├── home/      Editorial hero and scroll-linked decorative objects
 │   ├── news/      NewsFeed, NewsDigest, NewsRow
 │   ├── markets/   MarketStrip, MarketTable, SectorHeatmap, Sparkline, QuoteCard, Delta
 │   ├── podcasts/  EpisodeArchive, EpisodeCard, EpisodeArtwork, PlayButton, AutoPlayOnLoad
@@ -78,9 +80,11 @@ src/
 npm run dev      # http://localhost:3000 — works with no env vars (fixtures)
 npm run build    # production build
 npm run lint     # ESLint
+node scripts/theme-check.mjs # Theme/token and static accessibility guardrails
 ```
 
-No test runner. `npm run lint` and `npm run build` are the gate.
+No unit-test runner. Theme checks, `npm run lint`, and `npm run build` are the
+gate. Browser, keyboard, reflow and reduced-motion checks are still required.
 
 ---
 

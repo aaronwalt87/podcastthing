@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import EpisodeCard from './EpisodeCard'
 import EpisodeIndex from './EpisodeIndex'
 import type { Episode } from '@/types/episode'
+import styles from './Podcast.module.css'
 
 type SortKey = 'newest' | 'oldest' | 'title'
 
@@ -89,7 +90,7 @@ export default function EpisodeArchive({ episodes, categories, shows }: EpisodeA
   return (
     <div className="flex flex-col gap-6">
       {/* Controls */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div className={`${styles.toolbar} flex flex-col gap-3 lg:flex-row lg:items-center`}>
         <div className="relative lg:max-w-sm lg:flex-1">
           <label htmlFor="episode-search" className="sr-only">
             Search episodes

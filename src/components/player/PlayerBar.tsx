@@ -5,6 +5,7 @@ import { usePlayer, usePlayerClock, PLAYBACK_RATES } from '@/context/PlayerConte
 import EpisodeArtwork from '@/components/podcasts/EpisodeArtwork'
 import TranscriptLink from '@/components/podcasts/TranscriptLink'
 import { duration as formatDuration } from '@/lib/format'
+import styles from './PlayerBar.module.css'
 
 function Icon({ path, size = 16 }: { path: string; size?: number }) {
   return (
@@ -135,19 +136,14 @@ export default function PlayerBar() {
       {/* Keeps the fixed bar from covering the end of the page. */}
       <div aria-hidden="true" style={{ height: 'var(--player-h)' }} />
     <div
-      className="fixed inset-x-0 bottom-0 z-[110] border-t border-hair"
-      style={{
-        background: 'rgba(9,11,14,0.9)',
-        backdropFilter: 'blur(18px) saturate(1.3)',
-        WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
-      }}
+      className={styles.player}
       role="region"
       aria-label="Audio player"
     >
       {error && (
         <p
           role="alert"
-          className="border-b px-4 py-2 text-center text-xs"
+          className={`${styles.error} border-b px-4 py-2 text-center text-xs`}
           style={{
             color: 'var(--neg-text)',
             background: 'var(--neg-ghost)',
@@ -158,11 +154,11 @@ export default function PlayerBar() {
         </p>
       )}
 
-      <div className="shell flex items-center gap-4 py-3">
+      <div className={`${styles.controls} items-center`}>
         {/* Now playing */}
-        <div className="flex min-w-0 items-center gap-3 sm:w-64 lg:w-72">
+        <div className={`${styles.nowPlaying} flex min-w-0 items-center gap-3`}>
           <div className="h-11 w-11 shrink-0 overflow-hidden rounded-sm bg-ink-800">
-            <EpisodeArtwork episode={currentEpisode} />
+            <EpisodeArtwork episode={currentEpisode} size="sm" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-paper">{currentEpisode.title}</p>
@@ -184,13 +180,13 @@ export default function PlayerBar() {
         </div>
 
         {/* Transport */}
-        <div className="flex flex-1 flex-col gap-1.5">
+        <div className={`${styles.transport} flex min-w-0 flex-1 flex-col gap-1.5`}>
           <div className="flex items-center justify-center gap-1">
             {hasQueue && (
               <button
                 type="button"
                 onClick={previous}
-                className="btn btn-ghost btn-icon hidden sm:inline-flex"
+                className="btn btn-ghost btn-icon"
                 aria-label="Previous episode"
               >
                 <Icon path={ICONS.prev} />
@@ -244,7 +240,7 @@ export default function PlayerBar() {
               <button
                 type="button"
                 onClick={next}
-                className="btn btn-ghost btn-icon hidden sm:inline-flex"
+                className="btn btn-ghost btn-icon"
                 aria-label="Next episode"
               >
                 <Icon path={ICONS.next} />
@@ -254,7 +250,7 @@ export default function PlayerBar() {
 
           </div>
 
-          <div className="hidden sm:flex">
+          <div className="hidden md:flex">
             <Scrubber />
           </div>
         </div>
@@ -262,7 +258,7 @@ export default function PlayerBar() {
         {/* Options. Mute stays inline; rate and the shortcut toggle sit behind a
             disclosure available at every width. Nothing is removed at a
             breakpoint, so the row still fits a 320px viewport (1.4.10). */}
-        <div ref={optionsRef} className="relative flex shrink-0 items-center gap-1">
+        <div ref={optionsRef} className={`${styles.options} relative flex shrink-0 items-center gap-1`}>
           <button
             type="button"
             onClick={toggleMute}
@@ -333,7 +329,7 @@ export default function PlayerBar() {
       </div>
 
       {/* Compact scrubber below the controls on small screens */}
-      <div className="shell pb-2 sm:hidden">
+      <div className={`${styles.scrubber} pb-3 md:hidden`}>
         <Scrubber />
       </div>
     </div>

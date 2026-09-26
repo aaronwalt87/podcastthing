@@ -1,6 +1,6 @@
 /* ============================================================================
-   SIGNAL — design system for aaronwalters.dev
-   One token set. One accent. Every surface derives from these values.
+   SIGNAL — an editorial playground for useful technology.
+   Paper, olive, charcoal and one burnt-orange accent.
    Components must reference tokens (or Tailwind utilities that map to them),
    never raw hex.
    ========================================================================= */
@@ -14,78 +14,124 @@
 
 /* ---------------------------------------------------------------- tokens -- */
 :root {
-  /* Canvas — cool near-black, each step ~1 stop of elevation */
-  --ink-950: #07080a;
-  --ink-900: #0b0d10;
-  --ink-850: #101318;
-  --ink-800: #14181e;
-  --ink-700: #1b2027;
-  --ink-600: #262c35;
+  /* Material palette. Legacy ink-* names remain surface tokens, not colors. */
+  --cream: #f2f1e9;
+  --charcoal: #252820;
+  --olive: #4b593c;
+  --olive-light: #d9dccb;
+  --inverse-paper: #f2f1e9;
+  --inverse-muted: #d9dccb;
+  --inverse-hair: rgba(242, 241, 233, 0.25);
+  --ink-950: var(--cream);
+  --ink-900: #faf9f3;
+  --ink-850: #e9eade;
+  --ink-800: #e1e3d6;
+  --ink-700: #d9dccb;
+  --ink-600: #b0b6a3;
 
   /* Hairlines. --hair and --hair-2 are decorative; --edge is the boundary of
      an interactive control and must stay at or above 3:1 (WCAG 1.4.11). */
-  --hair: rgba(255, 255, 255, 0.07);
-  --hair-2: rgba(255, 255, 255, 0.13);
-  --edge: rgba(255, 255, 255, 0.35);
+  --hair: rgba(37, 40, 32, 0.14);
+  --hair-2: rgba(37, 40, 32, 0.25);
+  --edge: #7b826e;
 
-  /* Ink on canvas — warm whites keep the dark UI from going clinical */
-  --paper: #f2f0ec;
-  --paper-2: #9aa4ae;
-  /* 5.2:1 on --ink-950 and 4.8:1 on --ink-850, the surfaces it actually sits
-     on. The original #646d79 was 3.5:1 — below AA everywhere — while carrying
-     most of the site's labels and metadata.
-     It is also held a step below --paper-2 (1.5:1 between them) so the three
-     ink levels stay distinguishable from each other, not just from the ground.
-     Tertiary text leans on size as well as colour; do not brighten this to
-     close the gap. */
-  --paper-3: #78828f;
+  /* Dark readable ink on light materials. */
+  --paper: var(--charcoal);
+  --paper-2: #4b5146;
+  --paper-3: #606657;
 
-  /* Signal — the one accent. Instrument backlight / Colorado ember. */
-  --ember: #ff6a2b;
-  --ember-2: #ffa877;
-  --ember-ghost: rgba(255, 106, 43, 0.13);
+  --ember: #b34523;
+  --ember-2: #963b20;
+  --ember-ghost: rgba(179, 69, 35, 0.09);
 
   /* Data semantics — never the accent, so "up" never reads as "brand" */
-  --pos: #38c98e;
-  --neg: #f05a52;
-  --warn: #f0b429;
-  --cool: #6fa8ff;
+  --pos: #267044;
+  --neg: #ad3345;
+  --warn: #85610d;
+  --cool: #365ea1;
 
-  /* Readable text on the tinted alert surfaces below — --neg itself is only
-     4.5:1 against them, and --warn is worse. */
-  --neg-text: #ff9d97;
-  --neg-ghost: rgba(240, 90, 82, 0.1);
-  --neg-edge: rgba(240, 90, 82, 0.32);
-  --warn-text: #f5cf7a;
-  --warn-ghost: rgba(240, 180, 41, 0.14);
-  --warn-edge: rgba(240, 180, 41, 0.34);
+  --neg-text: #8f2334;
+  --neg-ghost: rgba(173, 51, 69, 0.07);
+  --neg-edge: rgba(173, 51, 69, 0.42);
+  --warn-text: #74500b;
+  --warn-ghost: rgba(133, 97, 13, 0.09);
+  --warn-edge: rgba(133, 97, 13, 0.44);
 
   /* Foreground for anything sitting on the accent. */
-  --on-ember: #180a03;
+  --on-ember: #fff9ed;
+
+  /* Shared chrome and interaction materials, including portal surfaces. */
+  --chrome-bg: rgba(242, 241, 233, 0.95);
+  --overlay-bg: #faf9f3;
+  --scrim: rgba(37, 40, 32, 0.54);
+  --surface-hover: rgba(75, 89, 60, 0.07);
+  --surface-active: rgba(75, 89, 60, 0.13);
+  --selection-bg: #d9dccb;
+  --selection-ink: #252820;
+  --highlight: rgba(255, 255, 255, 0.65);
+  --shadow-color: rgba(37, 40, 32, 0.14);
 
   /* Type */
-  --font-display: var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif;
+  --font-display: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Radius — small and deliberate; this is an instrument, not a toy */
-  --r-1: 2px;
-  --r-2: 6px;
-  --r-3: 12px;
-  --r-4: 20px;
+  /* Soft-edged physical objects, not glass dashboard panes. */
+  --r-1: 6px;
+  --r-2: 14px;
+  --r-3: 24px;
+  --r-4: 36px;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Elevation */
-  --shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.075) inset, 0 12px 32px -12px rgba(0, 0, 0, 0.7);
-  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 32px 80px -32px rgba(0, 0, 0, 0.85);
+  --shadow-lift: 0 1px 0 var(--highlight) inset, 0 12px 30px -22px var(--shadow-color);
+  --shadow-panel: 0 1px 0 var(--highlight) inset, 0 28px 70px -34px var(--shadow-color);
 
   /* Layout */
-  --header-h: 60px;
-  --player-h: 76px;
+  --header-h: 80px;
+  --player-h: 170px;
 
+  color-scheme: light;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --player-h: 100px;
+  }
+}
+
+/* An intentional inverse material, scoped at section level. This is not a
+   second global theme: every child still consumes the same semantic roles. */
+.inverse-band {
+  --ink-950: #252820;
+  --ink-900: #30362a;
+  --ink-850: #363d2e;
+  --ink-800: #404934;
+  --ink-700: #4b593c;
+  --ink-600: #667254;
+  --paper: #f2f1e9;
+  --paper-2: #d9dccb;
+  --paper-3: #b9c0aa;
+  --hair: rgba(242, 241, 233, 0.16);
+  --hair-2: rgba(242, 241, 233, 0.28);
+  --edge: #9da58d;
+  --ember: #ffb28f;
+  --ember-2: #ffd0b8;
+  --ember-ghost: rgba(255, 178, 143, 0.12);
+  --on-ember: #252820;
+  --pos: #94d2a0;
+  --neg: #ffabb5;
+  --warn: #eed184;
+  --cool: #a8c7fa;
+  --surface-hover: rgba(242, 241, 233, 0.07);
+  --surface-active: rgba(242, 241, 233, 0.12);
+  --highlight: rgba(242, 241, 233, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  background: var(--ink-950);
+  color: var(--paper);
   color-scheme: dark;
 }
 
@@ -117,14 +163,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  /* a single faint ember bloom anchored top-left, so the page has a light source */
-  background-image: radial-gradient(
-    120vw 70vh at 12% -10%,
-    rgba(255, 106, 43, 0.07),
-    transparent 60%
-  );
-  background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 a {
@@ -142,8 +180,8 @@ textarea {
 
 h1, h2, h3, h4 {
   margin: 0;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.045em;
   text-wrap: balance;
 }
 
@@ -153,8 +191,8 @@ p {
 }
 
 ::selection {
-  background: rgba(255, 106, 43, 0.28);
-  color: #fff;
+  background: var(--selection-bg);
+  color: var(--selection-ink);
 }
 
 ::-webkit-scrollbar {
@@ -170,7 +208,7 @@ p {
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #39424e;
+  background: var(--olive);
 }
 
 /* `hidden` must beat any display utility. Tailwind's preflight rule has the
@@ -194,16 +232,13 @@ p {
     width: 100%;
     max-width: var(--shell, 1320px);
     margin-inline: auto;
-    padding-inline: clamp(18px, 4vw, 44px);
+    padding-inline: clamp(20px, 4.5vw, 64px);
   }
 
-  /* Raised surface. One recipe, used everywhere a panel is needed. */
-  /* The brighter top edge is what makes a panel sit on the ground rather than
-     read as an outlined region — a black shadow is invisible on #07080a. */
+  /* Tactile paper surface: softly rounded, with a quiet inset edge. */
   .panel {
-    background: linear-gradient(180deg, var(--ink-850), var(--ink-900));
+    background: var(--ink-900);
     border: 1px solid var(--hair);
-    border-top-color: rgba(255, 255, 255, 0.12);
     border-radius: var(--r-3);
     box-shadow: var(--shadow-lift);
   }
@@ -230,12 +265,12 @@ p {
     color: var(--ember);
   }
 
-  /* Display headline — the serif is the voice of the site */
+  /* Oversized, tightly set sans is the editorial voice. */
   .display {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.025em;
-    line-height: 0.98;
+    font-weight: 650;
+    letter-spacing: -0.065em;
+    line-height: 0.96;
   }
 
   /* Data readouts */
@@ -250,10 +285,10 @@ p {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 22px;
-    padding-inline: 8px;
+    min-height: 26px;
+    padding-inline: 10px;
     border: 1px solid var(--hair-2);
-    border-radius: var(--r-1);
+    border-radius: 999px;
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.1em;
@@ -285,7 +320,7 @@ p {
   }
   .seg[aria-pressed='true'] {
     color: var(--paper);
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--surface-active);
     box-shadow: inset 0 -2px 0 var(--ember);
   }
 
@@ -295,21 +330,22 @@ p {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    height: 40px;
-    padding-inline: 16px;
-    border: 1px solid var(--hair-2);
-    border-radius: var(--r-2);
+    min-height: 44px;
+    padding: 11px 20px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
     background: transparent;
     color: var(--paper);
     font-size: 13px;
-    font-weight: 500;
+    line-height: 1.3;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.18s var(--ease-out), border-color 0.18s var(--ease-out),
       transform 0.18s var(--ease-out), color 0.18s var(--ease-out);
   }
   .btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.22);
+    background: var(--surface-hover);
+    border-color: var(--paper-2);
   }
   .btn:active {
     transform: translateY(1px);
@@ -332,19 +368,20 @@ p {
   }
   .btn-ghost:hover {
     color: var(--paper);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-hover);
     border-color: transparent;
   }
 
   .btn-sm {
-    height: 32px;
-    padding-inline: 11px;
+    min-height: 36px;
+    padding: 8px 13px;
     font-size: 12px;
   }
 
   .btn-icon {
     width: 36px;
     height: 36px;
+    min-height: 36px;
     padding: 0;
     flex-shrink: 0;
   }
@@ -352,8 +389,8 @@ p {
   /* Text field */
   .field {
     width: 100%;
-    height: 40px;
-    padding-inline: 12px;
+    height: 46px;
+    padding-inline: 15px;
     background: var(--ink-900);
     border: 1px solid var(--edge);
     border-radius: var(--r-2);
@@ -365,7 +402,7 @@ p {
     color: var(--paper-3);
   }
   .field:hover {
-    border-color: rgba(255, 255, 255, 0.5);
+    border-color: var(--paper-2);
   }
   .field:focus {
     border-color: var(--ember);
@@ -406,7 +443,7 @@ p {
   border-radius: inherit;
   background: radial-gradient(
     380px circle at var(--mx, 50%) var(--my, 0%),
-    rgba(255, 106, 43, 0.1),
+    var(--ember-ghost),
     transparent 62%
   );
   opacity: 0;
@@ -616,12 +653,12 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--paper);
   border: 0;
-  box-shadow: 0 0 0 4px rgba(255, 106, 43, 0.001);
+  box-shadow: 0 0 0 4px transparent;
   transition: box-shadow 0.18s var(--ease-out), transform 0.18s var(--ease-out);
 }
 input[type='range']:hover::-webkit-slider-thumb,
 input[type='range']:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 5px rgba(255, 106, 43, 0.22);
+  box-shadow: 0 0 0 5px var(--ember-ghost);
 }
 input[type='range']::-moz-range-thumb {
   width: 12px;
@@ -656,12 +693,17 @@ input[type='range']::-moz-range-thumb {
 
 @media (prefers-contrast: more) {
   :root {
-    --hair: rgba(255, 255, 255, 0.2);
-    --hair-2: rgba(255, 255, 255, 0.34);
-    --edge: rgba(255, 255, 255, 0.55);
-    --paper-2: #c9d0d7;
-    /* Held further from --paper-2 than the default palette, not closer: a user
-       who asks for more contrast should not get a flatter hierarchy. */
-    --paper-3: #8f98a3;
+    --hair: rgba(37, 40, 32, 0.35);
+    --hair-2: rgba(37, 40, 32, 0.5);
+    --edge: #4b5146;
+    --paper-2: #35392f;
+    --paper-3: #515746;
+  }
+  .inverse-band {
+    --hair: rgba(242, 241, 233, 0.4);
+    --hair-2: rgba(242, 241, 233, 0.6);
+    --edge: #d9dccb;
+    --paper-2: #e8ebdd;
+    --paper-3: #cbd2be;
   }
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { activeLinks, profile } from '@/lib/profile'
+import styles from './Shell.module.css'
 
 const SECTIONS = [
   { label: 'News', href: '/news' },
@@ -25,25 +26,25 @@ export default function SiteFooter() {
   const contact = activeLinks()
 
   return (
-    <footer className="mt-24 border-t border-hair">
-      <div className="shell grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2">
-          <p className="display text-2xl text-paper">{profile.name}</p>
-          <p className="mt-2 max-w-[46ch] text-sm text-paper-2">
+    <footer className={styles.footer}>
+      <div className={`shell ${styles.footerInner}`}>
+      <div className={styles.footerTop}>
+        <div className={styles.footerBio}>
+          <p className={styles.footerStatement}>Still learning.<br />Still checking<br />the logs.</p>
+          <p className={styles.footerCopy}>
             Built in {profile.location} after 14 years in infrastructure and technology leadership.
-            Still learning the code. Still checking the logs.
+            Still learning the code.
           </p>
-          <p className="eyebrow mt-5">Next.js · Redis · Vercel</p>
+          <p className={`${styles.footerLabel} ${styles.footerStack}`}>Next.js · Redis · Vercel</p>
         </div>
 
         <nav aria-label="Sections">
-          <p className="eyebrow">Sections</p>
-          <ul role="list" className="mt-4 flex flex-col gap-2.5">
+          <p className={styles.footerLabel}>Take a look around</p>
+          <ul role="list" className={styles.footerLinks}>
             {SECTIONS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-sm text-paper-2 transition-colors hover:text-paper"
                 >
                   {link.label}
                 </Link>
@@ -55,14 +56,13 @@ export default function SiteFooter() {
         <nav aria-label={contact.length > 0 ? 'Elsewhere' : 'Sources'}>
           {contact.length > 0 ? (
             <>
-              <p className="eyebrow">Elsewhere</p>
-              <ul role="list" className="mt-4 flex flex-col gap-2.5">
+              <p className={styles.footerLabel}>Find me elsewhere</p>
+              <ul role="list" className={styles.footerLinks}>
                 {contact.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
                       {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      className="text-sm text-paper-2 transition-colors hover:text-paper"
                     >
                       {link.label} {link.external && <span aria-hidden="true">↗</span>}
                     </a>
@@ -72,15 +72,14 @@ export default function SiteFooter() {
             </>
           ) : (
             <>
-              <p className="eyebrow">Sources</p>
-              <ul role="list" className="mt-4 flex flex-col gap-2.5">
+              <p className={styles.footerLabel}>Sources</p>
+              <ul role="list" className={styles.footerLinks}>
                 {SOURCES.map((link) => (
                   <li key={link.href}>
                     <a
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-paper-2 transition-colors hover:text-paper"
                     >
                       {link.label} <span aria-hidden="true">↗</span>
                     </a>
@@ -92,11 +91,16 @@ export default function SiteFooter() {
         </nav>
       </div>
 
-      <div className="shell flex flex-col gap-3 border-t border-hair py-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="eyebrow">
-          © {new Date().getFullYear()} {profile.name}
+      <div className={styles.footerWordmark}>
+        <span>{profile.name}</span>
+        <span className={styles.footerAsterisk} aria-hidden="true">✳</span>
+      </div>
+      <div className={styles.footerBottom}>
+        <p>
+          © <span className="num">{new Date().getFullYear()}</span> {profile.name}
         </p>
-        <p className="eyebrow">Refreshed while I do other things</p>
+        <p>Refreshed while I do other things</p>
+      </div>
       </div>
     </footer>
   )

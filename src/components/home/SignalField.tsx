@@ -58,6 +58,8 @@ export default function SignalField({
     let onScreen = true
     /** Rebuilt on resize — allocating five gradients per frame is 300/s of GC. */
     let fills: CanvasGradient[] = []
+    let accent = ''
+    let line = ''
 
     // Normalise the series to 0..1 once; redrawing shouldn't recompute it.
     const normalised: number[] = (() => {
@@ -76,6 +78,9 @@ export default function SignalField({
       canvas.width = Math.round(width * dpr)
       canvas.height = Math.round(height * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const tokens = getComputedStyle(canvas)
+      accent = tokens.getPropertyValue('--ember').trim()
+      line = tokens.getPropertyValue('--paper-2').trim()
 
       // Gradients depend only on height, so they are built here, not per frame.
       fills = Array.from({ length: LAYERS }, (_, index) => {
@@ -85,8 +90,8 @@ export default function SignalField({
         const alpha = 0.5 - depth * 0.4
 
         const fill = ctx.createLinearGradient(0, baseline - amplitude, 0, height)
-        fill.addColorStop(0, `rgba(255, 106, 43, ${(alpha * 0.14).toFixed(3)})`)
-        fill.addColorStop(1, 'rgba(255, 106, 43, 0)')
+        fill.addColorStop(0, accent)
+        fill.addColorStop(1, 'transparent')
         return fill
       })
     }
@@ -111,12 +116,15 @@ export default function SignalField({
       ctx.lineTo(width, height)
       ctx.closePath()
 
-      ctx.fillStyle = fills[index] ?? 'rgba(255, 106, 43, 0)'
+      ctx.globalAlpha = alpha * 0.14
+      ctx.fillStyle = fills[index] ?? 'transparent'
       ctx.fill()
 
-      ctx.strokeStyle = `rgba(180, 196, 214, ${(alpha * 0.5).toFixed(3)})`
+      ctx.globalAlpha = alpha * 0.5
+      ctx.strokeStyle = line
       ctx.lineWidth = 1
       ctx.stroke()
+      ctx.globalAlpha = 1
     }
 
     const drawSeriesLayer = (time: number) => {
@@ -143,11 +151,13 @@ export default function SignalField({
 
       // Two strokes instead of shadowBlur: visually equivalent glow, an order of
       // magnitude cheaper per frame.
-      ctx.strokeStyle = 'rgba(255, 106, 43, 0.16)'
+      ctx.globalAlpha = 0.16
+      ctx.strokeStyle = accent
       ctx.lineWidth = 5
       ctx.stroke()
 
-      ctx.strokeStyle = 'rgba(255, 106, 43, 0.9)'
+      ctx.globalAlpha = 0.9
+      ctx.strokeStyle = accent
       ctx.lineWidth = 1.5
       ctx.stroke()
 
@@ -156,7 +166,8 @@ export default function SignalField({
       const lastY = baseline - lastValue * amplitude + breath
       ctx.beginPath()
       ctx.arc(right, lastY, 3, 0, Math.PI * 2)
-      ctx.fillStyle = 'rgba(255, 168, 119, 1)'
+      ctx.globalAlpha = 1
+      ctx.fillStyle = accent
       ctx.fill()
     }
 

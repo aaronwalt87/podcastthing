@@ -85,7 +85,7 @@ export const profile = {
       title: 'No charting library',
       choice:
         'The trend lines are server-rendered SVG and the ridge is a hand-written canvas, rather than pulling in a charting package.',
-      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the hero ridge is a canvas, and its drawing code does run in the browser.",
+      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the market ridge is a canvas, and its drawing code does run in the browser.",
     },
     {
       title: 'Cache stale data rather than show none',

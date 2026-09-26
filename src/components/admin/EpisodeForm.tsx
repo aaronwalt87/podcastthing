@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 import { upload } from '@vercel/blob/client'
 import type { Episode } from '@/types/episode'
+import styles from './Admin.module.css'
 
 interface EpisodeFormProps {
   episode?: Episode
@@ -129,10 +130,10 @@ export default function EpisodeForm({
   const isLoading = uploading || saving
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className={`${styles.form} flex flex-col gap-5`}>
       {!isEditing && (
         <div
-          className="flex rounded-sm border border-hair p-0.5"
+          className="flex rounded-[var(--r-2)] border border-hair p-1"
           role="group"
           aria-label="Audio source"
         >
@@ -146,11 +147,7 @@ export default function EpisodeForm({
                 setFile(null)
                 update('audioUrl', '')
               }}
-              className={`flex-1 rounded-xs py-2 text-xs transition-colors ${
-                form.audioType === type
-                  ? 'bg-white/[0.07] text-paper'
-                  : 'text-paper-3 hover:text-paper'
-              }`}
+              className="seg flex-1 py-2"
             >
               {type === 'url' ? 'Paste a URL' : 'Upload a file'}
             </button>
@@ -185,7 +182,7 @@ export default function EpisodeForm({
             type="file"
             accept="audio/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full cursor-pointer text-sm text-paper-2 file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-white/[0.07] file:px-3 file:py-2 file:text-xs file:text-paper"
+            className={styles.file}
           />
         </Field>
       )}
