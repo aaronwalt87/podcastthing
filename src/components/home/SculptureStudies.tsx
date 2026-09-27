@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef } from 'react'
+import { useId, type CSSProperties } from 'react'
 import hero from './Hero.module.css'
 import styles from './SculptureStudies.module.css'
 
@@ -95,63 +95,11 @@ function Cairn({ id }: { id: string }) {
   )
 }
 
-/** Three closed-form objects driven by the existing native-scroll progress. */
+/** Three closed-form objects driven by a local progress token in the sequence. */
 export default function SculptureStudies({ variant }: { variant: SculptureOption }) {
-  const root = useRef<HTMLDivElement>(null)
   const id = useId().replace(/:/g, '')
-  useEffect(() => {
-    const node = root.current
-    if (!node) return
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let frame = 0
-    let x = 0
-    let y = 0
-    let visible = true
-    const reset = () => { node.style.setProperty('--turn', '0deg'); node.style.setProperty('--tilt', '0deg') }
-    const update = () => {
-      frame = 0
-      if (reduced.matches || document.hidden || !visible) return
-      node.style.setProperty('--turn', `${x * 8}deg`)
-      node.style.setProperty('--tilt', `${y * -4}deg`)
-    }
-    const schedule = () => {
-      if (!frame && !reduced.matches && !document.hidden && visible) frame = requestAnimationFrame(update)
-    }
-    const pointer = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse') return
-      const rect = node.getBoundingClientRect()
-      x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1))
-      y = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1))
-      schedule()
-    }
-    const leave = () => { x = 0; y = 0; schedule() }
-    const environment = () => {
-      cancelAnimationFrame(frame); frame = 0
-      if (reduced.matches || document.hidden) reset()
-      else schedule()
-    }
-    const observer = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting
-      if (visible) schedule()
-      else { cancelAnimationFrame(frame); frame = 0 }
-    })
-    observer?.observe(node)
-    node.addEventListener('pointermove', pointer)
-    node.addEventListener('pointerleave', leave)
-    document.addEventListener('visibilitychange', environment)
-    reduced.addEventListener('change', environment)
-    return () => {
-      cancelAnimationFrame(frame)
-      observer?.disconnect()
-      node.removeEventListener('pointermove', pointer)
-      node.removeEventListener('pointerleave', leave)
-      document.removeEventListener('visibilitychange', environment)
-      reduced.removeEventListener('change', environment)
-    }
-  }, [])
-
   return (
-    <div ref={root} className={hero.sculpture} aria-hidden="true">
+    <div className={hero.sculpture} aria-hidden="true" style={{ '--turn': 'var(--sequence-turn, 0deg)', '--tilt': 'var(--sequence-tilt, 0deg)' } as CSSProperties}>
       <svg viewBox="0 0 600 620" fill="none" className={hero.assembly}>
         <defs>
           <linearGradient id={`${id}-ivory`} x1="110" y1="130" x2="500" y2="450" gradientUnits="userSpaceOnUse"><stop stopColor="var(--cream)" /><stop offset=".6" stopColor="var(--olive-light)" /><stop offset="1" stopColor="var(--cream)" /></linearGradient>

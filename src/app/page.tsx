@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic'
 // a slow upstream can exceed.
 export const maxDuration = 60
 
-export default async function HomePage({ searchParams }: { searchParams?: { sculpture?: string } }) {
+export default async function HomePage() {
   const [episodes, news, snapshot] = await Promise.all([
     getAllEpisodes(),
     getCachedNews(),
@@ -49,7 +49,6 @@ export default async function HomePage({ searchParams }: { searchParams?: { scul
   return (
     <>
       <Hero
-        sculpture={searchParams?.sculpture}
         latestEpisode={featured ?? null}
         headlineCount={news.length}
         sourceCount={sourceCount}

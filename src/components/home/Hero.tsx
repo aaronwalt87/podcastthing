@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import SculptureStudies, { sculptureOptions, type SculptureOption } from './SculptureStudies'
+import SculptureSequence from './SculptureSequence'
 import ScrollScene from '@/components/ui/ScrollScene'
 import Reveal from '@/components/ui/Reveal'
 import styles from './Hero.module.css'
@@ -15,12 +15,10 @@ interface HeroProps {
   headlineCount: number
   sourceCount: number
   snapshot: MarketSnapshot
-  sculpture?: string
 }
 
-export default function Hero({ latestEpisode, headlineCount, sourceCount, snapshot, sculpture }: HeroProps) {
+export default function Hero({ latestEpisode, headlineCount, sourceCount, snapshot }: HeroProps) {
   const total = snapshot.advancers + snapshot.decliners
-  const selected: SculptureOption = sculptureOptions.find(({ id }) => id === sculpture)?.id ?? 'strata'
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <ScrollScene kind="hero">
@@ -35,17 +33,7 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
           </div>
         </div>
         <div className={styles.stage} data-scroll-anchor>
-          <SculptureStudies variant={selected} />
-          <nav className={styles.sculpturePicker} aria-label="Sculpture concepts">
-            <span>Choose a sculpture</span>
-            <div>
-              {sculptureOptions.map(({ id, label }, i) => (
-                <Link key={id} href={`/?sculpture=${id}`} scroll={false} aria-current={selected === id ? 'page' : undefined}>
-                  <span>{String(i + 1).padStart(2, '0')}</span> {label}
-                </Link>
-              ))}
-            </div>
-          </nav>
+          <SculptureSequence />
         </div>
       </div>
       </ScrollScene>
