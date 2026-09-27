@@ -12,6 +12,13 @@
 .stage { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; isolation: isolate; background: var(--olive); color: var(--cream); min-height: 690px; border-radius: 3px; }
 .stage::before { content: ''; position: absolute; z-index: 0; width: min(72%, 34rem); aspect-ratio: 1; left: 50%; top: 50%; border: 1px solid color-mix(in oklab, var(--cream) 18%, transparent); border-radius: 50%; background: radial-gradient(circle, color-mix(in oklab, var(--cream) 8%, transparent), transparent 68%); transform: translate(-50%, -50%) scale(calc(.78 + var(--scene-progress, 0) * .22)); opacity: calc(.45 + var(--scene-progress, 0) * .55); }
 .stage::after { content: ''; position: absolute; z-index: 2; inset: 1rem; border: 1px solid color-mix(in oklab, var(--cream) 14%, transparent); border-radius: inherit; pointer-events: none; }
+.sculpturePicker { position: absolute; z-index: 3; left: 50%; bottom: clamp(1.3rem, 3vw, 2.5rem); width: max-content; max-width: calc(100% - 2rem); transform: translateX(-50%); padding: .65rem .7rem; border: 1px solid color-mix(in oklab, var(--cream) 27%, transparent); border-radius: 14px; background: color-mix(in oklab, var(--charcoal) 82%, transparent); box-shadow: 0 16px 40px rgba(0,0,0,.2); backdrop-filter: blur(16px); }
+.sculpturePicker > span { display: block; margin: 0 0 .45rem .55rem; color: var(--olive-light); font-size: .59rem; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; }
+.sculpturePicker > div { display: flex; gap: .2rem; }
+.sculpturePicker a { display: inline-block; padding: .55rem .75rem; border-radius: 7px; color: var(--cream); font-size: .74rem; white-space: nowrap; transition: background 180ms ease, color 180ms ease; }
+.sculpturePicker a span { opacity: .6; font-variant-numeric: tabular-nums; }
+.sculpturePicker a:hover, .sculpturePicker a[aria-current='page'] { background: var(--cream); color: var(--charcoal); }
+.sculpturePicker a:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
 .sculpture { --turn: 0deg; --tilt: 0deg; position: absolute; z-index: 1; inset: -1rem -3rem -1.5rem; display: grid; align-items: center; perspective: 1000px; }
 .assembly { width: 100%; max-height: 100%; overflow: visible; transform: rotateY(var(--turn)) rotateX(var(--tilt)); transition: transform 450ms ease-out; }
 .machine { transform-origin: 300px 310px; transform: rotate(calc(-14deg + var(--scene-progress, 0) * 48deg)) scale(calc(1 - var(--scene-progress, 0) * .1)); }
@@ -85,6 +92,7 @@
   [data-motion='on'] > .composition .stage { height: 100%; min-height: 0; aspect-ratio: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .sculpturePicker a { transition: none; }
   .assembly, .top, .bottom, .title span { transform: none; transition: none; }
   .machine { transform: rotate(-14deg); }
   .copy > * { animation: none; }
