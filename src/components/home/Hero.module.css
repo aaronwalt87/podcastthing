@@ -68,6 +68,10 @@
   .stage { min-height: 0; aspect-ratio: 1 / 1.04; }
   .stage::after { inset: .65rem; }
   .sculpture { inset: -1rem -2.5rem; }
+  .stage .sculpture { transform: translateY(-7%) scale(.86); }
+  .sculpturePicker { bottom: .75rem; padding: .3rem; max-width: calc(100% - 1rem); border-radius: 10px; }
+  .sculpturePicker > span { display: none; }
+  .sculpturePicker a { padding: .5rem .55rem; font-size: .68rem; }
   .intro { grid-template-columns: 1fr; gap: 1.75rem; padding-top: 3.5rem; padding-bottom: 2.5rem; }
   .introHeading h2 { margin-top: 1rem; }
   .introBody > p { font-size: 1rem; }
