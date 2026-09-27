@@ -15,7 +15,7 @@ export default function ScrollScene({ children, kind = 'chapter', className = ''
     const node = ref.current
     if (!node) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const wide = window.matchMedia('(min-width: 900px) and (min-height: 700px)')
+    const pinned = window.matchMedia('(min-width: 900px) and (min-height: 700px), (max-width: 899px) and (min-height: 740px)')
     let frame = 0
     let previous = 0
     let current = 0
@@ -25,7 +25,7 @@ export default function ScrollScene({ children, kind = 'chapter', className = ''
     const measure = () => {
       const rect = node.getBoundingClientRect()
       const header = parseFloat(getComputedStyle(node).getPropertyValue('--header-h')) || 80
-      if (kind === 'hero' && wide.matches) {
+      if (kind === 'hero' && pinned.matches) {
         target = clamp((header - rect.top) / Math.max(1, rect.height - window.innerHeight + header))
       } else if (kind === 'hero') {
         const anchor = node.querySelector('[data-scroll-anchor]') ?? node
@@ -82,7 +82,7 @@ export default function ScrollScene({ children, kind = 'chapter', className = ''
     window.addEventListener('resize', schedule, { passive: true })
     document.addEventListener('visibilitychange', onVisibility)
     reduced.addEventListener('change', configure)
-    wide.addEventListener('change', configure)
+    pinned.addEventListener('change', configure)
     return () => {
       cancelAnimationFrame(frame)
       observer?.disconnect()
@@ -91,7 +91,7 @@ export default function ScrollScene({ children, kind = 'chapter', className = ''
       window.removeEventListener('resize', schedule)
       document.removeEventListener('visibilitychange', onVisibility)
       reduced.removeEventListener('change', configure)
-      wide.removeEventListener('change', configure)
+      pinned.removeEventListener('change', configure)
     }
   }, [kind])
 

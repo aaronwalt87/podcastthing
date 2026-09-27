@@ -14,7 +14,7 @@ function harness(kind = 'hero') {
   const frames = new Map(), values = new Map(), events = new Map()
   // Each query keeps its own change listener for runtime preference tests.
   function media(matches) { return { matches, addEventListener(_, cb) { this.change = cb }, removeEventListener() { this.change = undefined } } }
-  const reduced = media(false), wide = media(true)
+  const reduced = media(false), pinned = media(true)
   const node = {
     dataset: {}, style: { setProperty: (k, v) => values.set(k, v), removeProperty: k => values.delete(k) },
     getBoundingClientRect: () => ({ top, height: 1700 }),
@@ -29,7 +29,7 @@ function harness(kind = 'hero') {
   vm.runInNewContext(compiled, {
     exports, require: name => name === 'react' ? { useRef: () => ({ current: node }), useEffect: cb => { effect = cb } }
       : name === 'react/jsx-runtime' ? { jsx: () => null } : { default: { scene: 'scene' } },
-    window: { innerHeight: 900, matchMedia: q => q.includes('reduced') ? reduced : wide, ...eventTarget('win:') },
+    window: { innerHeight: 900, matchMedia: q => q.includes('reduced') ? reduced : pinned, ...eventTarget('win:') },
     document, getComputedStyle: () => ({ getPropertyValue: () => '80px' }),
     requestAnimationFrame: cb => { const id = nextFrame++; frames.set(id, cb); return id },
     cancelAnimationFrame: id => frames.delete(id),
@@ -39,7 +39,7 @@ function harness(kind = 'hero') {
   exports.default({ kind, children: null })
   const cleanup = effect()
   return {
-    node, values, frames, reduced, wide, document, cleanup, events,
+    node, values, frames, reduced, pinned, document, cleanup, events,
     scroll(value) { top = value; events.get('win:scroll')() },
     intersect(value) { intersection([{ isIntersecting: value }]) },
     visibility(value) { document.hidden = value; events.get('doc:visibilitychange')() },
@@ -74,7 +74,7 @@ h.reduced.matches = true; h.reduced.change()
 assert.equal(h.node.dataset.motion, 'off')
 assert.equal(h.values.has('--scene-progress'), false)
 h.scroll(-500); assert.equal(h.frames.size, 0)
-h.wide.matches = false; h.reduced.matches = false; h.reduced.change()
+h.pinned.matches = false; h.reduced.matches = false; h.reduced.change()
 h.scroll(765); h.settle()
 assert.equal(h.values.get('--scene-progress'), '0.0000', 'Mobile starts when sculpture enters viewport')
 h.scroll(140); h.settle()
