@@ -69,6 +69,21 @@
   .stats dt { font-size: .69rem; }
   .stats dd { font-size: .94rem; }
 }
+@media (max-width: 700px) and (min-height: 740px) and (prefers-reduced-motion: no-preference) {
+  [data-motion='on'] > .composition {
+    height: calc(100svh - var(--header-h));
+    grid-template-rows: minmax(0, .92fr) minmax(260px, 1.08fr);
+    align-content: stretch;
+    gap: .35rem;
+    padding-block: .5rem .8rem;
+  }
+  [data-motion='on'] > .composition .copy { justify-content: center; padding: .25rem 0; }
+  [data-motion='on'] > .composition .kicker { font-size: .68rem; }
+  [data-motion='on'] > .composition .title { margin-top: .9rem; font-size: clamp(3rem, 11vw, 4.65rem); }
+  [data-motion='on'] > .composition .summary { margin-top: .85rem; line-height: 1.45; }
+  [data-motion='on'] > .composition .actions { margin-top: .85rem; }
+  [data-motion='on'] > .composition .stage { height: 100%; min-height: 0; aspect-ratio: auto; }
+}
 @media (prefers-reduced-motion: reduce) {
   .assembly, .top, .bottom, .title span { transform: none; transition: none; }
   .machine { transform: rotate(-14deg); }
