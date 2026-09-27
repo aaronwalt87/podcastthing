@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import SystemSculpture from './SystemSculpture'
+import SculptureSequence from './SculptureSequence'
 import ScrollScene from '@/components/ui/ScrollScene'
 import Reveal from '@/components/ui/Reveal'
 import styles from './Hero.module.css'
@@ -33,7 +33,7 @@ export default function Hero({ latestEpisode, headlineCount, sourceCount, snapsh
           </div>
         </div>
         <div className={styles.stage} data-scroll-anchor>
-          <SystemSculpture />
+          <SculptureSequence />
         </div>
       </div>
       </ScrollScene>

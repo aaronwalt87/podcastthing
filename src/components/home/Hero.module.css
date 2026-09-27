@@ -14,9 +14,6 @@
 .stage::after { content: ''; position: absolute; z-index: 2; inset: 1rem; border: 1px solid color-mix(in oklab, var(--cream) 14%, transparent); border-radius: inherit; pointer-events: none; }
 .sculpture { --turn: 0deg; --tilt: 0deg; position: absolute; z-index: 1; inset: -1rem -3rem -1.5rem; display: grid; align-items: center; perspective: 1000px; }
 .assembly { width: 100%; max-height: 100%; overflow: visible; transform: rotateY(var(--turn)) rotateX(var(--tilt)); transition: transform 450ms ease-out; }
-.machine { transform-origin: 300px 310px; transform: rotate(calc(-14deg + var(--scene-progress, 0) * 48deg)) scale(calc(1 - var(--scene-progress, 0) * .1)); }
-.top { transform: translateY(calc(var(--scene-progress, 0) * -84px)); }
-.bottom { transform: translateY(calc(var(--scene-progress, 0) * 74px)); }
 @media (prefers-reduced-motion: no-preference) {
   .copy > * { animation: hero-enter 850ms var(--ease-out) both; }
   .copy > :nth-child(2) { animation-delay: 90ms; }
@@ -85,8 +82,10 @@
   [data-motion='on'] > .composition .stage { height: 100%; min-height: 0; aspect-ratio: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .assembly, .top, .bottom, .title span { transform: none; transition: none; }
-  .machine { transform: rotate(-14deg); }
+  .assembly, .title span { transform: none; transition: none; }
   .copy > * { animation: none; }
   .stage::before { transform: translate(-50%, -50%); }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .stage { min-height: 960px; aspect-ratio: auto; }
 }
