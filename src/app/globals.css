@@ -1,6 +1,6 @@
 /* ============================================================================
-   SIGNAL — an editorial playground for useful technology.
-   Paper, olive, charcoal and one burnt-orange accent.
+   AW–01 — a personal information console.
+   Warm gray hardware, black displays and safety orange controls.
    Components must reference tokens (or Tailwind utilities that map to them),
    never raw hex.
    ========================================================================= */
@@ -15,34 +15,47 @@
 /* ---------------------------------------------------------------- tokens -- */
 :root {
   /* Material palette. Legacy ink-* names remain surface tokens, not colors. */
-  --cream: #f2f1e9;
-  --charcoal: #252820;
-  --olive: #4b593c;
-  --olive-light: #d9dccb;
-  --inverse-paper: #f2f1e9;
-  --inverse-muted: #d9dccb;
-  --inverse-hair: rgba(242, 241, 233, 0.25);
+  --cream: #e5e3df;
+  --signal-orange: #ff5c24;
+  --signal-hover: #ff743f;
+  --on-signal: #211f1d;
+  --screen: #181918;
+  --screen-ink: #f3eee3;
+  --screen-muted: #b9b7ae;
+  --screen-line: #454640;
+  --screen-blue: #70b5d8;
+  --key-black: #30302f;
+  --key-edge: #121311;
+  --chassis: #c9c6c0;
+  --chassis-top: #e5e2dc;
+  --hardware-shadow: rgba(22, 21, 19, .3);
+  --charcoal: #22211f;
+  --olive: #343332;
+  --olive-light: #d1cec8;
+  --inverse-paper: #e5e3df;
+  --inverse-muted: #d1cec8;
+  --inverse-hair: rgba(241, 240, 237, 0.25);
   --ink-950: var(--cream);
-  --ink-900: #faf9f3;
-  --ink-850: #e9eade;
-  --ink-800: #e1e3d6;
-  --ink-700: #d9dccb;
-  --ink-600: #b0b6a3;
+  --ink-900: #f1f0ed;
+  --ink-850: #ddd9d3;
+  --ink-800: #d4d1cc;
+  --ink-700: #d1cec8;
+  --ink-600: #aaa6a0;
 
   /* Hairlines. --hair and --hair-2 are decorative; --edge is the boundary of
      an interactive control and must stay at or above 3:1 (WCAG 1.4.11). */
-  --hair: rgba(37, 40, 32, 0.14);
-  --hair-2: rgba(37, 40, 32, 0.25);
-  --edge: #7b826e;
+  --hair: rgba(34, 33, 31, 0.14);
+  --hair-2: rgba(34, 33, 31, 0.25);
+  --edge: #77726b;
 
   /* Dark readable ink on light materials. */
   --paper: var(--charcoal);
-  --paper-2: #4b5146;
-  --paper-3: #606657;
+  --paper-2: #494641;
+  --paper-3: #5b5751;
 
-  --ember: #b34523;
-  --ember-2: #963b20;
-  --ember-ghost: rgba(179, 69, 35, 0.09);
+  --ember: #a93412;
+  --ember-2: #862a0e;
+  --ember-ghost: rgba(169, 52, 18, 0.09);
 
   /* Data semantics — never the accent, so "up" never reads as "brand" */
   --pos: #267044;
@@ -58,29 +71,29 @@
   --warn-edge: rgba(133, 97, 13, 0.44);
 
   /* Foreground for anything sitting on the accent. */
-  --on-ember: #fff9ed;
+  --on-ember: #fff8f0;
 
   /* Shared chrome and interaction materials, including portal surfaces. */
-  --chrome-bg: rgba(242, 241, 233, 0.95);
-  --overlay-bg: #faf9f3;
-  --scrim: rgba(37, 40, 32, 0.54);
-  --surface-hover: rgba(75, 89, 60, 0.07);
-  --surface-active: rgba(75, 89, 60, 0.13);
-  --selection-bg: #d9dccb;
-  --selection-ink: #252820;
+  --chrome-bg: rgba(241, 240, 237, 0.95);
+  --overlay-bg: #f1f0ed;
+  --scrim: rgba(34, 33, 31, 0.54);
+  --surface-hover: rgba(34, 33, 31, 0.07);
+  --surface-active: rgba(34, 33, 31, 0.13);
+  --selection-bg: #d1cec8;
+  --selection-ink: #22211f;
   --highlight: rgba(255, 255, 255, 0.65);
-  --shadow-color: rgba(37, 40, 32, 0.14);
+  --shadow-color: rgba(34, 33, 31, 0.14);
 
   /* Type */
   --font-display: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Soft-edged physical objects, not glass dashboard panes. */
-  --r-1: 6px;
-  --r-2: 14px;
-  --r-3: 24px;
-  --r-4: 36px;
+  /* Machined panels and keycaps. */
+  --r-1: 2px;
+  --r-2: 3px;
+  --r-3: 5px;
+  --r-4: 6px;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -91,7 +104,7 @@
   --shadow-panel: 0 1px 0 var(--highlight) inset, 0 28px 70px -34px var(--shadow-color);
 
   /* Layout */
-  --header-h: 80px;
+  --header-h: 72px;
   --player-h: 170px;
 
   color-scheme: light;
@@ -106,29 +119,29 @@
 /* An intentional inverse material, scoped at section level. This is not a
    second global theme: every child still consumes the same semantic roles. */
 .inverse-band {
-  --ink-950: #252820;
-  --ink-900: #30362a;
-  --ink-850: #363d2e;
-  --ink-800: #404934;
-  --ink-700: #4b593c;
-  --ink-600: #667254;
-  --paper: #f2f1e9;
-  --paper-2: #d9dccb;
-  --paper-3: #b9c0aa;
-  --hair: rgba(242, 241, 233, 0.16);
-  --hair-2: rgba(242, 241, 233, 0.28);
-  --edge: #9da58d;
-  --ember: #ffb28f;
-  --ember-2: #ffd0b8;
+  --ink-950: #22211f;
+  --ink-900: #292827;
+  --ink-850: #30302e;
+  --ink-800: #383735;
+  --ink-700: #343332;
+  --ink-600: #77736b;
+  --paper: #e5e3df;
+  --paper-2: #d1cec8;
+  --paper-3: #bcb9b2;
+  --hair: rgba(241, 240, 237, 0.16);
+  --hair-2: rgba(241, 240, 237, 0.28);
+  --edge: #939089;
+  --ember: #ff8153;
+  --ember-2: #ff9c79;
   --ember-ghost: rgba(255, 178, 143, 0.12);
-  --on-ember: #252820;
+  --on-ember: #22211f;
   --pos: #94d2a0;
   --neg: #ffabb5;
   --warn: #eed184;
   --cool: #a8c7fa;
-  --surface-hover: rgba(242, 241, 233, 0.07);
-  --surface-active: rgba(242, 241, 233, 0.12);
-  --highlight: rgba(242, 241, 233, 0.08);
+  --surface-hover: rgba(241, 240, 237, 0.07);
+  --surface-active: rgba(241, 240, 237, 0.12);
+  --highlight: rgba(241, 240, 237, 0.08);
   --shadow-color: rgba(0, 0, 0, 0.3);
   background: var(--ink-950);
   color: var(--paper);
@@ -205,7 +218,7 @@ p {
 ::-webkit-scrollbar-thumb {
   background: var(--ink-600);
   border: 2px solid var(--ink-900);
-  border-radius: 999px;
+  border-radius: var(--r-1);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--olive);
@@ -235,7 +248,7 @@ p {
     padding-inline: clamp(20px, 4.5vw, 64px);
   }
 
-  /* Tactile paper surface: softly rounded, with a quiet inset edge. */
+  /* Inset hardware panels. */
   .panel {
     background: var(--ink-900);
     border: 1px solid var(--hair);
@@ -256,7 +269,7 @@ p {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--paper-3);
   }
@@ -265,12 +278,12 @@ p {
     color: var(--ember);
   }
 
-  /* Oversized, tightly set sans is the editorial voice. */
+  /* Plain, compact display typography. */
   .display {
     font-family: var(--font-display);
     font-weight: 650;
-    letter-spacing: -0.065em;
-    line-height: 0.96;
+    letter-spacing: -0.045em;
+    line-height: 1.04;
   }
 
   /* Data readouts */
@@ -288,7 +301,7 @@ p {
     min-height: 26px;
     padding-inline: 10px;
     border: 1px solid var(--hair-2);
-    border-radius: 999px;
+    border-radius: var(--r-1);
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.1em;
@@ -333,10 +346,11 @@ p {
     min-height: 44px;
     padding: 11px 20px;
     border: 1px solid var(--edge);
-    border-radius: 999px;
-    background: transparent;
+    border-radius: var(--r-1);
+    background: linear-gradient(var(--ink-900), var(--ink-850));
+    box-shadow: 0 2px 0 var(--hair-2), 0 1px 0 var(--highlight) inset;
     color: var(--paper);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.3;
     font-weight: 600;
     cursor: pointer;
@@ -348,18 +362,19 @@ p {
     border-color: var(--paper-2);
   }
   .btn:active {
-    transform: translateY(1px);
+    transform: translateY(2px);
+    box-shadow: 0 0 0 transparent;
   }
 
   .btn-primary {
-    background: var(--ember);
+    background: var(--signal-orange);
     border-color: var(--ember);
-    color: var(--on-ember);
+    color: var(--on-signal);
     font-weight: 600;
   }
   .btn-primary:hover {
-    background: var(--ember-2);
-    border-color: var(--ember-2);
+    background: var(--signal-hover);
+    border-color: var(--ember);
   }
 
   .btn-ghost {
@@ -625,7 +640,7 @@ input[type='range'] {
 }
 input[type='range']::-webkit-slider-runnable-track {
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--r-1);
   background: linear-gradient(
     90deg,
     var(--ember) 0%,
@@ -636,12 +651,12 @@ input[type='range']::-webkit-slider-runnable-track {
 }
 input[type='range']::-moz-range-track {
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--r-1);
   background: var(--ink-600);
 }
 input[type='range']::-moz-range-progress {
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--r-1);
   background: var(--ember);
 }
 input[type='range']::-webkit-slider-thumb {
@@ -693,16 +708,16 @@ input[type='range']::-moz-range-thumb {
 
 @media (prefers-contrast: more) {
   :root {
-    --hair: rgba(37, 40, 32, 0.35);
-    --hair-2: rgba(37, 40, 32, 0.5);
-    --edge: #4b5146;
+    --hair: rgba(34, 33, 31, 0.35);
+    --hair-2: rgba(34, 33, 31, 0.5);
+    --edge: #494641;
     --paper-2: #35392f;
     --paper-3: #515746;
   }
   .inverse-band {
-    --hair: rgba(242, 241, 233, 0.4);
-    --hair-2: rgba(242, 241, 233, 0.6);
-    --edge: #d9dccb;
+    --hair: rgba(241, 240, 237, 0.4);
+    --hair-2: rgba(241, 240, 237, 0.6);
+    --edge: #d1cec8;
     --paper-2: #e8ebdd;
     --paper-3: #cbd2be;
   }

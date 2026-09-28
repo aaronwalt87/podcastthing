@@ -18,22 +18,8 @@ function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname.startsWith(href)
 }
 
-/** A custom AW ligature held in a quiet orbital brand system. */
 function BrandMark() {
-  return (
-    <svg className={styles.brandMark} width="58" height="44" viewBox="0 0 58 44" fill="none" aria-hidden="true">
-      <ellipse className={styles.brandOrbit} cx="29" cy="22" rx="26" ry="19" />
-      <path
-        className={styles.brandLigature}
-        d="M12 31L21 11L30 31L37 14L42 31L47 11M15 24H27"
-        stroke="currentColor"
-        strokeWidth="3.2"
-        strokeLinecap="square"
-        strokeLinejoin="bevel"
-      />
-      <g className={styles.brandSatellite}><circle cx="55" cy="22" r="2.6" /></g>
-    </svg>
-  )
+  return <span className={styles.brandMark} aria-hidden="true">aw<span>01</span></span>
 }
 
 export default function SiteHeader() {
@@ -79,12 +65,12 @@ export default function SiteHeader() {
         <Link href="/" className={styles.brand} aria-label={`${profile.name} — home`}>
           <BrandMark />
           <span className={styles.brandName}>
-            Aaron<br />Walters<span className={styles.brandDot}>.</span>
+            Aaron Walters<span className={styles.brandSub}>PERSONAL DASHBOARD</span>
           </span>
         </Link>
 
         <nav className={styles.desktopNav} aria-label="Primary">
-          {LINKS.map(({ label, href }) => {
+          {LINKS.map(({ label, href }, index) => {
             const active = isActive(pathname, href)
             return (
               <Link
@@ -93,7 +79,7 @@ export default function SiteHeader() {
                 aria-current={active ? 'page' : undefined}
                 className={styles.navLink}
               >
-                {label}
+                <span className={styles.navIndex} aria-hidden="true">0{index + 1}</span>{label}
               </Link>
             )
           })}

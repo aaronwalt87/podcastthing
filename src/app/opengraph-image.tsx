@@ -8,7 +8,7 @@ export const contentType = 'image/png'
 
 // The image renderer has no document/CSS context. Mirror the canonical tokens
 // here; all in-browser components reference globals.css directly.
-const palette = { cream: '#f2f1e9', charcoal: '#252820', olive: '#4b593c', orange: '#ad3e20' }
+const palette = { cream: '#e5e3df', charcoal: '#22211f', olive: '#343332', orange: '#ff5c24' }
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -21,11 +21,11 @@ export default function OpengraphImage() {
             </svg>
             <span style={{ fontSize: 23, fontWeight: 700, letterSpacing: -1 }}>{profile.name}</span>
           </div>
-          <div style={{ display: 'flex', border: `1px solid ${palette.olive}`, borderRadius: 40, padding: '12px 22px', fontSize: 16 }}>A personal technology dashboard</div>
+          <div style={{ display: 'flex', border: `1px solid ${palette.olive}`, borderRadius: 3, padding: '12px 22px', fontSize: 16 }}>AW–01 / PERSONAL DASHBOARD</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', fontSize: 90, fontWeight: 700, letterSpacing: -6, lineHeight: 1.02, zIndex: 1 }}>
           <span>{profile.heroLead}</span>
-          <span style={{ color: palette.olive }}>{profile.heroLeadMuted}</span>
+          <span style={{ color: palette.orange }}>{profile.heroLeadMuted}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${palette.olive}`, paddingTop: 24 }}>
           <span style={{ fontSize: 18 }}>Tech signals. Market context. Episodes worth finishing.</span>

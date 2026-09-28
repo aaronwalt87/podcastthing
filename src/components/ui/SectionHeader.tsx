@@ -26,7 +26,7 @@ export default function SectionHeader({
             {eyebrow}
           </p>
         )}
-        <h2 className={`display max-w-[16ch] text-[clamp(38px,6.5vw,84px)] ${eyebrow ? 'mt-5' : ''}`}>
+        <h2 className={`display max-w-[24ch] text-[clamp(30px,4vw,48px)] ${eyebrow ? 'mt-3' : ''}`}>
           {title}
         </h2>
         {description && (

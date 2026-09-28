@@ -15,12 +15,12 @@ export default function PageMasthead({ index, eyebrow, title, children, meta }: 
     <header className={styles.masthead}>
       <div className={styles.topline}>
         <p className="eyebrow">{eyebrow}</p>
-        <span className="num" aria-hidden="true">FIELD NOTES / {index}</span>
+        <span className="num" aria-hidden="true">CHANNEL / {index}</span>
       </div>
       <h1 className={styles.title}>{title}<span className={styles.period}>.</span></h1>
       {children && <div className={styles.intro}>
         <div className={styles.chapter} aria-hidden="true">
-          <span className={styles.chapterMark}>↳</span>
+          <span className={styles.chapterMark}>→</span>
           <span className="num">{index}</span>
         </div>
         <div className={styles.description}>{children}</div>

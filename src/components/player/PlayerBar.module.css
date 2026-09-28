@@ -6,10 +6,9 @@
   right: max(12px, calc((100vw - 1180px) / 2));
   border: 1px solid var(--hair-2);
   border-radius: var(--r-4);
-  background: var(--chrome-bg);
+  background: var(--ink-850);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  border-top: 3px solid var(--signal-orange);
 }
 
 .player .controls {

@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // Must be a literal — Next serialises this into a meta tag, so it cannot
   // reference the --ink-950 custom property it mirrors.
-  themeColor: '#f2f1e9',
+  themeColor: '#e5e3df',
   colorScheme: 'light',
 }
 

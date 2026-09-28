@@ -28,8 +28,8 @@ export const profile = {
   tagline: 'News, markets, and good listening.',
 
   /** The hero headline, in two lines. Keep both short. */
-  heroLead: 'Worth a look.',
-  heroLeadMuted: 'Worth a listen.',
+  heroLead: 'A good place',
+  heroLeadMuted: 'to tune in.',
 
   /** Used in the hero and at the top of the About page. */
   standfirst:
@@ -76,8 +76,8 @@ export const profile = {
     {
       title: 'No charting library',
       choice:
-        'The trend lines are server-rendered SVG and the ridge is a hand-written canvas, rather than pulling in a charting package.',
-      cost: "The sparklines can't be hovered for a value, and any new chart type is work rather than a config option. The trade is also narrower than it sounds: the sparklines ship as plain server-rendered SVG with no JavaScript at all, but the market ridge is a canvas, and its drawing code does run in the browser.",
+        'The trend lines are drawn directly in SVG, without a charting package.',
+      cost: "The sparklines can’t be hovered for a value. Every new chart type needs its own drawing code. The chart on the home console updates in the browser when you switch channels; the other charts render on the server.",
     },
     {
       title: 'Cache stale data rather than show none',
