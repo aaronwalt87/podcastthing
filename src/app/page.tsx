@@ -62,8 +62,8 @@ export default async function HomePage() {
         <Reveal>
           <SectionHeader
             index="01"
-            eyebrow="Live intelligence"
-            title="What's moving right now"
+            eyebrow="01 / News + markets"
+            title="The daily input."
             description="Technology and infrastructure headlines, gathered in one feed."
             action={{ label: 'All headlines', href: '/news' }}
           />
@@ -121,10 +121,10 @@ export default async function HomePage() {
         <div className="shell">
           <p className="eyebrow">Pick a starting point</p>
           <div className={styles.interludeGrid}>
-            <div data-scroll-layer="back"><h2 id="working-title" className={styles.interludeTitle}>Read. Listen.<br /><span>Catch up.</span></h2></div>
+            <div data-scroll-layer="back"><h2 id="working-title" className={styles.interludeTitle}>Three channels.<br /><span>Your frequency.</span></h2></div>
             <div data-scroll-layer="front">
               <div className={styles.principles}>
-                {[{ label: 'The news feed', href: '/news' }, { label: 'The market board', href: '/markets' }, { label: 'The listening list', href: '/podcasts' }].map(({ label, href }, index) => (
+                {[{ label: 'News', href: '/news' }, { label: 'Markets', href: '/markets' }, { label: 'Podcasts', href: '/podcasts' }].map(({ label, href }, index) => (
                   <Link href={href} className={styles.principle} key={label}><span>0{index + 1}</span><strong>{label}</strong><span aria-hidden="true">↗</span></Link>
                 ))}
               </div>
@@ -142,8 +142,8 @@ export default async function HomePage() {
         <Reveal>
           <SectionHeader
             index="02"
-            eyebrow="Listening archive"
-            title="Episodes worth finishing"
+            eyebrow="02 / Podcasts"
+            title="Good listening."
             description="A hand-picked listening list. Pick an episode and carry on where you left off."
             action={{ label: 'Full archive', href: '/podcasts' }}
           />

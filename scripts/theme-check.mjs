@@ -60,6 +60,9 @@ for (const surface of ['--ink-950', '--ink-900', '--ink-850']) {
   for (const ink of ['--paper', '--paper-2', '--paper-3', '--ember']) contrast(ink, surface)
 }
 contrast('--on-ember', '--ember')
+contrast('--on-signal', '--signal-orange')
+contrast('--screen-ink', '--screen')
+contrast('--screen-muted', '--screen')
 contrast('--ember', '--ink-950', 3) // Shared focus outline.
 
 check(/\[hidden\]\s*\{[^}]*display\s*:\s*none\s*!important/.test(css), '[hidden] must beat display utilities')

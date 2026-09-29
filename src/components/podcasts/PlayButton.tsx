@@ -44,12 +44,12 @@ function PlayButton({ episode, queue, size = 'md', className = '' }: PlayButtonP
       type="button"
       onClick={onClick}
       aria-label={`${playingThis ? 'Pause' : 'Play'} ${episode.title}`}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 ease-spring hover:scale-105 active:scale-95 ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-[var(--r-2)] transition-transform duration-150 active:translate-y-0.5 ${className}`}
       style={{
         width: box,
         height: box,
-        background: 'var(--ember)',
-        color: 'var(--on-ember)',
+        background: 'var(--signal-orange)',
+        color: 'var(--on-signal)',
         boxShadow: playingThis ? '0 0 0 4px var(--ember-ghost)' : undefined,
       }}
     >
