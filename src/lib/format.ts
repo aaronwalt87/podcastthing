@@ -87,3 +87,13 @@ export function compact(value: number): string {
   if (abs >= 1e3) return `${num(value / 1e3, 1)}K`
   return num(value, 0)
 }
+
+/** Provider dates are explicit; a missing timestamp must not look current. */
+export function quoteTime(ms: number, dateOnly = false): string {
+  if (!Number.isFinite(ms) || ms <= 0) return 'Unavailable'
+  if (dateOnly) return longDate(ms)
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    timeZone: 'America/New_York', timeZoneName: 'short',
+  }).format(ms)
+}

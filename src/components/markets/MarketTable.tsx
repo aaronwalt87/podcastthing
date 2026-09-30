@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Sparkline from './Sparkline'
 import Delta from './Delta'
-import { num } from '@/lib/format'
+import { num, quoteTime } from '@/lib/format'
 import type { StockQuote } from '@/types/stocks'
 
 type SortKey = 'symbol' | 'price' | 'changePercent' | 'sector'
@@ -17,7 +17,7 @@ const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; hideBelow
 ]
 
 const SOURCE_LABEL: Record<StockQuote['source'], string> = {
-  finnhub: 'live quotes',
+  finnhub: 'Finnhub quotes',
   stooq: 'end-of-day closes',
 }
 
@@ -74,7 +74,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                 : sources.map((src) => SOURCE_LABEL[src]).join(' · ')}
             </span>
             <span className="sr-only">
-              . Sorted by {sortKey}, {sortDir === 'asc' ? 'ascending' : 'descending'}.
+              . Sorted by {activeLabel}, {sortDir === 'asc' ? 'ascending' : 'descending'}.
             </span>
           </caption>
           <thead>
@@ -106,7 +106,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                 )
               })}
               <th scope="col" className="hidden px-4 py-3 text-right sm:table-cell">
-                <span className="eyebrow">60d</span>
+                <span className="eyebrow">Daily history</span>
               </th>
             </tr>
           </thead>
@@ -118,7 +118,7 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                 className="border-b border-hair transition-colors last:border-0 hover:bg-ink-850"
               >
                 <th scope="row" className="px-4 py-3 text-left font-normal">
-                  <span className="num text-[13px] font-medium text-paper">{q.symbol}</span>
+                  <span className="num text-[13px] font-medium text-paper">{q.symbol}</span><span className="mt-1 block text-[10px] text-paper-3">{quoteTime(q.updatedAt, q.source === 'stooq')}</span>
                   <span className="ml-2 hidden text-xs text-paper-2 lg:inline">{q.name}</span>
                 </th>
                 <td className="hidden px-4 py-3 text-xs text-paper-2 md:table-cell">{q.sector}</td>
@@ -133,14 +133,14 @@ export default function MarketTable({ quotes }: { quotes: StockQuote[] }) {
                 </td>
                 <td className="hidden px-4 py-3 sm:table-cell">
                   <div className="flex justify-end">
-                    <Sparkline
+                    {q.dailyHistory && q.dailyHistory.length > 1 ? <Sparkline
                       id={`tbl-${q.symbol}`}
-                      points={q.history}
+                      points={q.dailyHistory.map(point => point.close)}
                       width={96}
                       height={26}
                       color="var(--paper-3)"
                       fill={false}
-                    />
+                    /> : <span className="text-xs text-paper-3">Unavailable</span>}
                   </div>
                 </td>
               </tr>

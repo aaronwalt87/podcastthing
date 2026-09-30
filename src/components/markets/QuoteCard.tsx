@@ -15,7 +15,7 @@ interface QuoteCardProps {
 }
 
 const SOURCE_LABEL: Record<StockQuote['source'], string> = {
-  finnhub: 'Live quote',
+  finnhub: 'Finnhub quote',
   stooq: 'End-of-day close',
 }
 

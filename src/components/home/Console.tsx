@@ -61,7 +61,7 @@ export default function Console({ headlineCount, sourceCount, snapshot, latestEp
           <SegmentNumber value={selected.code} />
           <div className={styles.screenContent} aria-live="polite" aria-atomic="true">
             {channel === 0 && <><strong>{headlineCount} headlines</strong><span>{sourceCount} sources · one feed</span><div className={styles.signalBars} aria-hidden="true">{[4,8,6,10,7,12,9,5,11,8,13,10,6,9,12,7,11,6,10,8].map((h,i)=><i key={i} style={{'--bar':h, '--i':i} as CSSProperties} />)}</div></>}
-            {channel === 1 && <><strong>{quote ? `${quote.symbol} / ${quote.price.toFixed(2)}` : 'Market feed idle'}</strong><span>{MARKET_STATE_LABEL[snapshot.marketState]} · {quote?.source === 'finnhub' ? 'Live quote' : 'End-of-day data'}</span>{quote && <Sparkline id="console-market" points={quote.history} color="var(--screen-blue)" width={240} height={34} fill={false} />}</>}
+            {channel === 1 && <><strong>{quote ? `${quote.symbol} / ${quote.price.toFixed(2)}` : 'Market feed idle'}</strong><span>{MARKET_STATE_LABEL[snapshot.marketState]} · {quote?.source === 'finnhub' ? 'Finnhub quote' : 'End-of-day data'}</span>{quote && <Sparkline id="console-market" points={quote.history} color="var(--screen-blue)" width={240} height={34} fill={false} />}</>}
             {channel === 2 && <><strong className={styles.episodeTitle}>{episode?.title ?? 'The listening list'}</strong><span>{player.error ? 'Audio unavailable · try again or browse episodes' : !playable ? 'No playable episode available' : player.isLoading ? 'Loading audio' : player.isPlaying ? 'Now playing' : 'Ready to play'}</span><div className={styles.transportGlyphs} aria-hidden="true"><span>●</span> ▷ Ⅱ <span>∿</span></div></>}
           </div>
         </div>

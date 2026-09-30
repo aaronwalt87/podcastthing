@@ -139,3 +139,26 @@ npm run build
 ```
 
 There is no test runner configured; lint and a production build are the gate.
+
+### Tech observatory
+
+The Markets route links sector tiles, a company inspector, and up to three stocks
+against QQQ. Comparisons use the intersection of provider trading dates and
+rebase closing prices to 0%; 1M/3M mean the last 30/90 calendar days ending at
+the latest common close. The actual available range is always displayed.
+These are price changes, not total returns or intraday charts.
+
+Finnhub quotes and Stooq daily closes have independent timestamps. Configure
+`FINNHUB_TOKEN` for quotes; `STOOQ_API_KEY` optionally supplies a server-only
+download key to Stooq. Historical availability depends on upstream access. No
+credentials are sent to the browser. An unavailable history feed leaves the
+quote board usable and names the missing series.
+
+The v3 cache keeps a last-successful fallback for 90 days, retaining original
+quote/history dates through partial outages. The existing refresh schedule is
+unchanged. Legacy v2 quotes remain usable, but undated arrays cannot enter a
+dated comparison. Development-only fixtures exercise the populated UI;
+production never substitutes generated prices.
+
+Run `node scripts/market-history-check.mjs` for parsing, comparison and outage
+retention checks, alongside lint, build and the theme check.

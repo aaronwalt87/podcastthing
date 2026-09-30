@@ -37,7 +37,13 @@ function quote(
   seed: number,
   start: number
 ): StockQuote {
-  const history = walk(seed, start)
+  const history = walk(seed, start, 100)
+  const dates: string[] = []
+  const day = new Date('2026-09-29T00:00:00Z')
+  while (dates.length < history.length) {
+    if (day.getUTCDay() !== 0 && day.getUTCDay() !== 6) dates.unshift(day.toISOString().slice(0, 10))
+    day.setUTCDate(day.getUTCDate() - 1)
+  }
   const price = history[history.length - 1]
   const previousClose = history[history.length - 2]
   const change = price - previousClose
@@ -51,6 +57,8 @@ function quote(
     changePercent: (change / previousClose) * 100,
     previousClose,
     history,
+    dailyHistory: history.map((close, index) => ({ date: dates[index], close })),
+    historyFetchedAt: Date.now() - 12 * 60_000,
     marketState: 'REGULAR',
     source: 'stooq',
     updatedAt: Date.now() - 12 * 60_000,
