@@ -1,173 +1,23 @@
 import type { Metadata } from 'next'
 import { getMarketSnapshot } from '@/lib/stocks'
-import { MARKET_STATE_LABEL } from '@/types/stocks'
-import QuoteCard from '@/components/markets/QuoteCard'
+import TechObservatory from '@/components/markets/TechObservatory'
 import MarketTable from '@/components/markets/MarketTable'
-import SectorHeatmap from '@/components/markets/SectorHeatmap'
-import Delta from '@/components/markets/Delta'
-import Reveal from '@/components/ui/Reveal'
-import SignalPlate from '@/components/home/SignalPlate'
-import SectionHeader from '@/components/ui/SectionHeader'
-import PageMasthead from '@/components/ui/PageMasthead'
-import styles from '@/components/ui/PageMasthead.module.css'
-import { timeAgo } from '@/lib/format'
-import Link from 'next/link'
+import { quoteTime } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
-// A cold cache triggers a background refresh through waitUntil, which keeps the
-// invocation alive but is still bounded by maxDuration — 10s by default, which
-// a slow upstream can exceed.
 export const maxDuration = 60
-
-export const metadata: Metadata = {
-  title: 'Markets',
-  description: 'The technology companies and broad market signals I watch for context, not prophecy.',
-}
+export const metadata: Metadata = { title: 'Markets', description: 'A technology stock landscape, dated performance comparisons, and the quotes behind them.' }
 
 export default async function MarketsPage() {
   const snapshot = await getMarketSnapshot()
-  const now = Date.now()
-
-  const indices = snapshot.quotes.filter((q) => q.sector === 'Index')
-  const equities = snapshot.quotes.filter((q) => q.sector !== 'Index')
-
-  const best = [...equities].sort((a, b) => b.changePercent - a.changePercent)[0]
-  const worst = [...equities].sort((a, b) => a.changePercent - b.changePercent)[0]
-
-  const live = snapshot.marketState === 'REGULAR'
-  const total = snapshot.advancers + snapshot.decliners
-  const breadth = total > 0 ? (snapshot.advancers / total) * 100 : 0
-
-  return (
-    <div className={`shell ${styles.page}`}>
-      <PageMasthead index="02" eyebrow="The market board" title="Markets" meta={
-        <p className="eyebrow flex flex-wrap items-center gap-2.5">
-          <span className={live ? 'pulse' : 'pulse pulse-idle'} aria-hidden="true" />
-          {MARKET_STATE_LABEL[snapshot.marketState]}
-          {snapshot.updatedAt > 0 && (
-            <>
-              <span aria-hidden="true" className="h-2.5 w-px bg-hair-2" />
-              <span style={{ color: 'var(--paper-3)' }}>
-                updated {timeAgo(snapshot.updatedAt, now)} ago
-              </span>
-            </>
-          )}
-        </p>
-      }>
-        <p>
-          Indices and technology stocks, with trend lines and sector views.
-          Each quote is labeled live or end-of-day. No crystal ball included.
-        </p>
-      </PageMasthead>
-
-      {snapshot.quotes.length === 0 ? (
-        <div className="panel-flat my-14 px-6 py-20 text-center">
-          <p className="display text-2xl text-paper">The board is dark.</p>
-          <p className="mx-auto mt-3 max-w-[52ch] text-sm text-paper-2">
-            The quote cache is empty. The upstream may be unavailable, the scheduled job may be between
-            runs, or the market may simply be enjoying a rare moment without my supervision.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/news" className="btn btn-sm">
-              Read the headlines <span aria-hidden="true">→</span>
-            </Link>
-            <Link href="/about" className="btn btn-sm">
-              How this is built <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Indices + breadth */}
-          <section className={styles.body} aria-label="Index proxies and breadth">
-            <div className={styles.sectionLabel}>
-              <h2 className="eyebrow">At a glance</h2>
-              <span className="eyebrow">Indices &amp; market breadth</span>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {indices.map((quote) => (
-                <Reveal key={quote.symbol} className="h-full">
-                  <QuoteCard quote={quote} emphasis now={now} />
-                </Reveal>
-              ))}
-
-              <Reveal delay={60} className="h-full">
-                <div className="panel flex h-full flex-col justify-between gap-4 p-5">
-                  <p className="eyebrow">Breadth</p>
-                  <div>
-                    <p className="num text-3xl font-medium tracking-tight text-paper">
-                      {snapshot.advancers}
-                      <span className="text-paper-3">/{total}</span>
-                    </p>
-                    <p className="mt-1 text-xs text-paper-3">advancing</p>
-                  </div>
-                  <div
-                    className="h-1.5 w-full overflow-hidden rounded-full bg-ink-700"
-                    role="img"
-                    aria-label={`${snapshot.advancers} of ${total} tracked names advancing`}
-                  >
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${breadth}%`, background: 'var(--pos)' }}
-                    />
-                  </div>
-                </div>
-              </Reveal>
-
-              {best && worst && (
-                <Reveal delay={110} className="h-full">
-                  <div className="panel flex h-full flex-col justify-between gap-4 p-5">
-                    <p className="eyebrow">Session extremes</p>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span className="num text-sm text-paper">{best.symbol}</span>
-                        <Delta changePercent={best.changePercent} />
-                      </div>
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span className="num text-sm text-paper">{worst.symbol}</span>
-                        <Delta changePercent={worst.changePercent} />
-                      </div>
-                    </div>
-                  </div>
-                </Reveal>
-              )}
-            </div>
-          </section>
-
-          <div className="inverse-band mt-10 overflow-hidden rounded-[var(--r-3)]">
-            <SignalPlate quote={snapshot.quotes.find((q) => q.symbol === 'SPY') ?? snapshot.quotes[0] ?? null} height={180} />
-          </div>
-
-          {/* Full board */}
-          <section className="mt-20" aria-label="Full board">
-            <Reveal>
-              <SectionHeader index="01" eyebrow="Full board" title="Every tracked name" />
-            </Reveal>
-            <Reveal delay={60}>
-              <div className="mt-8">
-                <MarketTable quotes={snapshot.quotes} />
-              </div>
-            </Reveal>
-          </section>
-
-          {/* Heatmap */}
-          <section className="mt-20 pb-8" aria-label="Sector heatmap">
-            <Reveal>
-              <SectionHeader
-                index="02"
-                eyebrow="By sector"
-                title="Where the move is concentrated"
-                description="Color shows direction and opacity shows magnitude, capped at ±2% so one dramatic stock cannot turn the whole board into its personal mood ring."
-              />
-            </Reveal>
-            <Reveal delay={60}>
-              <div className="mt-8">
-                <SectorHeatmap quotes={snapshot.quotes} />
-              </div>
-            </Reveal>
-          </section>
-        </>
-      )}
-    </div>
-  )
+  return <div className="shell py-10 md:py-14">
+    <header className="flex flex-wrap items-end justify-between gap-5 border-b border-hair pb-7">
+      <div><p className="eyebrow">AW–01 / Channel 02</p><h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Tech observatory</h1><p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-paper-2">Follow the companies shaping technology. Inspect a move, compare the paths, and see the numbers behind it.</p></div>
+      <p className="max-w-[30ch] text-xs leading-relaxed text-paper-3">Cached quotes · USD<br />Last refresh: {quoteTime(snapshot.updatedAt)}<br />Individual quote dates may differ.</p>
+    </header>
+    {snapshot.quotes.length ? <>
+      <TechObservatory quotes={snapshot.quotes} now={Date.now()} />
+      <section className="mt-12 pb-8" aria-labelledby="full-board"><p className="eyebrow">03 / Full board</p><h2 id="full-board" className="mb-6 mt-2 text-2xl font-semibold tracking-tight">Every tracked name</h2><MarketTable quotes={snapshot.quotes} /></section>
+    </> : <section className="panel-flat my-10 px-6 py-16"><h2 className="text-2xl">The board is waiting for data.</h2><p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-paper-2">Quotes are temporarily unavailable. The scheduled refresh will try again; no sample prices are shown here.</p></section>}
+  </div>
 }

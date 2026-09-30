@@ -3,6 +3,12 @@ export type MarketState = 'REGULAR' | 'PRE' | 'POST' | 'CLOSED'
 /** Where a quote came from — surfaced in the UI so numbers are never anonymous. */
 export type QuoteSource = 'finnhub' | 'stooq'
 
+export interface DailyClose {
+  /** Provider trading date, YYYY-MM-DD. Never inferred from array position. */
+  date: string
+  close: number
+}
+
 export interface StockQuote {
   symbol: string
   name: string
@@ -14,9 +20,14 @@ export interface StockQuote {
   previousClose: number
   /** Daily closes, oldest → newest. Drives the sparklines. */
   history: number[]
+  /** Dated provider closes; separate from the latest quote, never interpolated. */
+  dailyHistory?: DailyClose[]
+  historyFetchedAt?: number
   marketState: MarketState
   source: QuoteSource
   updatedAt: number
+  /** Fetch time, distinct from the provider's quote timestamp. */
+  fetchedAt?: number
 }
 
 export interface MarketSnapshot {

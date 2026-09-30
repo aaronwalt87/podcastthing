@@ -67,3 +67,13 @@ authentication, caching, sorting, filtering and audio persistence remain intact.
 
 Known limitation: third-party episodes may lack publisher transcripts. The
 archive continues to disclose transcript availability and links to the source.
+
+## Markets / Operate
+
+The tech observatory keeps the AW–01 console language: compact printed header,
+equal sector tiles, a gray company inspector, and one black comparison display.
+Orange identifies selection; signed changes carry gain/loss semantics. The
+comparison uses distinct line patterns as well as colors, a keyboard/touch date
+slider, explicit provider dates and honest missing-history states. The full
+sortable quote table remains below. Chart width follows its container; on small
+screens the inspector stacks beneath the tiles. No decorative chart motion.

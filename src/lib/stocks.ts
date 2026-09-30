@@ -2,12 +2,15 @@ import 'server-only'
 import { waitUntil } from '@vercel/functions'
 import { acquireLock, getRedis } from './redis'
 import { sampleMarket, sampleDataEnabled } from './sample-data'
-import type { MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
+import { parseHistoryCsv, retainMarketData } from './market-history'
+import type { DailyClose, MarketSnapshot, MarketState, StockQuote } from '@/types/stocks'
 
-const STOCK_KEY = 'stocks:cache:v2'
+const STOCK_KEY = 'stocks:cache:v3'
+const LEGACY_KEY = 'stocks:cache:v2'
+const LAST_GOOD_KEY = 'stocks:last-good:v3'
 /** See the note on NEWS_TTL_SECONDS — the TTL has to outlive the cron gap. */
 const STOCK_TTL = 172_800
-const HISTORY_POINTS = 60
+const HISTORY_POINTS = 260
 
 interface Tracked {
   symbol: string
@@ -73,10 +76,7 @@ export function marketStateAt(date = new Date()): MarketState {
 
 /* ------------------------------------------------------------------ stooq -- */
 
-/**
- * Daily closes from Stooq's CSV endpoint. No API key, so history (and a usable
- * fallback quote) works even when FINNHUB_TOKEN is absent.
- */
+/** Dated Stooq daily closes. STOOQ_API_KEY is server-only and never serialized. */
 function stooqDate(offsetDays: number): string {
   const d = new Date(Date.now() - offsetDays * 86_400_000)
   return [
@@ -86,31 +86,25 @@ function stooqDate(offsetDays: number): string {
   ].join('')
 }
 
-async function fetchHistory(symbol: string): Promise<number[]> {
+async function fetchHistory(symbol: string): Promise<DailyClose[]> {
   try {
-    // Unbounded, Stooq returns the entire daily history — decades of CSV per
-    // symbol, of which we keep 60 rows. Bounding the range keeps each response
-    // in the low kilobytes so 16 symbols fit inside the timeout budget.
-    const url =
-      `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol.toLowerCase())}.us&i=d` +
-      `&d1=${stooqDate(130)}&d2=${stooqDate(0)}`
-    const res = await fetchWithTimeout(url)
-    if (!res.ok) return []
-
-    const csv = await res.text()
-    const lines = csv.trim().split('\n')
-    if (lines.length < 2) return []
-
-    const header = lines[0].split(',')
-    const closeIdx = header.findIndex((h) => h.trim().toLowerCase() === 'close')
-    if (closeIdx === -1) return []
-
-    return lines
-      .slice(1)
-      .slice(-HISTORY_POINTS)
-      .map((line) => Number(line.split(',')[closeIdx]))
-      .filter((n) => Number.isFinite(n) && n > 0)
+    const url = new URL('https://stooq.com/q/d/l/')
+    url.searchParams.set('s', `${symbol.toLowerCase()}.us`)
+    url.searchParams.set('i', 'd')
+    url.searchParams.set('d1', stooqDate(400))
+    url.searchParams.set('d2', stooqDate(0))
+    if (process.env.STOOQ_API_KEY) url.searchParams.set('apikey', process.env.STOOQ_API_KEY)
+    const res = await fetchWithTimeout(url.toString())
+    if (!res.ok) {
+      console.warn(`[stocks] history unavailable for ${symbol}: HTTP ${res.status}`)
+      return []
+    }
+    const points = parseHistoryCsv(await res.text()).filter(point => point.date <= new Date().toISOString().slice(0, 10)).slice(-HISTORY_POINTS)
+    if (points.length < 2) console.warn(`[stocks] history unavailable for ${symbol}: no usable daily closes`)
+    return points
   } catch {
+    // Do not log URLs or raw upstream errors: they may contain provider keys.
+    console.warn(`[stocks] history request failed for ${symbol}`)
     return []
   }
 }
@@ -122,6 +116,7 @@ interface FinnhubQuote {
   d: number // change
   dp: number // change percent
   pc: number // previous close
+  t?: number // provider quote timestamp, Unix seconds
 }
 
 async function fetchFinnhubQuote(symbol: string, token: string): Promise<FinnhubQuote | null> {
@@ -140,13 +135,13 @@ async function fetchFinnhubQuote(symbol: string, token: string): Promise<Finnhub
 
 function buildQuote(
   tracked: Tracked,
-  history: number[],
+  history: DailyClose[],
   live: FinnhubQuote | null,
   state: MarketState
 ): StockQuote | null {
   // Live quote wins; otherwise derive from the last two daily closes.
-  const lastClose = history.at(-1)
-  const priorClose = history.at(-2)
+  const lastClose = history.at(-1)?.close
+  const priorClose = history.at(-2)?.close
 
   let price: number
   let previousClose: number
@@ -154,7 +149,7 @@ function buildQuote(
 
   if (live) {
     price = live.c
-    previousClose = Number.isFinite(live.pc) && live.pc > 0 ? live.pc : (priorClose ?? live.c)
+    previousClose = Number.isFinite(live.pc) && live.pc > 0 ? live.pc : (lastClose ?? live.c)
     source = 'finnhub'
   } else if (lastClose && priorClose) {
     price = lastClose
@@ -175,11 +170,16 @@ function buildQuote(
     change,
     changePercent,
     previousClose,
-    // Append the live price so the sparkline ends where the headline number is.
-    history: live && lastClose && live.c !== lastClose ? [...history, live.c] : history,
+    // Daily closes must remain daily closes; never append an intraday quote.
+    history: history.map(point => point.close),
+    dailyHistory: history,
+    historyFetchedAt: history.length >= 2 ? Date.now() : undefined,
     marketState: state,
     source,
-    updatedAt: Date.now(),
+    updatedAt: live
+      ? (typeof live.t === 'number' && Number.isFinite(live.t) && live.t > 0 && live.t * 1000 <= Date.now() + 300_000 ? live.t * 1000 : 0)
+      : Date.parse(`${history.at(-1)!.date}T00:00:00Z`),
+    fetchedAt: Date.now(),
   }
 }
 
@@ -202,6 +202,13 @@ async function pooled<T, R>(items: T[], limit: number, task: (item: T) => Promis
 export async function refreshStocks(): Promise<MarketSnapshot> {
   const token = process.env.FINNHUB_TOKEN
   const state = marketStateAt()
+  const redis = getRedis()
+  let previous: MarketSnapshot | null = null
+  if (redis) {
+    try {
+      previous = parseSnapshot(await redis.get(LAST_GOOD_KEY)) ?? parseSnapshot(await redis.get(STOCK_KEY)) ?? parseSnapshot(await redis.get(LEGACY_KEY))
+    } catch { /* Upstream refresh can still work if a cache read fails. */ }
+  }
 
   // Six at a time: sixteen concurrent cold fetches on a serverless container
   // push the slowest symbols past their timeout and drop them from the board.
@@ -210,7 +217,7 @@ export async function refreshStocks(): Promise<MarketSnapshot> {
       fetchHistory(tracked.symbol),
       token ? fetchFinnhubQuote(tracked.symbol, token) : Promise.resolve(null),
     ])
-    const quote = buildQuote(tracked, history, live, state)
+    const quote = retainMarketData(buildQuote(tracked, history, live, state), previous?.quotes.find(q => q.symbol === tracked.symbol))
     if (!quote) {
       // Silently vanishing from the board is worse than a noisy log line.
       console.warn(`[stocks] no usable data for ${tracked.symbol}`)
@@ -225,10 +232,10 @@ export async function refreshStocks(): Promise<MarketSnapshot> {
   // two days, and a truncated board is worse than an empty one — the empty
   // state at least explains itself.
   if (quotes.length >= Math.ceil(TRACKED.length / 2)) {
-    const redis = getRedis()
     if (redis) {
       try {
         await redis.set(STOCK_KEY, JSON.stringify(snapshot), { ex: STOCK_TTL })
+        await redis.set(LAST_GOOD_KEY, JSON.stringify(snapshot), { ex: 90 * 86_400 })
       } catch (err) {
         console.error('[stocks] cache write failed', err)
       }
@@ -256,47 +263,28 @@ const EMPTY_SNAPSHOT: MarketSnapshot = {
   updatedAt: 0,
 }
 
+function parseSnapshot(raw: unknown): MarketSnapshot | null {
+  try {
+    const value = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return value && Array.isArray(value.quotes) ? value as MarketSnapshot : null
+  } catch { return null }
+}
+
 export async function getMarketSnapshot(): Promise<MarketSnapshot> {
   const redis = getRedis()
-  // Local dev with no credentials renders fixtures; production renders empty.
   if (!redis) {
     return sampleDataEnabled() ? sampleMarket() : { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
   }
-
   try {
-    const raw = await redis.get(STOCK_KEY)
-    if (!raw) {
-      // See the note in getCachedNews: warm a cold cache rather than serving an
-      // empty board until the next scheduled run.
-      if (await acquireLock('lock:stocks:refresh', 180)) {
-        // waitUntil, not a bare promise: on Vercel the container is frozen once
-        // the response is flushed, so a fire-and-forget refresh never finishes
-        // — it just holds the lock while doing nothing. This only shows up in
-        // production; a long-lived `next dev` process completes it either way.
-        //
-        // Off Vercel this is a silent no-op (the request-context symbol is
-        // absent), which is correct on any host that keeps the process alive.
-        // On another FREEZING host — Lambda via OpenNext, Netlify, Workers —
-        // the original bug would return with no error and no log line.
-        waitUntil(
-          refreshStocks().catch((err) =>
-            console.error('[stocks] warm refresh failed', err)
-          )
-        )
-      }
-      return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
+    const current = parseSnapshot(await redis.get(STOCK_KEY))
+    // Old quotes stay visible during migration; undated arrays never become dated history.
+    const fallback = current ?? parseSnapshot(await redis.get(LAST_GOOD_KEY)) ?? parseSnapshot(await redis.get(LEGACY_KEY))
+    if (!current && await acquireLock('lock:stocks:refresh', 180)) {
+      waitUntil(refreshStocks().catch(() => console.error('[stocks] warm refresh failed')))
     }
-
-    const parsed = (typeof raw === 'string' ? JSON.parse(raw) : raw) as MarketSnapshot
-    if (!parsed || !Array.isArray(parsed.quotes)) {
-      return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
-    }
-
-    // Session moves on even while the cache sits still.
-    return { ...parsed, marketState: marketStateAt() }
-  } catch (err) {
-    console.error('[stocks] cache read failed', err)
+    return { ...(fallback ?? EMPTY_SNAPSHOT), marketState: marketStateAt() }
+  } catch {
+    console.error('[stocks] cache read failed')
     return { ...EMPTY_SNAPSHOT, marketState: marketStateAt() }
   }
 }
-
