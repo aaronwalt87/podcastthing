@@ -35,8 +35,8 @@ An empty archive disables playback; empty data is described truthfully.
 The news bars are decorative channel artwork, not fabricated live telemetry.
 
 Native scrolling drives `--scene-progress` through the bounded ScrollScene
-controller. The chassis rotates into place while its faceplate, display and
-key bank settle at different depths. Raised channel keys settle in sequence.
+controller. The chassis rotates into place with its printed nameplate and speaker grille
+fixed to its surface. Only the display and key bank settle at different depths. Raised channel keys settle in sequence.
 No wheel/touch interception or per-frame React state. The hero pins for 145svh
 on desktop (>=1000px wide, >=900px high). Phones, tablets and short screens
 use normal flow with the same assembly motion as the console enters view. Reduced motion removes pinning
