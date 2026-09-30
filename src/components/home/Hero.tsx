@@ -22,7 +22,7 @@ export default function Hero(props: HeroProps) {
           <h1 id="hero-title" className={styles.title}>A good place<br />to <span>tune in.</span></h1>
           <p className={styles.summary}>Technology news, market context,<br />and things worth listening to.</p>
           <div className={styles.actions}><Link href="#signal" className="btn btn-primary">Explore the collection <span aria-hidden="true">↓</span></Link><span className={styles.note}>Curiosity, on repeat.</span></div>
-          <div className={styles.legend}><span>01 / READ</span><span>02 / WATCH</span><span>03 / LISTEN</span></div>
+          <div className={styles.legend}><span>01 / NEWS</span><span>02 / MARKETS</span><span>03 / PODCASTS</span></div>
           <div className={styles.scrollCue} aria-hidden="true"><span>SCROLL TO ASSEMBLE</span><i /><span>↓</span></div>
         </div>
         <div className={styles.stage} data-scroll-anchor><Console {...props} /></div>

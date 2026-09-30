@@ -7,8 +7,8 @@
 .scene[data-motion='on'] [data-scroll-layer='back'] { transform: translate3d(0, calc((1 - var(--scene-progress)) * 55px), 0); }
 .scene[data-motion='on'] [data-scroll-layer='front'] { transform: translate3d(0, calc((1 - var(--scene-progress)) * 18px), 0); }
 .scene:focus-within > *, .scene:focus-within [data-scroll-layer] { transform: none; }
-@media (min-width: 1000px) and (min-height: 740px) and (prefers-reduced-motion: no-preference) {
-  .scene[data-motion='on'][data-scene='hero'] { height: 205svh; }
+@media (min-width: 1000px) and (min-height: 900px) and (prefers-reduced-motion: no-preference) {
+  .scene[data-motion='on'][data-scene='hero'] { height: 145svh; }
   .scene[data-motion='on'][data-scene='hero'] > * { position: sticky; top: var(--header-h); }
 }
 @media (prefers-reduced-motion: reduce) {
