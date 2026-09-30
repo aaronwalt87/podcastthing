@@ -39,6 +39,8 @@ export default function Console({ headlineCount, sourceCount, snapshot, latestEp
   const quote = snapshot.quotes.find(q => q.symbol === 'SPY') ?? snapshot.quotes[0]
   const episode = player.currentEpisode ?? latestEpisode
   const playable = Boolean(episode?.audioUrl.trim())
+  const volume = player.muted ? 0 : player.volume
+  const playbackLabel = player.isLoading ? 'Loading audio…' : player.isPlaying ? 'Pause episode' : 'Play episode'
   const openSearch = () => window.dispatchEvent(new Event('signal:open-palette'))
   const play = () => {
     if (!episode) return
@@ -60,34 +62,37 @@ export default function Console({ headlineCount, sourceCount, snapshot, latestEp
           <div className={styles.screenContent} aria-live="polite" aria-atomic="true">
             {channel === 0 && <><strong>{headlineCount} headlines</strong><span>{sourceCount} sources · one feed</span><div className={styles.signalBars} aria-hidden="true">{[4,8,6,10,7,12,9,5,11,8,13,10,6,9,12,7,11,6,10,8].map((h,i)=><i key={i} style={{'--bar':h, '--i':i} as CSSProperties} />)}</div></>}
             {channel === 1 && <><strong>{quote ? `${quote.symbol} / ${quote.price.toFixed(2)}` : 'Market feed idle'}</strong><span>{MARKET_STATE_LABEL[snapshot.marketState]} · {quote?.source === 'finnhub' ? 'Live quote' : 'End-of-day data'}</span>{quote && <Sparkline id="console-market" points={quote.history} color="var(--screen-blue)" width={240} height={34} fill={false} />}</>}
-            {channel === 2 && <><strong className={styles.episodeTitle}>{episode?.title ?? 'The listening list'}</strong><span>{player.isLoading ? 'Loading audio' : player.isPlaying ? 'Now playing' : 'Ready when you are'}</span><div className={styles.transportGlyphs} aria-hidden="true"><span>●</span> ▷ Ⅱ <span>∿</span></div></>}
+            {channel === 2 && <><strong className={styles.episodeTitle}>{episode?.title ?? 'The listening list'}</strong><span>{player.error ? 'Audio unavailable · try again or browse episodes' : !playable ? 'No playable episode available' : player.isLoading ? 'Loading audio' : player.isPlaying ? 'Now playing' : 'Ready to play'}</span><div className={styles.transportGlyphs} aria-hidden="true"><span>●</span> ▷ Ⅱ <span>∿</span></div></>}
           </div>
         </div>
-        <div className={styles.displayBottom}><span>READ / WATCH / LISTEN</span><span className={styles.screenDots} aria-hidden="true">{CHANNELS.map((c,i)=><i key={c.code} data-lit={i===channel} />)}</span></div>
+        <div className={styles.displayBottom}><span>NEWS / MARKETS / PODCASTS</span><span className={styles.screenDots} aria-hidden="true">{CHANNELS.map((c,i)=><i key={c.code} data-lit={i===channel} />)}</span></div>
       </div>
       <div className={styles.controls}>
-        <div className={styles.volume}>
-          <label htmlFor="console-volume">VOLUME</label>
-          <div className={styles.knob} aria-hidden="true" style={{'--knob-turn':`${-135 + (player.muted ? 0 : player.volume) * 270}deg`} as CSSProperties}><i /></div>
-          <input id="console-volume" type="range" min="0" max="1" step="0.05" value={player.muted ? 0 : player.volume} aria-valuetext={`${Math.round((player.muted ? 0 : player.volume) * 100)} percent`} onChange={e => { if(player.muted) player.toggleMute(); player.setVolume(Number(e.target.value)) }} />
-          <span className={styles.volumeEnds} aria-hidden="true"><span>−</span><span>+</span></span>
-          <button className={styles.smallKey} onClick={player.toggleMute} aria-pressed={player.muted}>{player.muted ? 'UNMUTE' : 'MUTE'}</button>
-        </div>
         <div className={styles.keyBank}>
-          <p className={styles.bankLabel}>SELECT CHANNEL <span>01—03</span></p>
+          <p className={styles.bankLabel}>PREVIEW A CHANNEL <span>01—03</span></p>
           <div className={styles.pads} role="group" aria-label="Console channel">
             {CHANNELS.map((c,i)=><button type="button" key={c.code} aria-pressed={channel===i} onClick={()=>setChannel(i)} className={styles.pad} style={{'--pad-order':i} as CSSProperties}><span className={styles.padTop}>{c.code}<i /></span><span>{c.name}</span></button>)}
           </div>
           <div className={styles.utilityKeys}>
             <button onClick={openSearch} className={styles.utilityKey}><span aria-hidden="true">⌕</span>Search</button>
-            <Link href="/about" className={styles.utilityKey}><span aria-hidden="true">↗</span>About</Link>
-            <button onClick={play} disabled={!playable} className={`${styles.utilityKey} ${styles.playKey}`} aria-label={playable ? `${player.isPlaying ? 'Pause' : 'Play'} ${episode?.title}` : 'No playable episode'}><span aria-hidden="true">{player.isPlaying ? 'Ⅱ' : '▷'}</span>{player.isLoading ? 'Loading' : player.isPlaying ? 'Pause' : 'Play'}</button>
+            {channel === 2
+              ? <button type="button" onClick={play} disabled={!playable || player.isLoading} className={`${styles.utilityKey} ${styles.playKey}`} aria-label={playable ? `${playbackLabel}: ${episode?.title}` : 'Play episode — no playable episode available'}>{playbackLabel}</button>
+              : <Link href={selected.href} className={`${styles.utilityKey} ${styles.playKey}`}>{channel === 0 ? 'Read news' : 'Open markets'}<span aria-hidden="true">↗</span></Link>}
           </div>
         </div>
       </div>
-      <div className={styles.bottomPlate}><span>THREE CHANNELS. ZERO DOOMSCROLL QUOTA.</span><Link href={selected.href}>Open {selected.name.toLowerCase()} <span aria-hidden="true">↗</span></Link></div>
+      <div className={styles.bottomPlate}>
+        {channel === 2 ? <>
+          <div className={styles.volume}>
+            <label htmlFor="console-volume">Volume <span>{Math.round(volume * 100)}%</span></label>
+            <input id="console-volume" type="range" min="0" max="1" step="0.05" value={volume} style={{'--range-progress': `${volume * 100}%`} as CSSProperties} aria-valuetext={`${Math.round(volume * 100)} percent`} onChange={e => { if (player.muted) player.toggleMute(); player.setVolume(Number(e.target.value)) }} />
+            <button type="button" className={styles.smallKey} onClick={player.toggleMute} aria-pressed={player.muted}>{player.muted ? 'Unmute' : 'Mute'}</button>
+          </div>
+          <Link href="/podcasts">Browse episodes <span aria-hidden="true">↗</span></Link>
+        </> : <p className={styles.channelHint}>{channel === 0 ? 'Read the full feed, then filter by topic or source.' : 'Open the board for quotes, trends and market context.'}</p>}
+      </div>
       <i className={`${styles.screw} ${styles.screwLeft}`} aria-hidden="true" /><i className={`${styles.screw} ${styles.screwRight}`} aria-hidden="true" />
     </div>
-    <div className={styles.instrumentCaption}><span>PERSONAL COLLECTION / {selected.code}</span><span>PRESS A KEY ↗</span></div>
+    <div className={styles.instrumentCaption}><span>PERSONAL COLLECTION / {selected.code}</span><span>{selected.name.toUpperCase()} SELECTED</span></div>
   </div>
 }

@@ -27,16 +27,18 @@ compatibility aliases for neutral charcoal and gray; no green theme remains.
 `Console.tsx` is a real three-channel control surface. News shows feed/source
 counts, Markets shows a real quote and its daily history, Podcasts shows the
 latest/current episode. Channel buttons have persistent `aria-pressed` state.
-Search opens the existing palette, volume/mute/play use the shared player,
-and Open Channel follows the selected route. No audio starts automatically.
+Search opens the existing palette, the orange action follows the selected channel: Read news, Open markets, or
+Play/Pause episode. Podcast volume and mute use a labeled native slider and
+button beneath the channel controls; a secondary link opens the archive.
+The selected channel uses a pressed light key as well as its status indicator. No audio starts automatically.
 An empty archive disables playback; empty data is described truthfully.
 The news bars are decorative channel artwork, not fabricated live telemetry.
 
 Native scrolling drives `--scene-progress` through the bounded ScrollScene
 controller. The chassis rotates into place while its faceplate, display and
 key bank settle at different depths. Raised channel keys settle in sequence.
-No wheel/touch interception or per-frame React state. The hero pins for 205svh
-on desktop (>=1000px wide, >=740px high). Phones, tablets and short screens
+No wheel/touch interception or per-frame React state. The hero pins for 145svh
+on desktop (>=1000px wide, >=900px high). Phones, tablets and short screens
 use normal flow with the same assembly motion as the console enters view. Reduced motion removes pinning
 and all assembly transforms and leaves every control accessible.
 Without JavaScript the site remains readable and navigation still works.

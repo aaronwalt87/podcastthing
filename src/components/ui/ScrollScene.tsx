@@ -15,7 +15,7 @@ export default function ScrollScene({ children, kind = 'chapter', className = ''
     const node = ref.current
     if (!node) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const pinned = window.matchMedia('(min-width: 1000px) and (min-height: 740px)')
+    const pinned = window.matchMedia('(min-width: 1000px) and (min-height: 900px)')
     let frame = 0
     let previous = 0
     let current = 0
